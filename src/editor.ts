@@ -21,7 +21,7 @@ declare var WebGLObject: {
 import * as monaco from "monaco-editor";
 // import * as BABYLON from 'babylonjs';
 import * as PlanetCute from './planetcute'
-
+import {TXG} from './tsxgraph'
 
 import lib_es5 from "./extraLibs/lib.es5.d.ts.txt";
 // import lib_baby from "./extraLibs/baby.d.ts.txt";
@@ -217,6 +217,9 @@ export class Editor {
 
         // this stuff has to go into the EVAL, since it doesn't see otherwise
 
+        // let TSX = TXG.TSXGraph.initBoard('crud')  // just to make sure webpack keeps it
+
+
         // TYPESCRIPT preloaded into editor
         this.systemDeclTS =
             `
@@ -239,8 +242,7 @@ export class Editor {
 
             const Mathcode:Mathcode = window.Mathcode
             const VT = Mathcode.VT52()
-            const JSXGraph = TSX.JSXGraph() as TSX.JSXGraph
-            let JSX = JSXGraph.initBoard('jxgbox')
+            const TSX = TXG.TSXGraph.initBoard('jxgbox')
             `
             + hiddenDecl;
 
@@ -271,7 +273,7 @@ export class Editor {
             // console.log('mathcode.TSX',mathcode.TSX)
             // console.log('window.TSX',window.TSX)
 
-            const JSXGraph = Mathcode.JSXGraph()
+            // let TSX = TXG.TSXGraph.initBoard('jxgbox')
 
             let currentParagraph = "jxgbox"
             `

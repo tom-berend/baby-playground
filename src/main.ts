@@ -10,7 +10,7 @@ import { OnClickSay } from "./onClickSay"
 import { asciiMath, testAsciiMath } from './ASCIIMathML'
 
 import { VT52 } from './vt52'
-import { TSX } from './jsxgraph'
+import { TXG } from './tsxgraph'
 import { Draw, V3, Ray } from './draw'
 import { PlanetCute } from "./planetcute";
 
@@ -106,10 +106,10 @@ export class Main {
     static attachMathCodeAPI() {   // NB - STATIC !!!
         // let onClickSay: OnClickSay
 
-        (window as any).TSX = {
-            JSXGraph: (): TSX.JSXGraph => {
+        (window as any).TXG = {
+            TSXGraph: (): TXG.TSXGraph => {
                 console.log('called TSX TSX init');
-                return new TSX.JSXGraph()
+                return TXG.TSXGraph.initBoard('jxgbox')
             },
 
         };
@@ -119,9 +119,9 @@ export class Main {
         // remember to add these to NAMESPACE in mathcoode.d.ts.txt
         (window as any).Mathcode = {
 
-            JSXGraph: (): TSX.JSXGraph => {
-                console.log('called Mathcode TSX init');
-                return new TSX.JSXGraph()
+            JSXGraph: (): TXG.TSXGraph => {
+                console.log('called Mathcode TXG init');
+                return new TXG.TSXGraph()
             },
 
             VT52: (): VT52 => {
