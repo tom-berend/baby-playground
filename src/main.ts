@@ -102,27 +102,27 @@ export class Main {
     //     }
     // }
 
+    // static attachJSXGraphAPI() {   // NB - STATIC !!!
+    //     // let onClickSay: OnClickSay
+
+    //     (window as any).TXG = {
+    //         TSXGraph: (): TXG.TSXGraph => {
+    //             console.log('called TSX TSX init');
+    //             return TXG.TSXGraph.initBoard('jxgbox')
+    //         },
+    //     };
+    // }
+
+
+
     /** Attaches the mathcode API to the window object so that you can discover it */
     static attachMathCodeAPI() {   // NB - STATIC !!!
         // let onClickSay: OnClickSay
-
-        (window as any).TXG = {
-            TSXGraph: (): TXG.TSXGraph => {
-                console.log('called TSX TSX init');
-                return TXG.TSXGraph.initBoard('jxgbox')
-            },
-
-        };
 
 
 
         // remember to add these to NAMESPACE in mathcoode.d.ts.txt
         (window as any).Mathcode = {
-
-            JSXGraph: (): TXG.TSXGraph => {
-                console.log('called Mathcode TXG init');
-                return new TXG.TSXGraph()
-            },
 
             VT52: (): VT52 => {
                 return new VT52()
@@ -195,6 +195,13 @@ export class Main {
 
                 },
 
+                // call MathcodeAPI.TSXGraph('jsxbox')  to get a TSXGraph context
+                TSXGraph: (canvas:string): TXG.TSXGraph => {
+                    // console.log('mathcodeAPI initBoard', canvas);
+                    return TXG.TSXGraph.initBoard(canvas)
+                },
+
+
                 hiddencode: (hidden64: string, decl64: string) => {
 
                     let b = Buffer.from(hidden64, 'base64')
@@ -202,7 +209,7 @@ export class Main {
                     b = Buffer.from(hidden64, 'base64')
                     main.hiddenDecl = b.toString()
 
-                    main.setupMonacoEditor(main.hiddenCode,main.hiddenDecl)
+                    main.setupMonacoEditor(main.hiddenCode, main.hiddenDecl)
                     // console.log('hidden code', this.hiddenCode)
                 },
 
@@ -573,7 +580,7 @@ export class Main {
 
 
 
-    setupMonacoEditor(hiddenCode:string,hiddenDecl:string) {
+    setupMonacoEditor(hiddenCode: string, hiddenDecl: string) {
         // monaco.editor.createModel(lib_baby, 'typescript', monaco.Uri.parse(babyUri));
 
         this.editorDiv = document.getElementById("editor") as HTMLDivElement

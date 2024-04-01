@@ -242,16 +242,13 @@ export class Editor {
 
             const Mathcode:Mathcode = window.Mathcode
             const VT = Mathcode.VT52()
-            const TSX = TXG.TSXGraph.initBoard('jxgbox')
+            // const TSX = TXG.TSXGraph.initBoard('jxgbox')
             `
             + hiddenDecl;
 
         // must be JAVASCRIPT, not TYPESCRIPT
         this.systemDeclJS =
             `
-            // const doc = document
-            // const JXG = window.JXG   // (window as any).JXG
-            // const JSXGraph = window.TSX
             // const BABYLON = window.BABYLON
             // const Matter = window.Matter
             // let _canvas = document.getElementById("canvas")
@@ -265,17 +262,11 @@ export class Editor {
             // const engine = new BABYLON.Engine(canvas, true);
 
             const Mathcode = window.Mathcode
-            const document = window.document
-            let jxgbox = document.getElementById("jxgbox")
+            const document = window.documentattach
             let VT = Mathcode.VT52()
 
             // console.log('mathcode',mathcode.window)
             // console.log('mathcode.TSX',mathcode.TSX)
-            // console.log('window.TSX',window.TSX)
-
-            // let TSX = TXG.TSXGraph.initBoard('jxgbox')
-
-            let currentParagraph = "jxgbox"
             `
             + hiddenCode;
 
