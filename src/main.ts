@@ -195,10 +195,12 @@ export class Main {
 
                 },
 
-                // call MathcodeAPI.TSXGraph('jsxbox')  to get a TSXGraph context
-                TSXGraph: (canvas:string): TXG.TSXGraph => {
+                // call MathcodeAPI.TSXGraph() to get a TSXGraph context,  eg:
+                //      let TXG = MathcodeAPI.TSXGraph()     // called by editor.ts during launch
+                //      let TSX = TXG.TSXGraph.initBoard('jxgbox')
+                TSXGraph: (canvas: string): TXG.TSXGraph => {
                     // console.log('mathcodeAPI initBoard', canvas);
-                    return TXG.TSXGraph.initBoard(canvas)
+                    return TXG//.TSXGraph.initBoard(canvas)
                 },
 
 

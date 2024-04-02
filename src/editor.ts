@@ -47,11 +47,10 @@ import babylonjs from "./extraLibs/babylonjs.d.ts.txt"
 import lib_es2099 from "./extraLibs/lib.es2099.d.ts.txt"
 
 // import lib_jsx_tiny from "./extraLibs/jsx_tiny.d.ts.txt"
-import lib_jsxgraph from "./extraLibs/jsxgraph.d.ts.txt"
+import lib_tsxgraph from "./extraLibs/tsxgraph.d.ts.txt"
 
 import mathcode from "./extraLibs/mathcode.d.ts.txt"
 // import matter from "./extraLibs/matter.d.ts.txt"
-// import TSX from "./extraLibs/jsxgraph.d.ts.txt"
 
 // import { RuntimeAnimation } from "babylonjs/Animations/runtimeAnimation";
 import { Observable } from "./observer";
@@ -211,20 +210,19 @@ export class Editor {
 
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_jsx_tiny)    // my simply remix of the upper level call
 
-        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_jsxgraph)    // wrapper version
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_tsxgraph)    // wrapper version
         monaco.languages.typescript.typescriptDefaults.addExtraLib(mathcode)    // my simply remix of the upper level call
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(matter)    // my simply remix of the upper level call
 
         // this stuff has to go into the EVAL, since it doesn't see otherwise
 
-        // let TSX = TXG.TSXGraph.initBoard('crud')  // just to make sure webpack keeps it
+        // let TSX = TXG.TSXGraph.freeBoard(undefined)  // just to make sure webpack keeps it
 
 
         // TYPESCRIPT preloaded into editor
         this.systemDeclTS =
             `
             // const doc = document
-            // const JSXGraph.JSXGraph = window.JSXGraph
             // const Mathcode = window.Mathcode
             // const JXG = window.JXG   // (window as any).JXG
             // const BABYLON = window.BABYLON
@@ -240,33 +238,23 @@ export class Editor {
             // const PlanetCute = window.PlanetCute
             // const engine = new BABYLON.Engine(canvas, true);
 
-            const Mathcode:Mathcode = window.Mathcode
-            const VT = Mathcode.VT52()
-            // const TSX = TXG.TSXGraph.initBoard('jxgbox')
+            // const Mathcode:Mathcode = window.Mathcode
+            // const VT = Mathcode.VT52()
+
             `
             + hiddenDecl;
 
-        // must be JAVASCRIPT, not TYPESCRIPT
-        this.systemDeclJS =
+            // must be JAVASCRIPT, not TYPESCRIPT
+            this.systemDeclJS =
             `
-            // const BABYLON = window.BABYLON
-            // const Matter = window.Matter
-            // let _canvas = document.getElementById("canvas")
-            // let canvas = document.getElementById("canvas")
-
-            // let canvas2D = document.getElementById("canvas2D")
-            // let canvas3D = document.getElementById("canvas3D")
-            // let ctx =  canvas.getContext("2d")  // this causes WebGL to fail
-            // const window.PlanetCute = new PlanetCute()
-            // const PlanetCute = window.PlanetCute
-            // const engine = new BABYLON.Engine(canvas, true);
-
             const Mathcode = window.Mathcode
             const document = window.documentattach
             let VT = Mathcode.VT52()
 
             // console.log('mathcode',mathcode.window)
             // console.log('mathcode.TSX',mathcode.TSX)
+
+            let TXG = MathcodeAPI.TSXGraph()  // use MathcodeAPI to access from inside editor
             `
             + hiddenCode;
 
