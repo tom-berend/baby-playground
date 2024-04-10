@@ -21,7 +21,7 @@ declare var WebGLObject: {
 import * as monaco from "monaco-editor";
 // import * as BABYLON from 'babylonjs';
 import * as PlanetCute from './planetcute'
-import {TXG} from './tsxgraph'
+import { TXG } from './tsxgraph'
 
 import lib_es5 from "./extraLibs/lib.es5.d.ts.txt";
 // import lib_baby from "./extraLibs/baby.d.ts.txt";
@@ -128,7 +128,7 @@ export class Editor {
     editorCode = ''
     commandCode = ''
 
-    constructor(el: HTMLElement, initFile: string, hiddenCode:string = '',hiddenDecl: string ='') {
+    constructor(el: HTMLElement, initFile: string, hiddenCode: string = '', hiddenDecl: string = '') {
         // console.log('%cSTARTING EDITOR','background-color:blue;color:white;')
         // return;
         this.el = el
@@ -244,8 +244,8 @@ export class Editor {
             `
             + hiddenDecl;
 
-            // must be JAVASCRIPT, not TYPESCRIPT
-            this.systemDeclJS =
+        // must be JAVASCRIPT, not TYPESCRIPT
+        this.systemDeclJS =
             `
             const Mathcode = window.Mathcode
             const document = window.documentattach
@@ -322,10 +322,10 @@ export class Editor {
 
 
 
-    async transpile(hiddenCode:string) {
+    async transpile(hiddenCode: string) {
 
         // const args = names.map((key) => scope[key]);
-        const model =this.editor.getModel();   // typescript needs a typeguard to be happy
+        const model = this.editor.getModel();   // typescript needs a typeguard to be happy
         // console.log('model from editor is', model)
 
         if (model !== null) {
@@ -388,14 +388,19 @@ export class Editor {
         // eval() is crazy dangerous because it runs in the local context
         // Function() is a bit safer, but not much
 
-        console.log('code to run',code)
-        let f = new Function(code)
-        f()
+        console.log('code to run', code)
+
+        try {
+            let f = new Function(code)
+            f()
+        }
+        catch (err) {
+            alert(err.message);
+        }
     }
 
 
 }
-
 
 
 
