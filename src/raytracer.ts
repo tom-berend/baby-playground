@@ -88,7 +88,7 @@ class Triangle extends Obj {
 class Sphere extends Obj {
     center: V3
     radius: number
-    material: Material;
+    // material: Material;
 
     constructor(center: V3, radius: number, material: Material) {
         super(material);

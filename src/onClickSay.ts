@@ -95,14 +95,18 @@ export class OnClickSay {
         // 1:  UK english male
         // 2:  UK english female
 
-        msg.voice = this.englishVoices[selectedVoice] // Note: some voices don't support altering params
-        msg.lang = this.englishVoices[selectedVoice].lang  // usually en-US or en-GB
-        msg.volume = 1 // 0 to 1
-        msg.rate = 1 // 0.1 to 1.0
-        msg.pitch = .9 // 0 to 2
-        msg.onstart = (event) => {
-            this.synthRunning = true
-            // console.log(`'Speech Starts ${event}`)
+        if (this.englishVoices.length == 0) {
+            console.error('Voice annotation requires internet connection')
+        } else {
+            msg.voice = this.englishVoices[selectedVoice] // Note: some voices don't support altering params
+            msg.lang = this.englishVoices[selectedVoice].lang  // usually en-US or en-GB
+            msg.volume = 1 // 0 to 1
+            msg.rate = 1 // 0.1 to 1.0
+            msg.pitch = .9 // 0 to 2
+            msg.onstart = (event) => {
+                this.synthRunning = true
+                // console.log(`'Speech Starts ${event}`)
+            }
         }
         msg.onend = (event) => {
             this.synthRunning = false
@@ -150,7 +154,7 @@ export class OnClickSay {
                 // https://stackoverflow.com/questions/57667357/speech-synthesis-problem-with-long-texts-pause-mid-speaking
 
                 let r = setInterval(() => {
-                    console.log('speech keep-alive',speechSynthesis.speaking);
+                    console.log('speech keep-alive', speechSynthesis.speaking);
                     if (!speechSynthesis.speaking) {
                         clearInterval(r);
                     } else {

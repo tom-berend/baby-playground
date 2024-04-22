@@ -21,13 +21,15 @@
         //
         /////////////////////////////////////////////////////////////////////////////
 
-        //   Generated on April 3, 2024, 2:36 am 
+        //   Generated on April 22, 2024, 5:34 pm 
 
 
 
  export namespace TXG {
 
  interface GeometryElementAttributes  {
+ /** used by V2 vector math library */
+ scaleXY?: Number 
  /** Color of the element. */
  color?: String
  /** Opacity of the element (between 0 and 1). */
@@ -71,14 +73,20 @@
  }
 
  interface GeometryElement3DAttributes  {
+ /** used by V2 vector math library */
+ scaleXY?: Number 
  /** Set whether the element is visibledisplay name  */
  visible?:Boolean
  }
 
  interface BoardAttributes  {
+ /** used by V2 vector math library */
+ scaleXY?: Number 
  }
 
  interface InfoboxAttributes  {
+ /** used by V2 vector math library */
+ scaleXY?: Number 
  /** Horizontal offset in pixel of the infobox text from its anchor point. */
   distanceX?: Number
  /** Vertical offset in pixel of the infobox text from its anchor point. */
@@ -88,9 +96,13 @@
  }
 
  interface CAttributes  {
+ /** used by V2 vector math library */
+ scaleXY?: Number 
  }
 
  interface CAAttributes  {
+ /** used by V2 vector math library */
+ scaleXY?: Number 
  }
 
  interface ChartAttributes extends GeometryElementAttributes {
@@ -120,12 +132,18 @@
  }
 
  interface ComplexAttributes  {
+ /** used by V2 vector math library */
+ scaleXY?: Number 
  }
 
  interface CompositionAttributes  {
+ /** used by V2 vector math library */
+ scaleXY?: Number 
  }
 
  interface CoordsAttributes  {
+ /** used by V2 vector math library */
+ scaleXY?: Number 
  }
 
  interface CurveAttributes extends GeometryElementAttributes {
@@ -161,9 +179,13 @@
  }
 
  interface DumpAttributes  {
+ /** used by V2 vector math library */
+ scaleXY?: Number 
  }
 
  interface ForeignObjectAttributes  {
+ /** used by V2 vector math library */
+ scaleXY?: Number 
  /** List of attractor elements. If the distance of the foreignobject is less than attractorDistance the foreignobject is made to glider of this element. */
   attractors?: Element[]
  }
@@ -202,6 +224,8 @@
  }
 
  interface LegendAttributes  {
+ /** used by V2 vector math library */
+ scaleXY?: Number 
  }
 
  interface LineAttributes extends GeometryElementAttributes {
@@ -914,12 +938,6 @@
   zPlaneRearYAxis?: Object
  }
 
- interface MatrixAttributes extends MathAttributes {
- }
-
- interface NumericsAttributes extends MathAttributes {
- }
-
         type NumberFunction = Number|Function
 
         /** A 'point' has a position in space.  The only characteristic that distinguishes one point from another is its position. */
@@ -980,7 +998,7 @@
        const COORDS_BY_SCREEN= 0x0002
 
 
-       interface MathAttributes {
+       interface JSXMathAttributes {
        }
 
         interface InitBoardAttributes {
@@ -1076,7 +1094,7 @@
     }
 
 
-        export class Math{
+        export class JSXMath{
             static board:TSXBoard
 
         }
@@ -1097,11 +1115,13 @@
 
         export class TSXGraph{
 
+            static defaultAttrs:Object = {name:'',keepAspectRatio:false}
+
             static initBoard(html: string, attributes:any={}): TSXBoard {
 
                    const newBoard = new TSXBoard()
                    newBoard.board = (window as any).JXG.JSXGraph.initBoard(html, attributes) as unknown as TSXBoard
-                   Math.board = newBoard.board  // make a copy for Math and its decendents
+                   JSXMath.board = newBoard.board  // make a copy for JSXMath and its decendents
                    return newBoard
             }
 
@@ -1123,6 +1143,20 @@
                 }
                 return ret
             }
+
+
+            // add in any default attributes
+            static defaultAttributes(attrs:Object){
+                for (const property in TSXGraph.defaultAttrs) {
+                    if (!attrs.hasOwnProperty(property)) {   // if the user has not specified a value for this property
+                        (attrs as any)[property] = (TSXGraph.defaultAttrs as any)[property]
+                    }
+                }
+                return attrs
+            }
+
+
+
         }
  interface ConicIface {
  z_ignore: Object,
@@ -1135,7 +1169,7 @@
  /** An Ellipse from 3 points */
    threePoints( focalPoint1:Point|point, focalPoint2:Point|point, outerPoint:Point|point,attributes?:EllipseAttributes):Ellipse
  /** Three Points, plus start and end. */
-   ellipseArc( focalPoint1:Point|point, focalPoint2:Point|point, outerPoint:Point|point, startAngle:Number|Function, endAngle:Number|Function,attributes?:ConicAttributes):Conic
+   ellipseArc( focalPoint1:Point|point, focalPoint2:Point|point, outerPoint:Point|point, startAngle:Number|Function, endAngle:Number|Function,attributes?:EllipseAttributes):Ellipse
 }
 
  interface TransformIface {
@@ -1160,7 +1194,10 @@
    curve( c:Curve, t:Transform|Transform[],attributes?:CurveAttributes):Curve
 }
 
- interface MatrixMathIface {
+ interface JSXMathJSXMathIface {
+ } 
+
+ interface MatrixJSXMathIface {
  /** Calculates the cross product of two vectors both of length three. */
  crossProduct(c1:matAny,c2:matAny):matAny,
  /** Generates a 4x4 matrix for 3D to 2D projections. */
@@ -1185,7 +1222,7 @@
  vector(n:number,init:number):Number[],
  } 
 
- interface NumericsMathIface {
+ interface NumericsJSXMathIface {
  CardinalSpline(pointArray:Point[],tau:Function):Function[],
  } 
 
@@ -1194,7 +1231,6 @@
                 export class TSXBoard {
                     board: TSXBoard | null
                     private printLineNumber:number = 0   // added a print() function, this tracks the line#
-                    private defaultAttrs: Object = {}   // hold defaults from setDefaultAttributes()
 
                     /** Version of underlying JSX library */
                     public get version():String {
@@ -1214,21 +1250,8 @@
 
                     /** allows setting default attributes by class or across the board */
                     public setDefaultAttributes(attrs: Object) {
-                        this.defaultAttrs = attrs
+                        TSXGraph.defaultAttrs = attrs
                     }
-
-                    // add in any default attributes
-                    private defaultAttributes(attrs:Object){
-                        for (const property in this.defaultAttrs) {
-                            if (!attrs.hasOwnProperty(property)) {   // if the user has not specified a value for this property
-                                (attrs as any)[property] = (this.defaultAttrs as any)[property]
-                            }
-                        }
-                        return attrs
-                    }
-
-
-
 
                     /** get a 2D canvas context (warning: cannot mix SVG and canvas) */
                     public getCanvasCTX(): CanvasRenderingContext2D{
@@ -1240,20 +1263,19 @@
 
 
 
-
                     setBoundingBox(left:Number,top:Number,right:Number,bottom:Number):TSXBoard{
-                        return (this.board! as any).setBoundingBox([left,top,right,bottom])
+                        return (this.board as any).setBoundingBox([left,top,right,bottom])
                     }
 
                     getBoundingBox():[number,number]{
-                        return (this.board! as any).getBoundingBox()
+                        return (this.board as any).getBoundingBox()
                     }
 
                     addGrid():TSXBoard{
-                        return (this.board! as any).addGrid()
+                        return (this.board as any).addGrid()
                     }
                     removeGrids():TSXBoard{
-                        return (this.board! as any).removeGrids() // Note: remove GRIDS, not GRID
+                        return (this.board as any).removeGrids() // Note: remove GRIDS, not GRID
                     }
                     addAxis():Board{
                         (this as any).axis([0,0],[1,0]);
@@ -1262,7 +1284,7 @@
                     }
 
                     setAttribute(attrs:object):Board{
-                        return (this.board! as any).setAttribute(attrs)
+                        return (this.board as any).setAttribute(attrs)
                     }
 
 
@@ -1271,9 +1293,7 @@
 
                     /** Legacy method to create elements. */
                     create(elType: string, params: any[] = [], attributes: Object = {}): GeometryElement {
-                        let newObject = (this.board as any).create(elType, params, attributes)
-                        let newElement = new GeometryElement(newObject as GeometryElement);
-                        return newElement
+                        return new GeometryElement(elType, params, attributes)
                     }
 
                     /** force board update */
@@ -1325,8 +1345,9 @@
                                 stringText += '{'
                                 if('elType' in item){
                                     stringText += item.elType
+                                }else if('elV2Math' in item){
+                                    stringText += [item.X(),item.Y()]
                                 }
-
                                 stringText += '}'
                             } else {
                                 stringText += 'UNKNOWN';
@@ -1372,17 +1393,27 @@
 
 
 
-                    //   /** Math.Clip */
-                    //   public get clip():Clip {
-                    //       let clip = new Clip({})
-                    //       return clip as Clip
-                    //   }
-
-
-
                     /////////////////////////////
                     /////////////////////////////
                     /////////////////////////////
+
+                    ///////////  V2 Math Library
+
+
+                    /** new Points from point, angle, and distance.  Angle is in radians. */
+                    public V2AngleDistance(origin: TXG.Point, distance: number, angle: number, dest?: TXG.Point): TXG.Point {
+                        console.log(origin, origin.tsxBoard)
+                        if (!dest) { dest = JSXMath.board.point([0, 0], { name: '' }) }
+
+                        let x = origin.X() + distance * Math.cos(angle)
+                        let y = origin.Y() + distance * Math.sin(angle)
+                        console.log(x,y)
+                        dest.setPositionDirectly(x, y)
+                        return dest
+                    }
+
+
+
 
 
 
@@ -1391,8 +1422,9 @@
  conic:ConicIface
  /** This element is used to provide projective transformations. */
  transform:TransformIface
- MatrixMath:MatrixMathIface
- NumericsMath:NumericsMathIface
+ JSXMathMath:JSXMathJSXMathIface
+ MatrixMath:MatrixJSXMathIface
+ NumericsMath:NumericsJSXMathIface
 
            constructor(){
             this.board = null
@@ -1403,28 +1435,23 @@
  z_ignore: {}, 
    /** Line defined by solution to a*z + b*y +c*y== 0 */
    line( a:Number|Function, b:Number|Function, c:Number|Function,attributes: LineAttributes ={}) : Line {
-  let newObject = (this.z_ignore as any).board.create('line', (this.z_ignore as any).dereference([a,b,c]), (this.z_ignore as any).defaultAttributes(attributes))
- return new Line(newObject as Line)
+ return new Line('Line',[a, b, c, ],attributes) as Line
  },
    /** Just as two (distinct) points determine a line, five points (no three collinear) determine a conic. */
    fivePoints( A:Point|point, B:Point|point, C:Point|point, D:Point|point, E:Point|point,attributes: ConicAttributes ={}) : Conic {
- let newObject = ((this.z_ignore as any).board as any).create('Conic', (this.z_ignore as any).dereference([A, B, C, D, E, ]), (this.z_ignore as any).defaultAttributes(attributes))
- return new Conic(newObject as Conic)
+ return new Conic('Conic',[A, B, C, D, E, ],attributes)
  },
    /** Build a plane algebraic curve from six numbers that satisfies Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0, and A,B,C not all zero.  This might be a circle, ellipse, parabola, or hyperbola. */
    sixNumbers( A:Number, B:Number, C:Number, D:Number, E:Number, F:Number,attributes: ConicAttributes ={}) : Conic {
- let newObject = ((this.z_ignore as any).board as any).create('Conic', (this.z_ignore as any).dereference([A, B, C, D, E, F, ]), (this.z_ignore as any).defaultAttributes(attributes))
- return new Conic(newObject as Conic)
+ return new Conic('Conic',[A, B, C, D, E, F, ],attributes)
  },
    /** An Ellipse from 3 points */
    threePoints( focalPoint1:Point|point, focalPoint2:Point|point, outerPoint:Point|point,attributes: EllipseAttributes ={}) : Ellipse {
-  let newObject = (this.z_ignore as any).board.create('ellipse', (this.z_ignore as any).dereference([focalPoint1,focalPoint2,outerPoint]), (this.z_ignore as any).defaultAttributes(attributes))
- return new Ellipse(newObject as Ellipse)
+ return new Ellipse('Ellipse',[focalPoint1, focalPoint2, outerPoint, ],attributes) as Ellipse
  },
    /** Three Points, plus start and end. */
-   ellipseArc( focalPoint1:Point|point, focalPoint2:Point|point, outerPoint:Point|point, startAngle:Number|Function, endAngle:Number|Function,attributes: ConicAttributes ={}) : Conic {
-  let newObject = (this.z_ignore as any).board.create('ellipse', (this.z_ignore as any).dereference([focalPoint1,focalPoint2,outerPoint,startAngle,endAngle]), (this.z_ignore as any).defaultAttributes(attributes))
- return new Conic(newObject as Conic)
+   ellipseArc( focalPoint1:Point|point, focalPoint2:Point|point, outerPoint:Point|point, startAngle:Number|Function, endAngle:Number|Function,attributes: EllipseAttributes ={}) : Ellipse {
+ return new Ellipse('Ellipse',[focalPoint1, focalPoint2, outerPoint, startAngle, endAngle, ],attributes) as Ellipse
  },
  }
  this.conic.z_ignore = this
@@ -1433,51 +1460,45 @@
  z_ignore: {}, 
    /** Move a distance from a point */
    translate( x:Number|Function, y:Number|Function,attributes: TransformAttributes ={}) : Transform {
- let newObject = ((this.z_ignore as any).board as any).create('Transform', (this.z_ignore as any).dereference([x, y, ]), (this.z_ignore as any).defaultAttributes({type:'translate' }))
- return new Transform(newObject as Transform)
+ return new Transform('Transform',[x, y, ],{type:'translate' })
  },
    /** Increase distance from a point by a factor */
    scale( x:number|Function, y:number|Function,attributes: TransformAttributes ={}) : Transform {
- let newObject = ((this.z_ignore as any).board as any).create('Transform', (this.z_ignore as any).dereference([x, y, ]), (this.z_ignore as any).defaultAttributes({type:'scale' }))
- return new Transform(newObject as Transform)
+ return new Transform('Transform',[x, y, ],{type:'scale' })
  },
    /** Rotate by angle around a point */
    rotate( angle:Number|Function, point:Point|point=[0,0],attributes: TransformAttributes ={}) : Transform {
- let newObject = ((this.z_ignore as any).board as any).create('Transform', (this.z_ignore as any).dereference([angle, point, ]), (this.z_ignore as any).defaultAttributes({type:'rotate' }))
- return new Transform(newObject as Transform)
+ return new Transform('Transform',[angle, point, ],{type:'rotate' })
  },
    /** Reflect around a line */
    reflect( x:Number|Function, y:Number|Function,attributes: TransformAttributes ={}) : Transform {
- let newObject = ((this.z_ignore as any).board as any).create('Transform', (this.z_ignore as any).dereference([x, y, ]), (this.z_ignore as any).defaultAttributes({type:'reflect' }))
- return new Transform(newObject as Transform)
+ return new Transform('Transform',[x, y, ],{type:'reflect' })
  },
    /** Move proportionally to distance */
    shear( x:Number|Function, y:Number|Function,attributes: TransformAttributes ={}) : Transform {
- let newObject = ((this.z_ignore as any).board as any).create('Transform', (this.z_ignore as any).dereference([x, y, ]), (this.z_ignore as any).defaultAttributes({type:'shear' }))
- return new Transform(newObject as Transform)
+ return new Transform('Transform',[x, y, ],{type:'shear' })
  },
    /** Transform using a MAT3 */
    generic( a:Number, b:Number, c:Number, d:Number, e:Number, f:Number, g:Number, h:Number, i:Number,attributes: TransformAttributes ={}) : Transform {
- let newObject = ((this.z_ignore as any).board as any).create('Transform', (this.z_ignore as any).dereference([a, b, c, d, e, f, g, h, i, ]), (this.z_ignore as any).defaultAttributes({type:'generic' }))
- return new Transform(newObject as Transform)
+ return new Transform('Transform',[a, b, c, d, e, f, g, h, i, ],{type:'generic' })
  },
    /** A new Point from a Point and Transform */
    point( p:Point|point, t:Transform|Transform[],attributes: PointAttributes ={}) : Point {
- let newObject = ((this.z_ignore as any).board as any).create('Point', [TSXGraph.dereference(p),TSXGraph.dereference(t),], attributes)
- return new Point(newObject as Point)
+ return new Point('Point',[p, t, ],attributes) as Point
  },
    /** A new Circle from a Circle and Transform */
    circle( c:Circle, t:Transform|Transform[],attributes: CircleAttributes ={}) : Circle {
- let newObject = ((this.z_ignore as any).board as any).create('Circle', TSXGraph.dereference([c,t]), attributes)
- return new Circle(newObject as Circle)
+ return new Circle('Circle',[c, t, ],attributes) as Circle
  },
    /** A new Curve from a Curve and Transform */
    curve( c:Curve, t:Transform|Transform[],attributes: CurveAttributes ={}) : Curve {
- let newObject = ((this.z_ignore as any).board as any).create('Curve', TSXGraph.dereference([c,t]), attributes)
- return new Curve(newObject as Curve)
+ return new Curve('Curve',[c, t, ],attributes) as Curve
  },
  }
  this.transform.z_ignore = this
+ this.JSXMathMath = { 
+ } 
+
  this.MatrixMath = { 
  /** Calculates the cross product of two vectors both of length three. */
  crossProduct(c1:matAny,c2:matAny):matAny { return (window as any).JXG.Math.crossProduct(c1,c2)  as matAny} ,
@@ -1510,9 +1531,7 @@
 }
 
  /** create a chart */
-chart(f:Number[], attributes: ChartAttributes ={} ):Chart{
- let newObject = (this.board as any).create('Chart', this.dereference([f,]), this.defaultAttributes(attributes))
- return new Chart(newObject as Chart)
+chart(f:Number[], attributes: ChartAttributes ={} ):Chart{return new Chart('Chart', [f,], attributes)
 }
 
 
@@ -1520,32 +1539,25 @@ chart(f:Number[], attributes: ChartAttributes ={} ):Chart{
 circle(centerPoint:Point|point, remotePoint:Point|point|Line|line|Number|Function|Circle, attributes: CircleAttributes ={} ):Circle{
   let newObject:any  // special case for circle with immediate segment eg:  circle(point,[[1,2],[3,4]]  )
                             if (Array.isArray(remotePoint) && Array.isArray(remotePoint[0] ) && Array.isArray(remotePoint[1] )) {
-                                newObject = (this.board as any).create(`circle`, this.dereference([centerPoint, remotePoint[0] ,remotePoint[1]]), this.defaultAttributes(attributes))
+                                return new Circle(`circle`, TSXGraph.dereference([centerPoint, remotePoint[0] ,remotePoint[1]]), TSXGraph.defaultAttributes(attributes))
                             } else {
-                                newObject = (this.board as any).create(`circle`, this.dereference([centerPoint, remotePoint]), this.defaultAttributes(attributes))
+                                return new Circle(`circle`, TSXGraph.dereference([centerPoint, remotePoint]), TSXGraph.defaultAttributes(attributes))
                             }
- return new Circle(newObject as Circle)
 }
 
 
  /** This element is used to provide a constructor for curve, which is just a wrapper for element Curve. A curve is a mapping from R to R^2. t mapsto (x(t),y(t)). The graph is drawn for t in the interval [a,b]. The following types of curves can be plotted: parametric curves: t mapsto (x(t),y(t)), where x() and y() are univariate functions. polar curves: curves commonly written with polar equations like spirals and cardioids. data plots: plot line segments through a given list of coordinates. */
-curve(xArray:Number[]|Function, yArray:Number[]|Function, left:NumberFunction=-5, right:NumberFunction=5, attributes: CurveAttributes ={} ):Curve{
- let newObject = (this.board as any).create('Curve', this.dereference([xArray,yArray,left,right,]), this.defaultAttributes(attributes))
- return new Curve(newObject as Curve)
+curve(xArray:Number[]|Function, yArray:Number[]|Function, left:NumberFunction=-5, right:NumberFunction=5, attributes: CurveAttributes ={} ):Curve{return new Curve('Curve', [xArray,yArray,left,right,], attributes)
 }
 
 
  /** Array of Points */
-group(pointArray:Point[], attributes: GroupAttributes ={} ):Group{
- let newObject = (this.board as any).create('Group', this.dereference([pointArray,].flat()), this.defaultAttributes(attributes))
- return new Group(newObject as Group)
+group(pointArray:Point[], attributes: GroupAttributes ={} ):Group{return new Group('Group', [pointArray,], attributes)
 }
 
 
  /** Displays an image. */
-image(url:String, lowerLeft:point, widthHeight:[Number,Number], attributes: ImageAttributes ={} ):Image{
- let newObject = (this.board as any).create('Image', this.dereference([url,lowerLeft,widthHeight,]), this.defaultAttributes(attributes))
- return new Image(newObject as Image)
+image(url:String, lowerLeft:point, widthHeight:[Number,Number], attributes: ImageAttributes ={} ):Image{return new Image('Image', [url,lowerLeft,widthHeight,], attributes)
 }
 
  /** An implicit curve is a plane curve defined by an implicit equation relating two coordinate variables, commonly x and y. For example, the unit circle is defined by the implicit equation x2 + y2 = 1. In general, every implicit curve is defined by an equation of the form f(x, y) = 0 for some function f of two variables. */
@@ -1555,91 +1567,85 @@ image(url:String, lowerLeft:point, widthHeight:[Number,Number], attributes: Imag
             // implementation of signature,  hidden from user
             implicitcurve(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Implicitcurve {
  let newObject: Implicitcurve = {} as Implicitcurve // just so it is initialized
-if (arguments.length == 1){
-                    if(isJSXAttribute(a)){
-                        newObject = (this.board as any).create('implicitcurve', this.dereference([]), this.defaultAttributes(a)) // as unknown as Implicitcurve
-                    }else{
-                        newObject = (this.board as any).create('implicitcurve', this.dereference([a,]), this.defaultAttributes({})) // as Implicitcurve
-                    }
-                }
-if (arguments.length == 2){
-                    if(isJSXAttribute(b)){
-                        newObject = (this.board as any).create('implicitcurve', this.dereference([a,]), this.defaultAttributes(b)) // as unknown as Implicitcurve
-                    }else{
-                        newObject = (this.board as any).create('implicitcurve', this.dereference([a,b,]), this.defaultAttributes({})) // as Implicitcurve
-                    }
-                }
-if (arguments.length == 3){
-                    if(isJSXAttribute(c)){
-                        newObject = (this.board as any).create('implicitcurve', this.dereference([a,b,]), this.defaultAttributes(c)) // as unknown as Implicitcurve
-                    }else{
-                        newObject = (this.board as any).create('implicitcurve', this.dereference([a,b,c,]), this.defaultAttributes({})) // as Implicitcurve
-                    }
-                }
- return new Implicitcurve (newObject as Implicitcurve)
+   let params = []
+   let attrs = {}
+   if (arguments.length == 1){
+      if(isJSXAttribute(a)){
+          attrs = TSXGraph.defaultAttributes(a)
+          params = TSXGraph.dereference([])
+      }else{
+          params = TSXGraph.dereference([a,])
+      }
+   }
+   if (arguments.length == 2){
+      if(isJSXAttribute(b)){
+          attrs = TSXGraph.defaultAttributes(b)
+          params = TSXGraph.dereference([a,])
+      }else{
+          params = TSXGraph.dereference([a,b,])
+      }
+   }
+   if (arguments.length == 3){
+      if(isJSXAttribute(c)){
+          attrs = TSXGraph.defaultAttributes(c)
+          params = TSXGraph.dereference([a,b,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,])
+      }
+   }
+   return new Implicitcurve('implicitcurve', params, TSXGraph.defaultAttributes(attrs)) // as Implicitcurve
  }
 
  /** This element is used to provide a constructor for a general line given by two points.
                                 By setting additional properties a line can be used as an arrow and/or axis.
                                 
 *```js
-                                JSX.line([3,2],[3,3], {strokeColor:'blue',strokeWidth:5, strokeOpacity:.5})
-                                let P1 = JSX.point([3,2])
-                                JSX.line(p1,[3,3])
+                                TSX.line([3,2],[3,3], {strokeColor:'blue',strokeWidth:5, strokeOpacity:.5})
+                                let P1 = TSX.point([3,2])
+                                TSX.line(p1,[3,3])
                                 
 *```
                                 
  also create lines with Segment, Arrow, Transform.Point, Circumcenter, Glider, and others.
                                 Look at .conic.line() for a line defined by the equation 'az +bx +cy = 0'
                     */
-line(p1:Point|point, p2:Point|point, attributes: LineAttributes ={} ):Line{
- let newObject = (this.board as any).create('Line', this.dereference([p1,p2,]), this.defaultAttributes(attributes))
- return new Line(newObject as Line)
+line(p1:Point|point, p2:Point|point, attributes: LineAttributes ={} ):Line{return new Line('Line', [p1,p2,], attributes)
 }
 
 
  /** Create a point. If any parent elements are functions or the attribute 'fixed' is true then point will be constrained.
             
 *```js
-             JSX.point([3,2], {strokeColor:'blue',strokeWidth:5, strokeOpacity:.5})
-             JSX.point([3,3]), {fixed:true, showInfobox:true}
-             JSX.point([()=>p1.X()+2,()=>p1.Y()+2]) // 2 up 2 right from p1
-             JSX.point([1,2,2])  // three axis definition - [z,x,y]
+             TSX.point([3,2], {strokeColor:'blue',strokeWidth:5, strokeOpacity:.5})
+             TSX.point([3,3]), {fixed:true, showInfobox:true}
+             TSX.point([()=>p1.X()+2,()=>p1.Y()+2]) // 2 up 2 right from p1
+             TSX.point([1,2,2])  // three axis definition - [z,x,y]
             
 *```
             
  also create points with Intersection, Midpoint, Transform.Point, Circumcenter, Glider, and others. */
 point(position:NumberFunction[], attributes: PointAttributes ={} ):Point{
- let newObject = (this.board as any).create('Point', position, this.defaultAttributes(attributes))
- return new Point(newObject as Point)
+ return new Point('Point', position, TSXGraph.defaultAttributes(attributes))
 }
 
 
  /** Array of Points */
-polygon(pointArray:Pointpoint[], attributes: PolygonAttributes ={} ):Polygon{
- let newObject = (this.board as any).create('Polygon', this.dereference([pointArray,].flat()), this.defaultAttributes(attributes))
- return new Polygon(newObject as Polygon)
+polygon(pointArray:Pointpoint[], attributes: PolygonAttributes ={} ):Polygon{return new Polygon('Polygon', [pointArray,], attributes)
 }
 
 
  /** Construct and handle texts. The coordinates can either be abslute (i.e. respective to the coordinate system of the board) or be relative to the coordinates of an element given in Text#anchor. HTML, MathJaX, KaTeX and GEONExT syntax can be handled. There are two ways to display texts: using the text element of the renderer (canvas or svg). In most cases this is the suitable approach if speed matters. However, advanced rendering like MathJax, KaTeX or HTML/CSS are not possible. using HTML <div>. This is the most flexible approach. The drawback is that HTML can only be display ”above” the geometry elements. If HTML should be displayed in an inbetween layer, conder to use an element of type ForeignObject (available in svg renderer, only). */
-text(x:Number|Function, y:Number|Function, string:String|Function, attributes: TextAttributes ={} ):Text{
- let newObject = (this.board as any).create('Text', this.dereference([x,y,string,]), this.defaultAttributes(attributes))
- return new Text(newObject as Text)
+text(x:Number|Function, y:Number|Function, string:String|Function, attributes: TextAttributes ={} ):Text{return new Text('Text', [x,y,string,], attributes)
 }
 
 
  /** A circular sector is a subarea of the area enclosed by a circle. It is enclosed by two radii and an arc. */
-sector(P1:Point|point, P2:Point|point, P3:Point|point, attributes: SectorAttributes ={} ):Sector{
- let newObject = (this.board as any).create('Sector', this.dereference([P1,P2,P3,]), this.defaultAttributes(attributes))
- return new Sector(newObject as Sector)
+sector(P1:Point|point, P2:Point|point, P3:Point|point, attributes: SectorAttributes ={} ):Sector{return new Sector('Sector', [P1,P2,P3,], attributes)
 }
 
 
  /** Vector field. Plot a vector field either given by two functions f1(x, y) and f2(x,y) or by a function f(x, y) returning an array of size 2. */
-vectorfield(fxfy:Function[], horizontalMesh:Number[]=[-6,25,6], verticalMesh:Number[]=[-6,25,6], attributes: VectorfieldAttributes ={} ):Vectorfield{
- let newObject = (this.board as any).create('Vectorfield', this.dereference([fxfy,horizontalMesh,verticalMesh,]), this.defaultAttributes(attributes))
- return new Vectorfield(newObject as Vectorfield)
+vectorfield(fxfy:Function[], horizontalMesh:Number[]=[-6,25,6], verticalMesh:Number[]=[-6,25,6], attributes: VectorfieldAttributes ={} ):Vectorfield{return new Vectorfield('Vectorfield', [fxfy,horizontalMesh,verticalMesh,], attributes)
 }
 
  /** The angle element is used to denote an angle defined by three points (from, around,to), or two lines and two directions (either points or plus-or-minus 1 to indicate direction.
@@ -1659,48 +1665,57 @@ vectorfield(fxfy:Function[], horizontalMesh:Number[]=[-6,25,6], verticalMesh:Num
             // implementation of signature,  hidden from user
             angle(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Angle {
  let newObject: Angle = {} as Angle // just so it is initialized
-if (arguments.length == 2){
-                    if(isJSXAttribute(b)){
-                        newObject = (this.board as any).create('angle', this.dereference([a,]), this.defaultAttributes(b)) // as unknown as Angle
-                    }else{
-                        newObject = (this.board as any).create('angle', this.dereference([a,b,]), this.defaultAttributes({})) // as Angle
-                    }
-                }
-if (arguments.length == 3){
-                    if(isJSXAttribute(c)){
-                        newObject = (this.board as any).create('angle', this.dereference([a,b,]), this.defaultAttributes(c)) // as unknown as Angle
-                    }else{
-                        newObject = (this.board as any).create('angle', this.dereference([a,b,c,]), this.defaultAttributes({})) // as Angle
-                    }
-                }
-if (arguments.length == 4){
-                    if(isJSXAttribute(d)){
-                        newObject = (this.board as any).create('angle', this.dereference([a,b,c,]), this.defaultAttributes(d)) // as unknown as Angle
-                    }else{
-                        newObject = (this.board as any).create('angle', this.dereference([a,b,c,d,]), this.defaultAttributes({})) // as Angle
-                    }
-                }
-if (arguments.length == 5){
-                    if(isJSXAttribute(e)){
-                        newObject = (this.board as any).create('angle', this.dereference([a,b,c,d,]), this.defaultAttributes(e)) // as unknown as Angle
-                    }else{
-                        newObject = (this.board as any).create('angle', this.dereference([a,b,c,d,e,]), this.defaultAttributes({})) // as Angle
-                    }
-                }
- return new Angle (newObject as Angle)
+   let params = []
+   let attrs = {}
+   if (arguments.length == 2){
+      if(isJSXAttribute(b)){
+          attrs = TSXGraph.defaultAttributes(b)
+          params = TSXGraph.dereference([a,])
+      }else{
+          params = TSXGraph.dereference([a,b,])
+      }
+   }
+   if (arguments.length == 3){
+      if(isJSXAttribute(c)){
+          attrs = TSXGraph.defaultAttributes(c)
+          params = TSXGraph.dereference([a,b,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,])
+      }
+   }
+   if (arguments.length == 4){
+      if(isJSXAttribute(d)){
+          attrs = TSXGraph.defaultAttributes(d)
+          params = TSXGraph.dereference([a,b,c,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,d,])
+      }
+   }
+   if (arguments.length == 5){
+      if(isJSXAttribute(e)){
+          attrs = TSXGraph.defaultAttributes(e)
+          params = TSXGraph.dereference([a,b,c,d,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,d,e,])
+      }
+   }
+   return new Angle('angle', params, TSXGraph.defaultAttributes(attrs)) // as Angle
  }
 
- /** Create an Arc with three points */
-arc(p1:Point|point, p2:Point|point, p3:Point|point, attributes: ArcAttributes ={} ):Arc{
- let newObject = (this.board as any).create('Arc', this.dereference([p1,p2,p3,]), this.defaultAttributes(attributes))
- return new Arc(newObject as Arc)
+ /** Create a circular Arc defined by three points (because a circle can be defined by three points - see circumcircle).
+                            
+*```js
+                            let arc = TSX.arc([-8,5],[-4,5],[-9,9]])
+                            
+*```
+                            
+ To create an arc with origin, startpoint, and angle, look at MajorArc/MinorArc. */
+arc(origin:Point|point, from:Point|point, to:Point|point, attributes: ArcAttributes ={} ):Arc{return new Arc('Arc', [origin,from,to,], attributes)
 }
 
 
  /** Arrow defined by two points (like a Segment) with arrow at P2 */
-arrow(p1:Point|point, p2:Point|point, attributes: ArrowAttributes ={} ):Arrow{
- let newObject = (this.board as any).create('Arrow', this.dereference([p1,p2,]), this.defaultAttributes(attributes))
- return new Arrow(newObject as Arrow)
+arrow(p1:Point|point, p2:Point|point, attributes: ArrowAttributes ={} ):Arrow{return new Arrow('Arrow', [p1,p2,], attributes)
 }
 
  /** A line parallel to a given line, through a point. */
@@ -1710,160 +1725,130 @@ arrow(p1:Point|point, p2:Point|point, attributes: ArrowAttributes ={} ):Arrow{
             // implementation of signature,  hidden from user
             parallel(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Parallel {
  let newObject: Parallel = {} as Parallel // just so it is initialized
-if (arguments.length == 2){
-                    if(isJSXAttribute(b)){
-                        newObject = (this.board as any).create('parallel', this.dereference([a,]), this.defaultAttributes(b)) // as unknown as Parallel
-                    }else{
-                        newObject = (this.board as any).create('parallel', this.dereference([a,b,]), this.defaultAttributes({})) // as Parallel
-                    }
-                }
-if (arguments.length == 3){
-                    if(isJSXAttribute(c)){
-                        newObject = (this.board as any).create('parallel', this.dereference([a,b,]), this.defaultAttributes(c)) // as unknown as Parallel
-                    }else{
-                        newObject = (this.board as any).create('parallel', this.dereference([a,b,c,]), this.defaultAttributes({})) // as Parallel
-                    }
-                }
-if (arguments.length == 4){
-                    if(isJSXAttribute(d)){
-                        newObject = (this.board as any).create('parallel', this.dereference([a,b,c,]), this.defaultAttributes(d)) // as unknown as Parallel
-                    }else{
-                        newObject = (this.board as any).create('parallel', this.dereference([a,b,c,d,]), this.defaultAttributes({})) // as Parallel
-                    }
-                }
-if (arguments.length == 5){
-                    if(isJSXAttribute(e)){
-                        newObject = (this.board as any).create('parallel', this.dereference([a,b,c,d,]), this.defaultAttributes(e)) // as unknown as Parallel
-                    }else{
-                        newObject = (this.board as any).create('parallel', this.dereference([a,b,c,d,e,]), this.defaultAttributes({})) // as Parallel
-                    }
-                }
- return new Parallel (newObject as Parallel)
+   let params = []
+   let attrs = {}
+   if (arguments.length == 2){
+      if(isJSXAttribute(b)){
+          attrs = TSXGraph.defaultAttributes(b)
+          params = TSXGraph.dereference([a,])
+      }else{
+          params = TSXGraph.dereference([a,b,])
+      }
+   }
+   if (arguments.length == 3){
+      if(isJSXAttribute(c)){
+          attrs = TSXGraph.defaultAttributes(c)
+          params = TSXGraph.dereference([a,b,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,])
+      }
+   }
+   if (arguments.length == 4){
+      if(isJSXAttribute(d)){
+          attrs = TSXGraph.defaultAttributes(d)
+          params = TSXGraph.dereference([a,b,c,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,d,])
+      }
+   }
+   if (arguments.length == 5){
+      if(isJSXAttribute(e)){
+          attrs = TSXGraph.defaultAttributes(e)
+          params = TSXGraph.dereference([a,b,c,d,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,d,e,])
+      }
+   }
+   return new Parallel('parallel', params, TSXGraph.defaultAttributes(attrs)) // as Parallel
  }
 
  /** Create an Arrow parallel to a segment. The constructed arrow contains p3 and has the same slope as the line through p1 and p2. */
-arrowparallel(p1:Point|point, p2:Point|point, p3:Point|point, attributes: ArrowparallelAttributes ={} ):Arrowparallel{
- let newObject = (this.board as any).create('Arrowparallel', this.dereference([p1,p2,p3,]), this.defaultAttributes(attributes))
- return new Arrowparallel(newObject as Arrowparallel)
+arrowparallel(p1:Point|point, p2:Point|point, p3:Point|point, attributes: ArrowparallelAttributes ={} ):Arrowparallel{return new Arrowparallel('Arrowparallel', [p1,p2,p3,], attributes)
 }
 
 
  /** Create an Axis with two points (like a Line) */
-axis(p1:Point|point, p2:Point|point, attributes: AxisAttributes ={} ):Axis{
- let newObject = (this.board as any).create('Axis', this.dereference([p1,p2,]), this.defaultAttributes(attributes))
- return new Axis(newObject as Axis)
+axis(p1:Point|point, p2:Point|point, attributes: AxisAttributes ={} ):Axis{return new Axis('Axis', [p1,p2,], attributes)
 }
 
 
  /** Bisect an Angle defined with three points */
-bisector(p1:Point, p2:Point, p3:Point, attributes: BisectorAttributes ={} ):Bisector{
- let newObject = (this.board as any).create('Bisector', this.dereference([p1,p2,p3,]), this.defaultAttributes(attributes))
- return new Bisector(newObject as Bisector)
+bisector(p1:Point, p2:Point, p3:Point, attributes: BisectorAttributes ={} ):Bisector{return new Bisector('Bisector', [p1,p2,p3,], attributes)
 }
 
 
  /** Bisect a Line defined with two points */
-bisectorlines(l1:Line, l2:Line, attributes: BisectorlinesAttributes ={} ):Bisectorlines{
- let newObject = (this.board as any).create('Bisectorlines', this.dereference([l1,l2,]), this.defaultAttributes(attributes))
- return new Bisectorlines(newObject as Bisectorlines)
+bisectorlines(l1:Line, l2:Line, attributes: BisectorlinesAttributes ={} ):Bisectorlines{return new Bisectorlines('Bisectorlines', [l1,l2,], attributes)
 }
 
 
  /** create a button */
-button(x:Number|Function, y:Number|Function, label:String, handler:Function, attributes: ButtonAttributes ={} ):Button{
- let newObject = (this.board as any).create('button', [x,y,label], this.defaultAttributes(attributes))
- return new Button(newObject as Button)
+button(x:Number|Function, y:Number|Function, label:String, handler:Function, attributes: ButtonAttributes ={} ):Button{return new Button('Button', [x,y,label,handler,], attributes)
 }
 
 
  /** This element is used to provide a constructor for cardinal spline curves. Create a dynamic cardinal spline interpolated curve given by sample points p_1 to p_n. */
-cardinalspline(data:Point[]|number[][], funct:Function, splineType:`uniform`|`centripetal`, attributes: CardinalsplineAttributes ={} ):Curve{
- let newObject = (this.board as any).create('Cardinalspline', this.dereference([data,funct,splineType,]), this.defaultAttributes(attributes))
- return new Curve(newObject as Curve)
+cardinalspline(data:Point[]|number[][], funct:Function, splineType:`uniform`|`centripetal`, attributes: CardinalsplineAttributes ={} ):Curve{return new Cardinalspline('Cardinalspline', [data,funct,splineType,], attributes)
 }
 
 
  /** This element is used to provide a constructor for special texts containing a form checkbox element. For this element, the attribute ”display” has to have the value 'html' (which is the default). The underlying HTML checkbox element can be accessed through the sub-object 'rendNodeCheck', e.g. to add event listeners. */
-checkbox(x:Number|Function, y:Number|Function, label:String|Function, attributes: CheckboxAttributes ={} ):Checkbox{
- let newObject = (this.board as any).create('Checkbox', this.dereference([x,y,label,]), this.defaultAttributes(attributes))
- return new Checkbox(newObject as Checkbox)
+checkbox(x:Number|Function, y:Number|Function, label:String|Function, attributes: CheckboxAttributes ={} ):Checkbox{return new Checkbox('Checkbox', [x,y,label,], attributes)
 }
 
 
  /** Creates a Point at the center of a circle defined by 3 points */
-circumcenter(p1:Point|point, p2:Point|point, p3:Point|point, attributes: CircumcenterAttributes ={} ):Circumcenter{
- let newObject = (this.board as any).create('Circumcenter', this.dereference([p1,p2,p3,]), this.defaultAttributes(attributes))
- return new Circumcenter(newObject as Circumcenter)
+circumcenter(p1:Point|point, p2:Point|point, p3:Point|point, attributes: CircumcenterAttributes ={} ):Circumcenter{return new Circumcenter('Circumcenter', [p1,p2,p3,], attributes)
 }
 
 
  /** Draw a circle defined by 3 points */
-circumcircle(p1:Point|point, p2:Point|point, p3:Point|point, attributes: CircumcircleAttributes ={} ):Circumcircle{
- let newObject = (this.board as any).create('Circumcircle', this.dereference([p1,p2,p3,]), this.defaultAttributes(attributes))
- return new Circumcircle(newObject as Circumcircle)
+circumcircle(p1:Point|point, p2:Point|point, p3:Point|point, attributes: CircumcircleAttributes ={} ):Circumcircle{return new Circumcircle('Circumcircle', [p1,p2,p3,], attributes)
 }
 
 
  /** Draw an arc from P1 to P3 (missing P3 to P1) defined by 3 points */
-circumcircleArc(p1:Point|point, p2:Point|point, p3:Point|point, attributes: CircumcircleArcAttributes ={} ):CircumcircleArc{
- let newObject = (this.board as any).create('CircumcircleArc', this.dereference([p1,p2,p3,]), this.defaultAttributes(attributes))
- return new CircumcircleArc(newObject as CircumcircleArc)
+circumcircleArc(p1:Point|point, p2:Point|point, p3:Point|point, attributes: CircumcircleArcAttributes ={} ):CircumcircleArc{return new CircumcircleArc('CircumcircleArc', [p1,p2,p3,], attributes)
 }
 
 
  /** Creates a CircumCenter and draws a sector from P1 to P3 (missing P3 to P1) defined by 3 points */
-circumcircleSector(p1:Point|point, p2:Point|point, p3:Point|point, attributes: CircumcircleSectorAttributes ={} ):CircumcircleSector{
- let newObject = (this.board as any).create('CircumcircleSector', this.dereference([p1,p2,p3,]), this.defaultAttributes(attributes))
- return new CircumcircleSector(newObject as CircumcircleSector)
+circumcircleSector(p1:Point|point, p2:Point|point, p3:Point|point, attributes: CircumcircleSectorAttributes ={} ):CircumcircleSector{return new CircumcircleSector('CircumcircleSector', [p1,p2,p3,], attributes)
 }
 
 
  /** A comb to display domains of inequalities. */
-comb(p1:Point|point, p2:Point|point, attributes: CombAttributes ={} ):Comb{
- let newObject = (this.board as any).create('Comb', this.dereference([p1,p2,]), this.defaultAttributes(attributes))
- return new Comb(newObject as Comb)
+comb(p1:Point|point, p2:Point|point, attributes: CombAttributes ={} ):Comb{return new Comb('Comb', [p1,p2,], attributes)
 }
 
 
  /** Difference of two closed path elements. The elements may be of type curve, circle, polygon, inequality. If one element is a curve, it has to be closed. The resulting element is of type curve. */
-curveDifference(curve1:GeometryElement, curve2:GeometryElement, attributes: CurveDifferenceAttributes ={} ):CurveDifference{
- let newObject = (this.board as any).create('CurveDifference', this.dereference([curve1,curve2,]), this.defaultAttributes(attributes))
- return new CurveDifference(newObject as CurveDifference)
+curveDifference(curve1:GeometryElement, curve2:GeometryElement, attributes: CurveDifferenceAttributes ={} ):CurveDifference{return new CurveDifference('CurveDifference', [curve1,curve2,], attributes)
 }
 
 
  /** Intersection of two closed path elements. The elements may be of type curve, circle, polygon, inequality. If one element is a curve, it has to be closed. The resulting element is of type curve. */
-curveIntersection(curve1:GeometryElement, curve2:GeometryElement, attributes: CurveIntersectionAttributes ={} ):CurveIntersection{
- let newObject = (this.board as any).create('CurveIntersection', this.dereference([curve1,curve2,]), this.defaultAttributes(attributes))
- return new CurveIntersection(newObject as CurveIntersection)
+curveIntersection(curve1:GeometryElement, curve2:GeometryElement, attributes: CurveIntersectionAttributes ={} ):CurveIntersection{return new CurveIntersection('CurveIntersection', [curve1,curve2,], attributes)
 }
 
 
  /** Union of two closed path elements. The elements may be of type curve, circle, polygon, inequality. If one element is a curve, it has to be closed. The resulting element is of type curve. */
-curveUnion(curve1:GeometryElement, curve2:GeometryElement, attributes: CurveUnionAttributes ={} ):CurveUnion{
- let newObject = (this.board as any).create('CurveUnion', this.dereference([curve1,curve2,]), this.defaultAttributes(attributes))
- return new CurveUnion(newObject as CurveUnion)
+curveUnion(curve1:GeometryElement, curve2:GeometryElement, attributes: CurveUnionAttributes ={} ):CurveUnion{return new CurveUnion('CurveUnion', [curve1,curve2,], attributes)
 }
 
 
  /** This element is used to provide a constructor for the graph showing the (numerical) derivative of a given curve. */
-derivative(curve:Curve, attributes: DerivativeAttributes ={} ):Derivative{
- let newObject = (this.board as any).create('Derivative', this.dereference([curve,]), this.defaultAttributes(attributes))
- return new Derivative(newObject as Derivative)
+derivative(curve:Curve, attributes: DerivativeAttributes ={} ):Derivative{return new Derivative('Derivative', [curve,], attributes)
 }
 
 
  /** Two Points and Radius */
-ellipse(p1:Point|point, p2:Point|point, radius:Number|Function, attributes: EllipseAttributes ={} ):Ellipse{
- let newObject = (this.board as any).create('Ellipse', this.dereference([p1,p2,radius,]), this.defaultAttributes(attributes))
- return new Ellipse(newObject as Ellipse)
+ellipse(p1:Point|point, p2:Point|point, radius:Number|Function, attributes: EllipseAttributes ={} ):Ellipse{return new Ellipse('Ellipse', [p1,p2,radius,], attributes)
 }
 
 
  /** This element is used to provide a constructor for functiongraph, which is just a wrapper for element Curve with JXG.Curve#X() set to x. The graph is drawn for x in the interval [a,b]. */
-functiongraph(funct:Function, leftBorder?:Number, rightBorder?:Number, attributes: FunctiongraphAttributes ={} ):Functiongraph{
- let newObject = (this.board as any).create('Functiongraph', this.dereference([funct,leftBorder,rightBorder,]), this.defaultAttributes(attributes))
- return new Functiongraph(newObject as Functiongraph)
+functiongraph(funct:Function, leftBorder?:Number, rightBorder?:Number, attributes: FunctiongraphAttributes ={} ):Functiongraph{return new Functiongraph('Functiongraph', [funct,leftBorder,rightBorder,], attributes)
 }
 
  /** A GeometryElement like Line, Circle, or Curve, and optionally a starting point defined by X,Y */
@@ -1873,28 +1858,41 @@ functiongraph(funct:Function, leftBorder?:Number, rightBorder?:Number, attribute
             // implementation of signature,  hidden from user
             glider(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Glider {
  let newObject: Glider = {} as Glider // just so it is initialized
-if (arguments.length == 1){
-                    if(isJSXAttribute(a)){
-                        newObject = (this.board as any).create('glider', this.dereference([]), this.defaultAttributes(a)) // as unknown as Glider
-                    }else{
-                        newObject = (this.board as any).create('glider', this.dereference([a,]), this.defaultAttributes({})) // as Glider
-                    }
-                }
-if (arguments.length == 2){
-                    if(isJSXAttribute(b)){
-                        newObject = (this.board as any).create('glider', this.dereference([a,]), this.defaultAttributes(b)) // as unknown as Glider
-                    }else{
-                        newObject = (this.board as any).create('glider', this.dereference([a,b,]), this.defaultAttributes({})) // as Glider
-                    }
-                }
-if (arguments.length == 3){
-                    if(isJSXAttribute(c)){
-                        newObject = (this.board as any).create('glider', this.dereference([a,b,]), this.defaultAttributes(c)) // as unknown as Glider
-                    }else{
-                        newObject = (this.board as any).create('glider', this.dereference([a,b,c,]), this.defaultAttributes({})) // as Glider
-                    }
-                }
- return new Glider (newObject as Glider)
+   let params = []
+   let attrs = {}
+   if (arguments.length == 1){
+      if(isJSXAttribute(a)){
+          attrs = TSXGraph.defaultAttributes(a)
+          params = TSXGraph.dereference([])
+      }else{
+          params = TSXGraph.dereference([a,])
+      }
+   }
+   if (arguments.length == 2){
+      if(isJSXAttribute(b)){
+          attrs = TSXGraph.defaultAttributes(b)
+          params = TSXGraph.dereference([a,])
+      }else{
+          params = TSXGraph.dereference([a,b,])
+      }
+   }
+   if (arguments.length == 3){
+      if(isJSXAttribute(c)){
+          attrs = TSXGraph.defaultAttributes(c)
+          params = TSXGraph.dereference([a,b,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,])
+      }
+   }
+   if (arguments.length == 4){
+      if(isJSXAttribute(d)){
+          attrs = TSXGraph.defaultAttributes(d)
+          params = TSXGraph.dereference([a,b,c,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,d,])
+      }
+   }
+   return new Glider('glider', params, TSXGraph.defaultAttributes(attrs)) // as Glider
  }
  /** Creates a grid to support the user with element placement or to improve determination of position. */
  grid(axis1:Axis, axis2:Axis,  attributes?: GridAttributes):Grid 
@@ -1903,104 +1901,91 @@ if (arguments.length == 3){
             // implementation of signature,  hidden from user
             grid(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Grid {
  let newObject: Grid = {} as Grid // just so it is initialized
-if (arguments.length == 0){
-                    if(isJSXAttribute(a)){
-                        newObject = (this.board as any).create('grid', this.dereference([]), this.defaultAttributes(a)) // as unknown as Grid
-                    }else{
-                        newObject = (this.board as any).create('grid', this.dereference([]), this.defaultAttributes({})) // as Grid
-                    }
-                }
-if (arguments.length == 1){
-                    if(isJSXAttribute(a)){
-                        newObject = (this.board as any).create('grid', this.dereference([]), this.defaultAttributes(a)) // as unknown as Grid
-                    }else{
-                        newObject = (this.board as any).create('grid', this.dereference([a,]), this.defaultAttributes({})) // as Grid
-                    }
-                }
-if (arguments.length == 2){
-                    if(isJSXAttribute(b)){
-                        newObject = (this.board as any).create('grid', this.dereference([a,]), this.defaultAttributes(b)) // as unknown as Grid
-                    }else{
-                        newObject = (this.board as any).create('grid', this.dereference([a,b,]), this.defaultAttributes({})) // as Grid
-                    }
-                }
-if (arguments.length == 3){
-                    if(isJSXAttribute(c)){
-                        newObject = (this.board as any).create('grid', this.dereference([a,b,]), this.defaultAttributes(c)) // as unknown as Grid
-                    }else{
-                        newObject = (this.board as any).create('grid', this.dereference([a,b,c,]), this.defaultAttributes({})) // as Grid
-                    }
-                }
- return new Grid (newObject as Grid)
+   let params = []
+   let attrs = {}
+   if (arguments.length == 0){
+      if(isJSXAttribute(a)){
+          attrs = TSXGraph.defaultAttributes(a)
+          params = TSXGraph.dereference([])
+      }else{
+          params = TSXGraph.dereference([])
+      }
+   }
+   if (arguments.length == 1){
+      if(isJSXAttribute(a)){
+          attrs = TSXGraph.defaultAttributes(a)
+          params = TSXGraph.dereference([])
+      }else{
+          params = TSXGraph.dereference([a,])
+      }
+   }
+   if (arguments.length == 2){
+      if(isJSXAttribute(b)){
+          attrs = TSXGraph.defaultAttributes(b)
+          params = TSXGraph.dereference([a,])
+      }else{
+          params = TSXGraph.dereference([a,b,])
+      }
+   }
+   if (arguments.length == 3){
+      if(isJSXAttribute(c)){
+          attrs = TSXGraph.defaultAttributes(c)
+          params = TSXGraph.dereference([a,b,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,])
+      }
+   }
+   return new Grid('grid', params, TSXGraph.defaultAttributes(attrs)) // as Grid
  }
 
  /** Hatches can be used to mark congruent lines or curves. */
-hatch(line:Line|line, numberHatches:Number, attributes: HatchAttributes ={} ):Hatch{
- let newObject = (this.board as any).create('Hatch', this.dereference([line,numberHatches,]), this.defaultAttributes(attributes))
- return new Hatch(newObject as Hatch)
+hatch(line:Line|line, numberHatches:Number, attributes: HatchAttributes ={} ):Hatch{return new Hatch('Hatch', [line,numberHatches,], attributes)
 }
 
 
  /** This element is used to provide a constructor for an hyperbola. An hyperbola is given by two points (the foci) and a third point on the hyperbola or the length of the major axis. */
-hyperbola(point1:Point|point, point2:Point|point, point3:Point|point|Number, start:Number=-3.14, end:Number=3.14, attributes: HyperbolaAttributes ={} ):Hyperbola{
- let newObject = (this.board as any).create('Hyperbola', this.dereference([point1,point2,point3,start,end,]), this.defaultAttributes(attributes))
- return new Hyperbola(newObject as Hyperbola)
+hyperbola(point1:Point|point, point2:Point|point, point3:Point|point|Number, start:Number=-3.14, end:Number=3.14, attributes: HyperbolaAttributes ={} ):Hyperbola{return new Hyperbola('Hyperbola', [point1,point2,point3,start,end,], attributes)
 }
 
 
  /** Constructs the incenter of the triangle described by the three given points. https://mathworld.wolfram.com/Incenter.html */
-incenter(p1:Point|point, p2:Point|point, p3:Point|point, attributes: IncenterAttributes ={} ):Incenter{
- let newObject = (this.board as any).create('Incenter', this.dereference([p1,p2,p3,]), this.defaultAttributes(attributes))
- return new Incenter(newObject as Incenter)
+incenter(p1:Point|point, p2:Point|point, p3:Point|point, attributes: IncenterAttributes ={} ):Incenter{return new Incenter('Incenter', [p1,p2,p3,], attributes)
 }
 
 
  /** An incircle is given by three points. */
-incircle(p1:Point|point, p2:Point|point, p3:Point|point, attributes: IncircleAttributes ={} ):Incircle{
- let newObject = (this.board as any).create('Incircle', this.dereference([p1,p2,p3,]), this.defaultAttributes(attributes))
- return new Incircle(newObject as Incircle)
+incircle(p1:Point|point, p2:Point|point, p3:Point|point, attributes: IncircleAttributes ={} ):Incircle{return new Incircle('Incircle', [p1,p2,p3,], attributes)
 }
 
 
  /** Creates an area indicating the solution of a linear inequality or an inequality of a function graph, i.e. an inequality of type y */
-inequality(boundaryLine:Line|line|Curve, attributes: InequalityAttributes ={} ):Inequality{
- let newObject = (this.board as any).create('Inequality', this.dereference([boundaryLine,]), this.defaultAttributes(attributes))
- return new Inequality(newObject as Inequality)
+inequality(boundaryLine:Line|line|Curve, attributes: InequalityAttributes ={} ):Inequality{return new Inequality('Inequality', [boundaryLine,], attributes)
 }
 
 
  /** This element is used to provide a constructor for special texts containing a HTML form input element. If the width of element is set with the attribute ”cssStyle”, the width of the label must be added. For this element, the attribute ”display” has to have the value 'html' (which is the default). The underlying HTML input field can be accessed through the sub-object 'rendNodeInput', e.g. to add event listeners. */
-input(x:Number|Function, y:Number|Function, prompt:String, initial:String, attributes: InputAttributes ={} ):Input{
- let newObject = (this.board as any).create('Input', this.dereference([x,y,prompt,initial,]), this.defaultAttributes(attributes))
- return new Input(newObject as Input)
+input(x:Number|Function, y:Number|Function, prompt:String, initial:String, attributes: InputAttributes ={} ):Input{return new Input('Input', [x,y,prompt,initial,], attributes)
 }
 
 
  /** This element is used to visualize the integral of a given curve over a given interval. */
-integral(range:Number[], curve:Curve, attributes: IntegralAttributes ={} ):Integral{
- let newObject = (this.board as any).create('Integral', this.dereference([range,curve,]), this.defaultAttributes(attributes))
- return new Integral(newObject as Integral)
+integral(range:Number[], curve:Curve, attributes: IntegralAttributes ={} ):Integral{return new Integral('Integral', [range,curve,], attributes)
 }
 
 
  /** An intersection point is a point which lives on two JSXGraph elements, i.e. it is one point of the set consisting of the intersection points of the two elements. The following element types can be (mutually) intersected: line, circle, curve, polygon, polygonal chain. */
-intersection(element1:Line|Circle, element2:Line|Circle, attributes: IntersectionAttributes ={} ):Point{
- let newObject = (this.board as any).create('intersection', this.dereference([element1,element2,0]), this.defaultAttributes(attributes))
- return new Point(newObject as Point)
+intersection(element1:Line|Circle|Curve, element2:Line|Circle, attributes: IntersectionAttributes ={} ):Point{
+ return new Intersection('intersection', TSXGraph.dereference([element1,element2,0]), TSXGraph.defaultAttributes(attributes)) as Point
 }
 
 
  /** A major arc is a segment of the circumference of a circle having measure greater than or equal to 180 degrees (pi radians). It is defined by a center, one point that defines the radius, and a third point that defines the angle of the arc. */
-majorArc(p1:Point|point, p2:Point|point, p3:Point|point, attributes: MajorArcAttributes ={} ):MajorArc{
- let newObject = (this.board as any).create('MajorArc', this.dereference([p1,p2,p3,]), this.defaultAttributes(attributes))
- return new MajorArc(newObject as MajorArc)
+majorArc(p1:Point|point, p2:Point|point, p3:Point|point, attributes: MajorArcAttributes ={} ):MajorArc{return new MajorArc('MajorArc', [p1,p2,p3,], attributes)
 }
 
 
  /** A major sector is a sector of a circle having measure greater than or equal to 180 degrees (pi radians). It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
-majorSector(p1:Point|point, p2:Point|point, p3:Point|point, attributes: MajorSectorAttributes ={} ):MajorSector{
- let newObject = (this.board as any).create('MajorSector', this.dereference([p1,p2,p3,]), this.defaultAttributes(attributes))
- return new MajorSector(newObject as MajorSector)
+majorSector(p1:Point|point, p2:Point|point, p3:Point|point, attributes: MajorSectorAttributes ={} ):MajorSector{return new MajorSector('MajorSector', [p1,p2,p3,], attributes)
 }
 
  /** A point in the middle of two given points or a line segment. */
@@ -2010,62 +1995,57 @@ majorSector(p1:Point|point, p2:Point|point, p3:Point|point, attributes: MajorSec
             // implementation of signature,  hidden from user
             midpoint(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Midpoint {
  let newObject: Midpoint = {} as Midpoint // just so it is initialized
-if (arguments.length == 1){
-                    if(isJSXAttribute(a)){
-                        newObject = (this.board as any).create('midpoint', this.dereference([]), this.defaultAttributes(a)) // as unknown as Midpoint
-                    }else{
-                        newObject = (this.board as any).create('midpoint', this.dereference([a,]), this.defaultAttributes({})) // as Midpoint
-                    }
-                }
-if (arguments.length == 2){
-                    if(isJSXAttribute(b)){
-                        newObject = (this.board as any).create('midpoint', this.dereference([a,]), this.defaultAttributes(b)) // as unknown as Midpoint
-                    }else{
-                        newObject = (this.board as any).create('midpoint', this.dereference([a,b,]), this.defaultAttributes({})) // as Midpoint
-                    }
-                }
-if (arguments.length == 3){
-                    if(isJSXAttribute(c)){
-                        newObject = (this.board as any).create('midpoint', this.dereference([a,b,]), this.defaultAttributes(c)) // as unknown as Midpoint
-                    }else{
-                        newObject = (this.board as any).create('midpoint', this.dereference([a,b,c,]), this.defaultAttributes({})) // as Midpoint
-                    }
-                }
- return new Midpoint (newObject as Midpoint)
+   let params = []
+   let attrs = {}
+   if (arguments.length == 1){
+      if(isJSXAttribute(a)){
+          attrs = TSXGraph.defaultAttributes(a)
+          params = TSXGraph.dereference([])
+      }else{
+          params = TSXGraph.dereference([a,])
+      }
+   }
+   if (arguments.length == 2){
+      if(isJSXAttribute(b)){
+          attrs = TSXGraph.defaultAttributes(b)
+          params = TSXGraph.dereference([a,])
+      }else{
+          params = TSXGraph.dereference([a,b,])
+      }
+   }
+   if (arguments.length == 3){
+      if(isJSXAttribute(c)){
+          attrs = TSXGraph.defaultAttributes(c)
+          params = TSXGraph.dereference([a,b,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,])
+      }
+   }
+   return new Midpoint('midpoint', params, TSXGraph.defaultAttributes(attrs)) // as Midpoint
  }
 
  /** A minor arc is a segment of the circumference of a circle having measure less than or equal to 180 degrees (pi radians). It is defined by a center, one point that defines the radius, and a third point that defines the angle of the arc. */
-minorArc(p1:Point|point, p2:Point|point, p3:Point|point, attributes: MinorArcAttributes ={} ):MinorArc{
- let newObject = (this.board as any).create('MinorArc', this.dereference([p1,p2,p3,]), this.defaultAttributes(attributes))
- return new MinorArc(newObject as MinorArc)
+minorArc(p1:Point|point, p2:Point|point, p3:Point|point, attributes: MinorArcAttributes ={} ):MinorArc{return new MinorArc('MinorArc', [p1,p2,p3,], attributes)
 }
 
 
  /** A minor sector is a sector of a circle having measure less than or equal to 180 degrees (pi radians). It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
-minorSector(p1:Point|point, p2:Point|point, p3:Point|point, attributes: MinorSectorAttributes ={} ):MinorSector{
- let newObject = (this.board as any).create('MinorSector', this.dereference([p1,p2,p3,]), this.defaultAttributes(attributes))
- return new MinorSector(newObject as MinorSector)
+minorSector(p1:Point|point, p2:Point|point, p3:Point|point, attributes: MinorSectorAttributes ={} ):MinorSector{return new MinorSector('MinorSector', [p1,p2,p3,], attributes)
 }
 
 
  /** A mirror element of a point, line, circle, curve, polygon will be constructed. */
-mirrorelement(element:Point|Line|Circle|Curve|Polygon, acrossPoint:Point|point, attributes: mirrorelementAttributes ={} ):mirrorelement{
- let newObject = (this.board as any).create('mirrorelement', this.dereference([element,acrossPoint,]), this.defaultAttributes(attributes))
- return new mirrorelement(newObject as mirrorelement)
+mirrorelement(element:Point|Line|Circle|Curve|Polygon, acrossPoint:Point|point, attributes: mirrorelementAttributes ={} ):mirrorelement{return new mirrorelement('mirrorelement', [element,acrossPoint,], attributes)
 }
 
 
  /** A mirror point will be constructed. */
-mirrorpoint(p1:Point, p2:Point, attributes: MirrorpointAttributes ={} ):Mirrorpoint{
- let newObject = (this.board as any).create('Mirrorpoint', this.dereference([p1,p2,]), this.defaultAttributes(attributes))
- return new Mirrorpoint(newObject as Mirrorpoint)
+mirrorpoint(p1:Point, p2:Point, attributes: MirrorpointAttributes ={} ):Mirrorpoint{return new Mirrorpoint('Mirrorpoint', [p1,p2,], attributes)
 }
 
 
  /** A non-reflex angle is the acute or obtuse instance of an angle. It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
-nonReflexAngle(point1:Point, point2:Point, point3:Point, attributes: NonReflexAngleAttributes ={} ):NonReflexAngle{
- let newObject = (this.board as any).create('NonReflexAngle', this.dereference([point1,point2,point3,]), this.defaultAttributes(attributes))
- return new NonReflexAngle(newObject as NonReflexAngle)
+nonReflexAngle(point1:Point, point2:Point, point3:Point, attributes: NonReflexAngleAttributes ={} ):NonReflexAngle{return new NonReflexAngle('NonReflexAngle', [point1,point2,point3,], attributes)
 }
 
  /** A line through a given point on an element of type line, circle, curve, or turtle and orthogonal (at right angle) to that object. */
@@ -2075,104 +2055,93 @@ nonReflexAngle(point1:Point, point2:Point, point3:Point, attributes: NonReflexAn
             // implementation of signature,  hidden from user
             normal(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Normal {
  let newObject: Normal = {} as Normal // just so it is initialized
-if (arguments.length == 1){
-                    if(isJSXAttribute(a)){
-                        newObject = (this.board as any).create('normal', this.dereference([]), this.defaultAttributes(a)) // as unknown as Normal
-                    }else{
-                        newObject = (this.board as any).create('normal', this.dereference([a,]), this.defaultAttributes({})) // as Normal
-                    }
-                }
-if (arguments.length == 2){
-                    if(isJSXAttribute(b)){
-                        newObject = (this.board as any).create('normal', this.dereference([a,]), this.defaultAttributes(b)) // as unknown as Normal
-                    }else{
-                        newObject = (this.board as any).create('normal', this.dereference([a,b,]), this.defaultAttributes({})) // as Normal
-                    }
-                }
-if (arguments.length == 3){
-                    if(isJSXAttribute(c)){
-                        newObject = (this.board as any).create('normal', this.dereference([a,b,]), this.defaultAttributes(c)) // as unknown as Normal
-                    }else{
-                        newObject = (this.board as any).create('normal', this.dereference([a,b,c,]), this.defaultAttributes({})) // as Normal
-                    }
-                }
- return new Normal (newObject as Normal)
+   let params = []
+   let attrs = {}
+   if (arguments.length == 1){
+      if(isJSXAttribute(a)){
+          attrs = TSXGraph.defaultAttributes(a)
+          params = TSXGraph.dereference([])
+      }else{
+          params = TSXGraph.dereference([a,])
+      }
+   }
+   if (arguments.length == 2){
+      if(isJSXAttribute(b)){
+          attrs = TSXGraph.defaultAttributes(b)
+          params = TSXGraph.dereference([a,])
+      }else{
+          params = TSXGraph.dereference([a,b,])
+      }
+   }
+   if (arguments.length == 3){
+      if(isJSXAttribute(c)){
+          attrs = TSXGraph.defaultAttributes(c)
+          params = TSXGraph.dereference([a,b,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,])
+      }
+   }
+   return new Normal('normal', params, TSXGraph.defaultAttributes(attrs)) // as Normal
  }
 
  /** This is used to construct a point that is the orthogonal projection of a point to a line. */
-orthogonalprojection(point:Point|point, line:Line|line, attributes: OrthogonalprojectionAttributes ={} ):Orthogonalprojection{
- let newObject = (this.board as any).create('Orthogonalprojection', this.dereference([point,line,]), this.defaultAttributes(attributes))
- return new Orthogonalprojection(newObject as Orthogonalprojection)
+orthogonalprojection(point:Point|point, line:Line|line, attributes: OrthogonalprojectionAttributes ={} ):Orthogonalprojection{return new Orthogonalprojection('Orthogonalprojection', [point,line,], attributes)
 }
 
 
  /** This element is used to provide a constructor for the ”other” intersection point. */
 otherIntersection(element1:Line|Circle, element2:Line|Circle, firstIntersection:Point, attributes: OtherIntersectionAttributes ={} ):Point{
- let newObject = (this.board as any).create('otherintersection', this.dereference([element1,element2,firstIntersection]), attributes)
- return new Point(newObject as Point)
+  return new OtherIntersection('otherintersection', TSXGraph.dereference([element1,element2,firstIntersection]), attributes)
 }
 
 
  /** This element is used to provide a constructor for a parabola. A parabola is given by one point (the focus) and a line (the directrix). */
-parabola(focalPoint:Point|point, line:Line|line, attributes: ParabolaAttributes ={} ):Parabola{
- let newObject = (this.board as any).create('Parabola', this.dereference([focalPoint,line,]), this.defaultAttributes(attributes))
- return new Parabola(newObject as Parabola)
+parabola(focalPoint:Point|point, line:Line|line, attributes: ParabolaAttributes ={} ):Parabola{return new Parabola('Parabola', [focalPoint,line,], attributes)
 }
 
 
  /** This element is used to provide a constructor for a segment. It's strictly spoken just a wrapper for element Line with Line#straightFirst and Line#straightLast properties set to false. If there is a third variable then the segment has a fixed length (which may be a function, too). */
-segment(P1:Point|point, P2:Point|point, attributes: SegmentAttributes ={} ):Segment{
- let newObject = (this.board as any).create('Segment', this.dereference([P1,P2,]), this.defaultAttributes(attributes))
- return new Segment(newObject as Segment)
+segment(P1:Point|point, P2:Point|point, attributes: SegmentAttributes ={} ):Segment{return new Segment('Segment', [P1,P2,], attributes)
 }
 
 
  /**  */
-parallelogram(p1:Point|point, p2:Point|point, p3:Point|point, attributes: ParallelogramAttributes ={} ):Parallelogram{
- let newObject = (this.board as any).create('Parallelogram', this.dereference([p1,p2,p3,]), this.defaultAttributes(attributes))
- return new Parallelogram(newObject as Parallelogram)
+parallelogram(p1:Point|point, p2:Point|point, p3:Point|point, attributes: ParallelogramAttributes ={} ):Parallelogram{return new Parallelogram('Parallelogram', [p1,p2,p3,], attributes)
 }
 
 
  /** This element is used to provide a constructor for a perpendicular. */
-perpendicular(line:Line|line, point:Point|point, attributes: PerpendicularAttributes ={} ):Perpendicular{
- let newObject = (this.board as any).create('Perpendicular', this.dereference([line,point,]), this.defaultAttributes(attributes))
- return new Perpendicular(newObject as Perpendicular)
+perpendicular(line:Line|line, point:Point|point, attributes: PerpendicularAttributes ={} ):Perpendicular{return new Perpendicular('Perpendicular', [line,point,], attributes)
+}
+
+
+ /** This element is used to provide a constructor for a perpendicular segment. */
+perpendicularSegment(line:Line|line, point:Point|point, attributes: PerpendicularSegmentAttributes ={} ):PerpendicularSegment{return new PerpendicularSegment('PerpendicularSegment', [line,point,], attributes)
 }
 
 
  /** This element is used to provide a constructor for the polar line of a point with respect to a conic or a circle. */
-polarLine(conic:Conic|Circle, point:Point, attributes: PolarLineAttributes ={} ):PolarLine{
- let newObject = (this.board as any).create('PolarLine', this.dereference([conic,point,]), this.defaultAttributes(attributes))
- return new PolarLine(newObject as PolarLine)
+polarLine(conic:Conic|Circle, point:Point, attributes: PolarLineAttributes ={} ):PolarLine{return new PolarLine('PolarLine', [conic,point,], attributes)
 }
 
 
  /** This element is used to provide a constructor for the pole point of a line with respect to a conic or a circle. */
-polePoint(conic:Conic|Circle, line:Line, attributes: PolePointAttributes ={} ):PolePoint{
- let newObject = (this.board as any).create('PolePoint', this.dereference([conic,line,]), this.defaultAttributes(attributes))
- return new PolePoint(newObject as PolePoint)
+polePoint(conic:Conic|Circle, line:Line, attributes: PolePointAttributes ={} ):PolePoint{return new PolePoint('PolePoint', [conic,line,], attributes)
 }
 
 
  /** This element is used to provide a constructor for the radical axis with respect to two circles with distinct centers. The angular bisector of the polar lines of the circle centers with respect to the other circle is always the radical axis. The radical axis passes through the intersection points when the circles intersect. When a circle about the midpoint of circle centers, passing through the circle centers, intersects the circles, the polar lines pass through those intersection points. */
-radicalAxis(circle1:Circle, circle2:Circle, attributes: RadicalAxisAttributes ={} ):RadicalAxis{
- let newObject = (this.board as any).create('RadicalAxis', this.dereference([circle1,circle2,]), this.defaultAttributes(attributes))
- return new RadicalAxis(newObject as RadicalAxis)
+radicalAxis(circle1:Circle, circle2:Circle, attributes: RadicalAxisAttributes ={} ):RadicalAxis{return new RadicalAxis('RadicalAxis', [circle1,circle2,], attributes)
 }
 
 
  /** A reflex angle is the neither acute nor obtuse instance of an angle. It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
-reflexAngle(point1:Point, point2:Point, point3:Point, attributes: ReflexAngleAttributes ={} ):ReflexAngle{
- let newObject = (this.board as any).create('ReflexAngle', this.dereference([point1,point2,point3,]), this.defaultAttributes(attributes))
- return new ReflexAngle(newObject as ReflexAngle)
+reflexAngle(point1:Point, point2:Point, point3:Point, attributes: ReflexAngleAttributes ={} ):ReflexAngle{return new ReflexAngle('ReflexAngle', [point1,point2,point3,], attributes)
 }
 
 
  /** Constructs a regular polygon. It needs two points which define the base line and the number of vertices. */
-regularPolygon(P1:Point|point, P2:Point|point, nVertices:Number, attributes: RegularPolygonAttributes ={} ):RegularPolygon{
- let newObject = (this.board as any).create('RegularPolygon', this.dereference([P1,P2,nVertices,]), this.defaultAttributes(attributes))
- return new RegularPolygon(newObject as RegularPolygon)
+regularPolygon(P1:Point|point, P2:Point|point, nVertices:Number, attributes: RegularPolygonAttributes ={} ):RegularPolygon{return new RegularPolygon('RegularPolygon', [P1,P2,nVertices,], attributes)
 }
 
 
@@ -2181,10 +2150,10 @@ regularPolygon(P1:Point|point, P2:Point|point, nVertices:Number, attributes: Reg
                 dragging the control or clicking on the line (you can disable clicking with {moveOnUp:false}
         
 *```js
-         let s = JSX.slider([1, 2], [3, 2], [1, 5, 10])           //  query with s.Value()
-         let s = JSX.slider([1, 2], [3, 2], [1, 5, 10],{snapWidth:1})     //  only values 1,2,3...
-         let s = JSX.slider([1, 2], [3, 2], [1, 5, 10],{withTicks:false}) //  hide the ticks
-         let s = JSX.slider[-3, 1], [1, 1], [-10, 1, 10], {
+         let s = TSX.slider([1, 2], [3, 2], [1, 5, 10])           //  query with s.Value()
+         let s = TSX.slider([1, 2], [3, 2], [1, 5, 10],{snapWidth:1})     //  only values 1,2,3...
+         let s = TSX.slider([1, 2], [3, 2], [1, 5, 10],{withTicks:false}) //  hide the ticks
+         let s = TSX.slider[-3, 1], [1, 1], [-10, 1, 10], {
             highline: { strokeColor: 'red'},        // to left of handle
             baseline: { strokeColor: 'blue'},       // to right of handle
             fillColor: 'red',                       // handle color
@@ -2193,9 +2162,7 @@ regularPolygon(P1:Point|point, P2:Point|point, nVertices:Number, attributes: Reg
             postLabel: ' meters'        // this is a suffix
         
 *``` */
-slider(StartPoint:Point|point, EndPoint:Point|point, minimum_initial_maximum:[number,number,number], attributes: SliderAttributes ={} ):Slider{
- let newObject = (this.board as any).create('Slider', this.dereference([StartPoint,EndPoint,minimum_initial_maximum,]), this.defaultAttributes(attributes))
- return new Slider(newObject as Slider)
+slider(StartPoint:Point|point, EndPoint:Point|point, minimum_initial_maximum:[number,number,number], attributes: SliderAttributes ={} ):Slider{return new Slider('Slider', [StartPoint,EndPoint,minimum_initial_maximum,], attributes)
 }
 
  /** A slope triangle is an imaginary triangle that helps you find the slope of a line or a line segment (use the method '.Value()' ). The hypotenuse of the triangle (the diagonal) is the line you are interested in finding the slope of. The two 'legs' of the triangle are the 'rise' and 'run' used in the slope formula. */
@@ -2205,55 +2172,53 @@ slider(StartPoint:Point|point, EndPoint:Point|point, minimum_initial_maximum:[nu
             // implementation of signature,  hidden from user
             slopetriangle(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Slopetriangle {
  let newObject: Slopetriangle = {} as Slopetriangle // just so it is initialized
-if (arguments.length == 1){
-                    if(isJSXAttribute(a)){
-                        newObject = (this.board as any).create('slopetriangle', this.dereference([]), this.defaultAttributes(a)) // as unknown as Slopetriangle
-                    }else{
-                        newObject = (this.board as any).create('slopetriangle', this.dereference([a,]), this.defaultAttributes({})) // as Slopetriangle
-                    }
-                }
-if (arguments.length == 2){
-                    if(isJSXAttribute(b)){
-                        newObject = (this.board as any).create('slopetriangle', this.dereference([a,]), this.defaultAttributes(b)) // as unknown as Slopetriangle
-                    }else{
-                        newObject = (this.board as any).create('slopetriangle', this.dereference([a,b,]), this.defaultAttributes({})) // as Slopetriangle
-                    }
-                }
-if (arguments.length == 3){
-                    if(isJSXAttribute(c)){
-                        newObject = (this.board as any).create('slopetriangle', this.dereference([a,b,]), this.defaultAttributes(c)) // as unknown as Slopetriangle
-                    }else{
-                        newObject = (this.board as any).create('slopetriangle', this.dereference([a,b,c,]), this.defaultAttributes({})) // as Slopetriangle
-                    }
-                }
- return new Slopetriangle (newObject as Slopetriangle)
+   let params = []
+   let attrs = {}
+   if (arguments.length == 1){
+      if(isJSXAttribute(a)){
+          attrs = TSXGraph.defaultAttributes(a)
+          params = TSXGraph.dereference([])
+      }else{
+          params = TSXGraph.dereference([a,])
+      }
+   }
+   if (arguments.length == 2){
+      if(isJSXAttribute(b)){
+          attrs = TSXGraph.defaultAttributes(b)
+          params = TSXGraph.dereference([a,])
+      }else{
+          params = TSXGraph.dereference([a,b,])
+      }
+   }
+   if (arguments.length == 3){
+      if(isJSXAttribute(c)){
+          attrs = TSXGraph.defaultAttributes(c)
+          params = TSXGraph.dereference([a,b,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,])
+      }
+   }
+   return new Slopetriangle('slopetriangle', params, TSXGraph.defaultAttributes(attrs)) // as Slopetriangle
  }
 
  /** This element is used to provide a constructor for (natural) cubic spline curves. Create a dynamic spline interpolated curve given by sample points p_1 to p_n. */
 spline(points:Point[]|number[][], attributes: SplineAttributes ={} ):Curve{
- let newObject = (this.board as any).create('spline', TSXGraph.dereference(points), this.defaultAttributes(attributes))
- return new Curve(newObject as Curve)
+ return new Spline('spline', TSXGraph.dereference(points), TSXGraph.defaultAttributes(attributes))
 }
 
 
  /** With the element tangent the slope of a line, circle, or curve in a certain point can be visualized. A tangent is always constructed by a glider on a line, circle, or curve and describes the tangent in the glider point on that line, circle, or curve. */
-tangent(glider:Glider, attributes: TangentAttributes ={} ):Tangent{
- let newObject = (this.board as any).create('Tangent', this.dereference([glider,]), this.defaultAttributes(attributes))
- return new Tangent(newObject as Tangent)
+tangent(glider:Glider, attributes: TangentAttributes ={} ):Tangent{return new Tangent('Tangent', [glider,], attributes)
 }
 
 
  /** A tape measure can be used to measure distances between points. */
-tapemeasure(P1:Point|point, P2:Point|point, attributes: TapemeasureAttributes ={} ):Tapemeasure{
- let newObject = (this.board as any).create('Tapemeasure', this.dereference([P1,P2,]), this.defaultAttributes(attributes))
- return new Tapemeasure(newObject as Tapemeasure)
+tapemeasure(P1:Point|point, P2:Point|point, attributes: TapemeasureAttributes ={} ):Tapemeasure{return new Tapemeasure('Tapemeasure', [P1,P2,], attributes)
 }
 
 
  /** This element is used to provide a constructor for trace curve (simple locus curve), which is realized as a special curve. */
-tracecurve(glider:Glider, point:Point, attributes: TracecurveAttributes ={} ):Tracecurve{
- let newObject = (this.board as any).create('Tracecurve', this.dereference([glider,point,]), this.defaultAttributes(attributes))
- return new Tracecurve(newObject as Tracecurve)
+tracecurve(glider:Glider, point:Point, attributes: TracecurveAttributes ={} ):Tracecurve{return new Tracecurve('Tracecurve', [glider,point,], attributes)
 }
 
 
@@ -2273,16 +2238,24 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
                          zPlaneFrontXAxis: { visible: false },
                          zPlaneFrontYAxis: { visible: false }
                      }, ):View3D{
- let newObject = (this.board as any).create('view3D',[ [x,y],[w,h],[xBounds,yBounds,zBounds]], attributes)
- return new View3D(newObject as View3D)
+ return new View3D('view3D',[ [x,y],[w,h],[xBounds,yBounds,zBounds]], attributes)
 }
 
 }
 
  export class GeometryElement {
  elValue: Object = {}
- constructor(elValue: any){
-     this.elValue = elValue
+ tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
+ scaleXY:number = 1   // used by V2 math library
+ constructor(className:string, params:any[], attrs: Object){
+ if (className == 'Polygon' || className == 'Group') {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
+ } else {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
+ }
+ if (Object.hasOwn(attrs, 'scaleXY')) {
+    this.scaleXY = (attrs as any).scaleXY    // for V2 Math
+}
  }
 
  /**  */
@@ -2526,8 +2499,17 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 
  export class GeometryElement3D {
  elValue: Object = {}
- constructor(elValue: any){
-     this.elValue = elValue
+ tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
+ scaleXY:number = 1   // used by V2 math library
+ constructor(className:string, params:any[], attrs: Object){
+ if (className == 'Polygon' || className == 'Group') {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
+ } else {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
+ }
+ if (Object.hasOwn(attrs, 'scaleXY')) {
+    this.scaleXY = (attrs as any).scaleXY    // for V2 Math
+}
  }
 
  /**  */
@@ -2568,22 +2550,49 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 
  export class Board {
  elValue: Object = {}
- constructor(elValue: any){
-     this.elValue = elValue
+ tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
+ scaleXY:number = 1   // used by V2 math library
+ constructor(className:string, params:any[], attrs: Object){
+ if (className == 'Polygon' || className == 'Group') {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
+ } else {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
+ }
+ if (Object.hasOwn(attrs, 'scaleXY')) {
+    this.scaleXY = (attrs as any).scaleXY    // for V2 Math
+}
  }
 }
 
  export class Infobox {
  elValue: Object = {}
- constructor(elValue: any){
-     this.elValue = elValue
+ tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
+ scaleXY:number = 1   // used by V2 math library
+ constructor(className:string, params:any[], attrs: Object){
+ if (className == 'Polygon' || className == 'Group') {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
+ } else {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
+ }
+ if (Object.hasOwn(attrs, 'scaleXY')) {
+    this.scaleXY = (attrs as any).scaleXY    // for V2 Math
+}
  }
 }
 
  export class CA {
  elValue: Object = {}
- constructor(elValue: any){
-     this.elValue = elValue
+ tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
+ scaleXY:number = 1   // used by V2 math library
+ constructor(className:string, params:any[], attrs: Object){
+ if (className == 'Polygon' || className == 'Group') {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
+ } else {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
+ }
+ if (Object.hasOwn(attrs, 'scaleXY')) {
+    this.scaleXY = (attrs as any).scaleXY    // for V2 Math
+}
  }
 
  /** f = map (x) -> x*sin(x); Usages: h = D(f, x); h = map (x) -> D(f, x); or D(x^2, x); */
@@ -2598,8 +2607,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Chart extends GeometryElement {
- constructor(elValues: GeometryElement){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -2649,8 +2658,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Circle extends GeometryElement {
- constructor(elValues: GeometryElement){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /** Circle area */
@@ -2686,8 +2695,17 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 
  export class Complex {
  elValue: Object = {}
- constructor(elValue: any){
-     this.elValue = elValue
+ tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
+ scaleXY:number = 1   // used by V2 math library
+ constructor(className:string, params:any[], attrs: Object){
+ if (className == 'Polygon' || className == 'Group') {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
+ } else {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
+ }
+ if (Object.hasOwn(attrs, 'scaleXY')) {
+    this.scaleXY = (attrs as any).scaleXY    // for V2 Math
+}
  }
 
  /**  */
@@ -2748,8 +2766,17 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 
  export class Composition {
  elValue: Object = {}
- constructor(elValue: any){
-     this.elValue = elValue
+ tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
+ scaleXY:number = 1   // used by V2 math library
+ constructor(className:string, params:any[], attrs: Object){
+ if (className == 'Polygon' || className == 'Group') {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
+ } else {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
+ }
+ if (Object.hasOwn(attrs, 'scaleXY')) {
+    this.scaleXY = (attrs as any).scaleXY    // for V2 Math
+}
  }
 
  /** Adds an element to the composition container. */
@@ -2795,8 +2822,17 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 
  export class Coords {
  elValue: Object = {}
- constructor(elValue: any){
-     this.elValue = elValue
+ tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
+ scaleXY:number = 1   // used by V2 math library
+ constructor(className:string, params:any[], attrs: Object){
+ if (className == 'Polygon' || className == 'Group') {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
+ } else {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
+ }
+ if (Object.hasOwn(attrs, 'scaleXY')) {
+    this.scaleXY = (attrs as any).scaleXY    // for V2 Math
+}
  }
 
  /**  */
@@ -2831,8 +2867,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Curve extends GeometryElement {
- constructor(elValues: GeometryElement){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -2923,8 +2959,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Curve3D extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /** Function which maps u to x; i.e. */
@@ -2945,8 +2981,17 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 
  export class Dump {
  elValue: Object = {}
- constructor(elValue: any){
-     this.elValue = elValue
+ tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
+ scaleXY:number = 1   // used by V2 math library
+ constructor(className:string, params:any[], attrs: Object){
+ if (className == 'Polygon' || className == 'Group') {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
+ } else {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
+ }
+ if (Object.hasOwn(attrs, 'scaleXY')) {
+    this.scaleXY = (attrs as any).scaleXY    // for V2 Math
+}
  }
 
  /** Adds markers to every element of the board */
@@ -3002,8 +3047,17 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 
  export class ForeignObject {
  elValue: Object = {}
- constructor(elValue: any){
-     this.elValue = elValue
+ tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
+ scaleXY:number = 1   // used by V2 math library
+ constructor(className:string, params:any[], attrs: Object){
+ if (className == 'Polygon' || className == 'Group') {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
+ } else {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
+ }
+ if (Object.hasOwn(attrs, 'scaleXY')) {
+    this.scaleXY = (attrs as any).scaleXY    // for V2 Math
+}
  }
 
  /**  */
@@ -3038,8 +3092,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Group extends GeometryElement {
- constructor(elValues: GeometryElement){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -3144,8 +3198,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Image extends GeometryElement {
- constructor(elValues: GeometryElement){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -3180,15 +3234,24 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Implicitcurve extends GeometryElement {
- constructor(elValues: GeometryElement){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Legend {
  elValue: Object = {}
- constructor(elValue: any){
-     this.elValue = elValue
+ tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
+ scaleXY:number = 1   // used by V2 math library
+ constructor(className:string, params:any[], attrs: Object){
+ if (className == 'Polygon' || className == 'Group') {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
+ } else {
+    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
+ }
+ if (Object.hasOwn(attrs, 'scaleXY')) {
+    this.scaleXY = (attrs as any).scaleXY    // for V2 Math
+}
  }
 
  /**  */
@@ -3213,8 +3276,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Line extends GeometryElement {
- constructor(elValues: GeometryElement){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -3289,8 +3352,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Line3D extends GeometryElement3D {
- constructor(elValues: GeometryElement3D){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -3320,8 +3383,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Point extends GeometryElement {
- constructor(elValues: GeometryElement){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -3358,11 +3421,16 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
  Z(): number {
   return (this.elValue as any).Z() as number
 }
+                    /** Point location in vector form [n,n] */
+                    XY(): [number,number] {
+                    return [(this.elValue as any).X() as number,(this.elValue as any).Y() as number]
+                    }
+                
 }
 
  export class Point3D extends GeometryElement3D {
- constructor(elValues: GeometryElement3D){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -3392,8 +3460,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Polygon extends GeometryElement {
- constructor(elValues: GeometryElement){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /** Attributes for the polygon border lines. */
@@ -3413,8 +3481,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Text extends GeometryElement {
- constructor(elValues: GeometryElement){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -3494,13 +3562,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Ticks extends GeometryElement {
- constructor(elValues: GeometryElement){
-   super(elValues)
-}
-
- /**  */
- public get board():Board {
-  return (this.elValue as any).board as Board
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -3560,8 +3623,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Turtle extends GeometryElement {
- constructor(elValues: GeometryElement){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /** Move the turtle backwards. */
@@ -3766,8 +3829,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Sector extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -3802,8 +3865,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Vectorfield extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /** Set the defining functions of vector field. */
@@ -3813,8 +3876,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Angle extends Sector {
- constructor(elValues: Sector){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -3839,8 +3902,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Arc extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -3875,26 +3938,26 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Arrow extends Line {
- constructor(elValues: Line){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Parallel extends Line {
- constructor(elValues: Line){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Arrowparallel extends Parallel {
- constructor(elValues: Parallel){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Axis extends Line {
- constructor(elValues: Line){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -3904,32 +3967,32 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Bisector extends Line {
- constructor(elValues: Line){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Bisectorlines extends Composition {
- constructor(elValues: Composition){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Button extends Text {
- constructor(elValues: Text){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Cardinalspline extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Checkbox extends Text {
- constructor(elValues: Text){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /** Returns the value of the checkbox element */
@@ -3939,26 +4002,26 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Circumcenter extends Point {
- constructor(elValues: Point){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Circumcircle extends Circle {
- constructor(elValues: Circle){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class CircumcircleArc extends Arc {
- constructor(elValues: Arc){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class CircumcircleSector extends Sector {
- constructor(elValues: Sector){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -3968,68 +4031,68 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Comb extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Conic extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class CurveDifference extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class CurveIntersection extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class CurveUnion extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Derivative extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Ellipse extends Conic {
- constructor(elValues: Conic){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class ParametricSurface3D extends Curve3D {
- constructor(elValues: Curve3D){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Functiongraph extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Functiongraph3D extends Curve3D {
- constructor(elValues: Curve3D){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Glider extends Point {
- constructor(elValues: Point){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /** Animate the point. */
@@ -4039,14 +4102,14 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Grid extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Hatch extends Ticks {
- constructor(elValues: Ticks){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -4056,32 +4119,32 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Hyperbola extends Conic {
- constructor(elValues: Conic){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Incenter extends Point {
- constructor(elValues: Point){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Incircle extends Circle {
- constructor(elValues: Circle){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Inequality extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Input extends Text {
- constructor(elValues: Text){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /** Sets value of the input element. */
@@ -4096,8 +4159,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Integral extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /** Attributes of the (left) base point of the integral. */
@@ -4127,20 +4190,20 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Intersection extends GeometryElement {
- constructor(elValues: GeometryElement){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Label extends Text {
- constructor(elValues: Text){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Locus extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -4155,116 +4218,116 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class MajorArc extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class MajorSector extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Metapostspline extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Midpoint extends Point {
- constructor(elValues: Point){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class MinorArc extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class MinorSector extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class mirrorelement extends GeometryElement {
- constructor(elValues: GeometryElement){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Mirrorpoint extends Point {
- constructor(elValues: Point){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class NonReflexAngle extends Angle {
- constructor(elValues: Angle){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Normal extends Line {
- constructor(elValues: Line){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Orthogonalprojection extends Point {
- constructor(elValues: Point){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class OtherIntersection extends Point {
- constructor(elValues: Point){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Parabola extends Conic {
- constructor(elValues: Conic){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Parallelpoint extends Point {
- constructor(elValues: Point){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Segment extends Line {
- constructor(elValues: Line){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Parallelogram extends Polygon {
- constructor(elValues: Polygon){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Perpendicular extends Segment {
- constructor(elValues: Segment){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class PerpendicularPoint extends Point {
- constructor(elValues: Point){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class PerpendicularSegment extends Segment {
- constructor(elValues: Segment){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -4274,50 +4337,50 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class PolarLine extends Line {
- constructor(elValues: Line){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class PolePoint extends Point {
- constructor(elValues: Point){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class PolygonalChain extends Polygon {
- constructor(elValues: Polygon){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class RadicalAxis extends Line {
- constructor(elValues: Line){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Reflection extends GeometryElement {
- constructor(elValues: GeometryElement){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class ReflexAngle extends Angle {
- constructor(elValues: Angle){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class RegularPolygon extends Polygon {
- constructor(elValues: Polygon){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Riemannsum extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /** Returns the value of the Riemann sum, i.e. */
@@ -4327,8 +4390,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Semicircle extends Arc {
- constructor(elValues: Arc){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -4338,8 +4401,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Slider extends Glider {
- constructor(elValues: Glider){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /** Sets the maximum value of the slider. */
@@ -4364,8 +4427,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Slopefield extends Vectorfield {
- constructor(elValues: Vectorfield){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /** Set the defining functions of slope field. */
@@ -4375,8 +4438,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Slopetriangle extends Line {
- constructor(elValues: Line){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /** Returns the value of the slope triangle, that is the slope of the tangent. */
@@ -4386,32 +4449,32 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Smartlabel extends Text {
- constructor(elValues: Text){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Spline extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Stepfunction extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Tangent extends Line {
- constructor(elValues: Line){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Tapemeasure extends Segment {
- constructor(elValues: Segment){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /** Returns the length of the tape measure. */
@@ -4421,14 +4484,14 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class Tracecurve extends Curve {
- constructor(elValues: Curve){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
  export class Transform extends GeometryElement {
- constructor(elValues: GeometryElement){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */
@@ -4448,8 +4511,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  export class View3D extends GeometryElement3D {
- constructor(elValues: GeometryElement3D){
-   super(elValues)
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 
  /**  */

@@ -25,7 +25,7 @@ import { TXG } from './tsxgraph'
 
 import lib_es5 from "./extraLibs/lib.es5.d.ts.txt";
 // import lib_baby from "./extraLibs/baby.d.ts.txt";
-// import lib_dom_mini from "./extraLibs/lib.dom_mini.d.ts.txt";
+import lib_dom_mini from "./extraLibs/lib.dom_mini.d.ts.txt";
 // import lib_dom from "./extraLibs/lib.dom.d.ts.txt";
 import lib_promise from "./extraLibs/lib.es2015.promise.d.ts.txt";
 
@@ -188,7 +188,7 @@ export class Editor {
 
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_baby_plus, "lib.baby.d.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es5, "lib.es5.d.ts");
-        // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom_mini, "lib.dom_mini.d.ts");
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom_mini, "lib.dom_mini.d.ts");
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom, "lib.dom.d.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_promise, "lib.es2015.promise.d.ts");
 
@@ -254,7 +254,6 @@ export class Editor {
             // console.log('mathcode',mathcode.window)
             // console.log('mathcode.TSX',mathcode.TSX)
 
-            let TXG = MathcodeAPI.TSXGraph()  // use MathcodeAPI to access from inside editor
             `
             + hiddenCode;
 

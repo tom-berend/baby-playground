@@ -200,7 +200,7 @@ export class Main {
                 //      let TSX = TXG.TSXGraph.initBoard('jxgbox')
                 TSXGraph: (canvas: string): TXG.TSXGraph => {
                     // console.log('mathcodeAPI initBoard', canvas);
-                    return TXG
+                    return TXG.TSXGraph.initBoard(canvas,{keepAspectRatio:true})
                 },
 
 

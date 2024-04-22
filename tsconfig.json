@@ -3,12 +3,12 @@
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": true,
     "module": "amd",
-    "target": "es2021",
+    "target": "es2022",
     "moduleResolution": "node",
     "allowJs": true,
     "skipLibCheck": true,
     "sourceMap": true,
-    "esModuleInterop": true,
+    "esModuleInterop": true
   },
   "files": [
     "src/index.ts"
