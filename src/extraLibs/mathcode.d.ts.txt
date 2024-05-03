@@ -10,10 +10,6 @@ declare namespace Mathcode{
     function JSXBoard():JSXBoard;
 }
 
-//declare class JSXBoard {
-//    constructor(canvasID: string ='jxgbox');
-//    initboard(canvasID: string ='jxgbox);
-//}
 
 
 declare class VT52 {

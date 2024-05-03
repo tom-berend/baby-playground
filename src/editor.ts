@@ -117,6 +117,7 @@ export class Editor {
     el: HTMLElement
     storageKey: string
     safeDelay: number
+    hiddenCode: string
     hiddenDecl: string
 
     systemDeclTS = ''     // hidden stuff that goes into all editors
@@ -135,6 +136,7 @@ export class Editor {
         this.initFile = initFile
         this.storageKey = ''
         this.safeDelay = 5000
+        this.hiddenCode = hiddenCode
         this.hiddenDecl = hiddenDecl
 
 
@@ -241,8 +243,9 @@ export class Editor {
             // const Mathcode:Mathcode = window.Mathcode
             // const VT = Mathcode.VT52()
 
+            const TSX: TXG.TSXBoard;        // might not ever get used
             `
-            + hiddenDecl;
+            + this.hiddenDecl;
 
         // must be JAVASCRIPT, not TYPESCRIPT
         this.systemDeclJS =
@@ -254,8 +257,8 @@ export class Editor {
             // console.log('mathcode',mathcode.window)
             // console.log('mathcode.TSX',mathcode.TSX)
 
-            `
-            + hiddenCode;
+                        `
+            + this.hiddenCode;
 
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(this.systemDeclTS)
@@ -310,7 +313,9 @@ export class Editor {
         input.click();
     }
 
-    copyToEditor(code: string) {
+    copyToEditor(code: string, hidden:string, decls:string) {
+        this.hiddenCode = hidden
+        this.hiddenDecl = decls
         this.editor.setValue(code)
     }
 
@@ -346,7 +351,6 @@ export class Editor {
             if (errorString.length > 0) {
                 // alert('errors coming')
                 alert(errorString)    //
-
                 return
             }
 
@@ -376,18 +380,16 @@ export class Editor {
         let code = ''
         code += this.systemDeclJS + "\r\n"
         // code += hiddenCode + "\r\n"
-        code += editorCode + "\r\n"
+        code += '{ ' + "\r\n" + editorCode + "\r\n" + ' }'
         code += this.commandCode + "\r\n"
 
-        console.log(code)
+        console.log('code', code)
 
         // wipe any observables from the last run
         Observable.resetUserObservers()
 
         // eval() is crazy dangerous because it runs in the local context
         // Function() is a bit safer, but not much
-
-        console.log('code to run', code)
 
         try {
             let f = new Function(code)

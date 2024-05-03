@@ -21,7 +21,7 @@
         //
         /////////////////////////////////////////////////////////////////////////////
 
-        //   Generated on April 22, 2024, 5:34 pm 
+        //   Generated on April 22, 2024, 5:41 pm
 
 
 
@@ -29,7 +29,7 @@
 
  interface GeometryElementAttributes  {
  /** used by V2 vector math library */
- scaleXY?: Number 
+ scaleXY?: Number
  /** Color of the element. */
  color?: String
  /** Opacity of the element (between 0 and 1). */
@@ -74,19 +74,19 @@
 
  interface GeometryElement3DAttributes  {
  /** used by V2 vector math library */
- scaleXY?: Number 
+ scaleXY?: Number
  /** Set whether the element is visibledisplay name  */
  visible?:Boolean
  }
 
  interface BoardAttributes  {
  /** used by V2 vector math library */
- scaleXY?: Number 
+ scaleXY?: Number
  }
 
  interface InfoboxAttributes  {
  /** used by V2 vector math library */
- scaleXY?: Number 
+ scaleXY?: Number
  /** Horizontal offset in pixel of the infobox text from its anchor point. */
   distanceX?: Number
  /** Vertical offset in pixel of the infobox text from its anchor point. */
@@ -97,12 +97,12 @@
 
  interface CAttributes  {
  /** used by V2 vector math library */
- scaleXY?: Number 
+ scaleXY?: Number
  }
 
  interface CAAttributes  {
  /** used by V2 vector math library */
- scaleXY?: Number 
+ scaleXY?: Number
  }
 
  interface ChartAttributes extends GeometryElementAttributes {
@@ -133,17 +133,17 @@
 
  interface ComplexAttributes  {
  /** used by V2 vector math library */
- scaleXY?: Number 
+ scaleXY?: Number
  }
 
  interface CompositionAttributes  {
  /** used by V2 vector math library */
- scaleXY?: Number 
+ scaleXY?: Number
  }
 
  interface CoordsAttributes  {
  /** used by V2 vector math library */
- scaleXY?: Number 
+ scaleXY?: Number
  }
 
  interface CurveAttributes extends GeometryElementAttributes {
@@ -180,12 +180,12 @@
 
  interface DumpAttributes  {
  /** used by V2 vector math library */
- scaleXY?: Number 
+ scaleXY?: Number
  }
 
  interface ForeignObjectAttributes  {
  /** used by V2 vector math library */
- scaleXY?: Number 
+ scaleXY?: Number
  /** List of attractor elements. If the distance of the foreignobject is less than attractorDistance the foreignobject is made to glider of this element. */
   attractors?: Element[]
  }
@@ -225,7 +225,7 @@
 
  interface LegendAttributes  {
  /** used by V2 vector math library */
- scaleXY?: Number 
+ scaleXY?: Number
  }
 
  interface LineAttributes extends GeometryElementAttributes {
@@ -1115,7 +1115,7 @@
 
         export class TSXGraph{
 
-            static defaultAttrs:Object = {name:'',keepAspectRatio:false}
+            static defaultAttrs:Object = {name:''}
 
             static initBoard(html: string, attributes:any={}): TSXBoard {
 
@@ -1195,7 +1195,7 @@
 }
 
  interface JSXMathJSXMathIface {
- } 
+ }
 
  interface MatrixJSXMathIface {
  /** Calculates the cross product of two vectors both of length three. */
@@ -1220,11 +1220,11 @@
  transpose(mat:matAny):matAny,
  /** Initializes a vector of size n wih coefficients set to the given value. */
  vector(n:number,init:number):Number[],
- } 
+ }
 
  interface NumericsJSXMathIface {
  CardinalSpline(pointArray:Point[],tau:Function):Function[],
- } 
+ }
 
 
 
@@ -1417,7 +1417,7 @@
 
 
 
-        
+
  /**  */
  conic:ConicIface
  /** This element is used to provide projective transformations. */
@@ -1429,10 +1429,10 @@
            constructor(){
             this.board = null
 
-            
+
  this.conic = {
- /** @protected */ 
- z_ignore: {}, 
+ /** @protected */
+ z_ignore: {},
    /** Line defined by solution to a*z + b*y +c*y== 0 */
    line( a:Number|Function, b:Number|Function, c:Number|Function,attributes: LineAttributes ={}) : Line {
  return new Line('Line',[a, b, c, ],attributes) as Line
@@ -1456,8 +1456,8 @@
  }
  this.conic.z_ignore = this
  this.transform = {
- /** @protected */ 
- z_ignore: {}, 
+ /** @protected */
+ z_ignore: {},
    /** Move a distance from a point */
    translate( x:Number|Function, y:Number|Function,attributes: TransformAttributes ={}) : Transform {
  return new Transform('Transform',[x, y, ],{type:'translate' })
@@ -1496,10 +1496,10 @@
  },
  }
  this.transform.z_ignore = this
- this.JSXMathMath = { 
- } 
+ this.JSXMathMath = {
+ }
 
- this.MatrixMath = { 
+ this.MatrixMath = {
  /** Calculates the cross product of two vectors both of length three. */
  crossProduct(c1:matAny,c2:matAny):matAny { return (window as any).JXG.Math.crossProduct(c1,c2)  as matAny} ,
  /** Generates a 4x4 matrix for 3D to 2D projections. */
@@ -1522,11 +1522,11 @@
  transpose(mat:matAny):matAny { return (window as any).JXG.Math.transpose(mat)  as matAny} ,
  /** Initializes a vector of size n wih coefficients set to the given value. */
  vector(n:number,init:number):Number[] { return (window as any).JXG.Math.vector(n,init)  as Number[]} ,
- } 
+ }
 
- this.NumericsMath = { 
+ this.NumericsMath = {
  CardinalSpline(pointArray:Point[],tau:Function):Function[] { return (window as any).JXG.Math.Numerics.CardinalSpline(TSXGraph.dereference(pointArray),tau)  as Function[]} ,
- } 
+ }
 
 }
 
@@ -1561,8 +1561,8 @@ image(url:String, lowerLeft:point, widthHeight:[Number,Number], attributes: Imag
 }
 
  /** An implicit curve is a plane curve defined by an implicit equation relating two coordinate variables, commonly x and y. For example, the unit circle is defined by the implicit equation x2 + y2 = 1. In general, every implicit curve is defined by an equation of the form f(x, y) = 0 for some function f of two variables. */
- implicitcurve(f:Function|String,  attributes?: ImplicitcurveAttributes):Implicitcurve 
- implicitcurve(f:Function|String, dfx:Function|String, dfy:Function|String,  attributes?: ImplicitcurveAttributes):Implicitcurve 
+ implicitcurve(f:Function|String,  attributes?: ImplicitcurveAttributes):Implicitcurve
+ implicitcurve(f:Function|String, dfx:Function|String, dfy:Function|String,  attributes?: ImplicitcurveAttributes):Implicitcurve
 
             // implementation of signature,  hidden from user
             implicitcurve(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Implicitcurve {
@@ -1598,14 +1598,14 @@ image(url:String, lowerLeft:point, widthHeight:[Number,Number], attributes: Imag
 
  /** This element is used to provide a constructor for a general line given by two points.
                                 By setting additional properties a line can be used as an arrow and/or axis.
-                                
+
 *```js
                                 TSX.line([3,2],[3,3], {strokeColor:'blue',strokeWidth:5, strokeOpacity:.5})
                                 let P1 = TSX.point([3,2])
                                 TSX.line(p1,[3,3])
-                                
+
 *```
-                                
+
  also create lines with Segment, Arrow, Transform.Point, Circumcenter, Glider, and others.
                                 Look at .conic.line() for a line defined by the equation 'az +bx +cy = 0'
                     */
@@ -1614,15 +1614,15 @@ line(p1:Point|point, p2:Point|point, attributes: LineAttributes ={} ):Line{retur
 
 
  /** Create a point. If any parent elements are functions or the attribute 'fixed' is true then point will be constrained.
-            
+
 *```js
              TSX.point([3,2], {strokeColor:'blue',strokeWidth:5, strokeOpacity:.5})
              TSX.point([3,3]), {fixed:true, showInfobox:true}
              TSX.point([()=>p1.X()+2,()=>p1.Y()+2]) // 2 up 2 right from p1
              TSX.point([1,2,2])  // three axis definition - [z,x,y]
-            
+
 *```
-            
+
  also create points with Intersection, Midpoint, Transform.Point, Circumcenter, Glider, and others. */
 point(position:NumberFunction[], attributes: PointAttributes ={} ):Point{
  return new Point('Point', position, TSXGraph.defaultAttributes(attributes))
@@ -1650,17 +1650,17 @@ vectorfield(fxfy:Function[], horizontalMesh:Number[]=[-6,25,6], verticalMesh:Num
 
  /** The angle element is used to denote an angle defined by three points (from, around,to), or two lines and two directions (either points or plus-or-minus 1 to indicate direction.
              As opposed to the sector, an angle has two angle points and no radius point.
-                                
+
  type=='sector': Sector is displayed.
-                                
+
  type=='square': a parallelogram is displayed.
-                                
+
  type=='auto':  a square is displayed if the angle is near orthogonal.
-                                
+
  If no name is provided the angle label is automatically set to a lower greek letter. */
- angle(from:Point|point, around:Point|point, to:Point|point,  attributes?: AngleAttributes):Angle 
- angle(line1:Line|line, line2:Line|line, direction1:[Number,Number], direction2:[Number,Number],  attributes?: AngleAttributes):Angle 
- angle(line1:Line|line, line2:Line|line, dirPlusMinus1:Number, dirPlusMinus2:Number,  attributes?: AngleAttributes):Angle 
+ angle(from:Point|point, around:Point|point, to:Point|point,  attributes?: AngleAttributes):Angle
+ angle(line1:Line|line, line2:Line|line, direction1:[Number,Number], direction2:[Number,Number],  attributes?: AngleAttributes):Angle
+ angle(line1:Line|line, line2:Line|line, dirPlusMinus1:Number, dirPlusMinus2:Number,  attributes?: AngleAttributes):Angle
 
             // implementation of signature,  hidden from user
             angle(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Angle {
@@ -1703,12 +1703,12 @@ vectorfield(fxfy:Function[], horizontalMesh:Number[]=[-6,25,6], verticalMesh:Num
  }
 
  /** Create a circular Arc defined by three points (because a circle can be defined by three points - see circumcircle).
-                            
+
 *```js
                             let arc = TSX.arc([-8,5],[-4,5],[-9,9]])
-                            
+
 *```
-                            
+
  To create an arc with origin, startpoint, and angle, look at MajorArc/MinorArc. */
 arc(origin:Point|point, from:Point|point, to:Point|point, attributes: ArcAttributes ={} ):Arc{return new Arc('Arc', [origin,from,to,], attributes)
 }
@@ -1719,8 +1719,8 @@ arrow(p1:Point|point, p2:Point|point, attributes: ArrowAttributes ={} ):Arrow{re
 }
 
  /** A line parallel to a given line, through a point. */
- parallel(line:Line|[Point,Point], point:Point|point,  attributes?: ParallelAttributes):Parallel 
- parallel(lineP1:Point|point, lineP2:Point|point, Point:Point|point,  attributes?: ParallelAttributes):Parallel 
+ parallel(line:Line|[Point,Point], point:Point|point,  attributes?: ParallelAttributes):Parallel
+ parallel(lineP1:Point|point, lineP2:Point|point, Point:Point|point,  attributes?: ParallelAttributes):Parallel
 
             // implementation of signature,  hidden from user
             parallel(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Parallel {
@@ -1852,8 +1852,8 @@ functiongraph(funct:Function, leftBorder?:Number, rightBorder?:Number, attribute
 }
 
  /** A GeometryElement like Line, Circle, or Curve, and optionally a starting point defined by X,Y */
- glider(hostElement:GeometryElement,  attributes?: GliderAttributes):Glider 
- glider(x:Number, y:Number, hostElement:GeometryElement,  attributes?: GliderAttributes):Glider 
+ glider(hostElement:GeometryElement,  attributes?: GliderAttributes):Glider
+ glider(x:Number, y:Number, hostElement:GeometryElement,  attributes?: GliderAttributes):Glider
 
             // implementation of signature,  hidden from user
             glider(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Glider {
@@ -1895,8 +1895,8 @@ functiongraph(funct:Function, leftBorder?:Number, rightBorder?:Number, attribute
    return new Glider('glider', params, TSXGraph.defaultAttributes(attrs)) // as Glider
  }
  /** Creates a grid to support the user with element placement or to improve determination of position. */
- grid(axis1:Axis, axis2:Axis,  attributes?: GridAttributes):Grid 
- grid( attributes?: GridAttributes):Grid 
+ grid(axis1:Axis, axis2:Axis,  attributes?: GridAttributes):Grid
+ grid( attributes?: GridAttributes):Grid
 
             // implementation of signature,  hidden from user
             grid(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Grid {
@@ -1989,8 +1989,8 @@ majorSector(p1:Point|point, p2:Point|point, p3:Point|point, attributes: MajorSec
 }
 
  /** A point in the middle of two given points or a line segment. */
- midpoint(p1:Point, p2:Point,  attributes?: MidpointAttributes):Midpoint 
- midpoint(line:Line,  attributes?: MidpointAttributes):Midpoint 
+ midpoint(p1:Point, p2:Point,  attributes?: MidpointAttributes):Midpoint
+ midpoint(line:Line,  attributes?: MidpointAttributes):Midpoint
 
             // implementation of signature,  hidden from user
             midpoint(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Midpoint {
@@ -2049,8 +2049,8 @@ nonReflexAngle(point1:Point, point2:Point, point3:Point, attributes: NonReflexAn
 }
 
  /** A line through a given point on an element of type line, circle, curve, or turtle and orthogonal (at right angle) to that object. */
- normal(object:Line|Circle|Curve|Turtle, point:Point,  attributes?: NormalAttributes):Normal 
- normal(glider:Glider,  attributes?: NormalAttributes):Normal 
+ normal(object:Line|Circle|Curve|Turtle, point:Point,  attributes?: NormalAttributes):Normal
+ normal(glider:Glider,  attributes?: NormalAttributes):Normal
 
             // implementation of signature,  hidden from user
             normal(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Normal {
@@ -2148,7 +2148,7 @@ regularPolygon(P1:Point|point, P2:Point|point, nVertices:Number, attributes: Reg
  /** An input widget for choosing values from a given range of numbers.  Parameters are startpoint, endpoint,
                 and an array with [minimum, initialValue, maximum].  Query the value with slider.Value().  Set the slider either by
                 dragging the control or clicking on the line (you can disable clicking with {moveOnUp:false}
-        
+
 *```js
          let s = TSX.slider([1, 2], [3, 2], [1, 5, 10])           //  query with s.Value()
          let s = TSX.slider([1, 2], [3, 2], [1, 5, 10],{snapWidth:1})     //  only values 1,2,3...
@@ -2160,14 +2160,14 @@ regularPolygon(P1:Point|point, P2:Point|point, nVertices:Number, attributes: Reg
             label: {fontSize: 16, strokeColor: 'orange'},
             suffixLabel: ' x=',         // really a prefix
             postLabel: ' meters'        // this is a suffix
-        
+
 *``` */
 slider(StartPoint:Point|point, EndPoint:Point|point, minimum_initial_maximum:[number,number,number], attributes: SliderAttributes ={} ):Slider{return new Slider('Slider', [StartPoint,EndPoint,minimum_initial_maximum,], attributes)
 }
 
  /** A slope triangle is an imaginary triangle that helps you find the slope of a line or a line segment (use the method '.Value()' ). The hypotenuse of the triangle (the diagonal) is the line you are interested in finding the slope of. The two 'legs' of the triangle are the 'rise' and 'run' used in the slope formula. */
- slopetriangle(tangent:Tangent,  attributes?: SlopetriangleAttributes):Slopetriangle 
- slopetriangle(line:Line, point:Point,  attributes?: SlopetriangleAttributes):Slopetriangle 
+ slopetriangle(tangent:Tangent,  attributes?: SlopetriangleAttributes):Slopetriangle
+ slopetriangle(line:Line, point:Point,  attributes?: SlopetriangleAttributes):Slopetriangle
 
             // implementation of signature,  hidden from user
             slopetriangle(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Slopetriangle {
@@ -3425,7 +3425,7 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
                     XY(): [number,number] {
                     return [(this.elValue as any).X() as number,(this.elValue as any).Y() as number]
                     }
-                
+
 }
 
  export class Point3D extends GeometryElement3D {

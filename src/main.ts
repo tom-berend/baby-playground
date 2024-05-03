@@ -200,7 +200,7 @@ export class Main {
                 //      let TSX = TXG.TSXGraph.initBoard('jxgbox')
                 TSXGraph: (canvas: string): TXG.TSXGraph => {
                     // console.log('mathcodeAPI initBoard', canvas);
-                    return TXG.TSXGraph.initBoard(canvas,{keepAspectRatio:true})
+                    return TXG.TSXGraph.initBoard(canvas, { keepAspectRatio: true })
                 },
 
 
@@ -331,21 +331,28 @@ export class Main {
                     return (true)  // whetherh we can go ahead
                 },
 
-                copyToEditor(paragraph: string, code: string, textbook: string) {
+
+                copyToEditor(paragraph: string, textbook: string, code: string) {
                     let codeString = window.atob(code)
                     writeMoodleLog({ 'datacode': 'Log_CopyToEditor', 'id': main.moodleID, 'textbook': textbook, 'uniq': paragraph, data01: code })
+
+                    // // refresh the editor before we copy, clearing any old hidden stuff
+
                     Main.editor.editor.setValue(codeString)
                     console.log('copyToEditor', codeString)
                 },
 
-                runInCanvas(paragraph: string, code: string, textbook: string) {   // convert from TS to JS first !!
+                runInCanvas(paragraph: string, textbook: string, code: string) {   // convert from TS to JS first !!
+                    // console.log('runInCanvas',code)
                     let tsCode = window.atob(code)
+
                     writeMoodleLog({ 'datacode': 'Log_RunInCanvas', 'id': main.moodleID, 'textbook': textbook, 'uniq': paragraph, data01: tsCode })
                     let jsCode = ts.transpile(tsCode);
 
                     // before we do anything else, we WIPE OUT any previous
                     // content of <div id='jxgbox'>
                     // then add back a simple canvas
+
                     let jxgDiv = document.getElementById('jxgbox')
                     // console.log('removing with method 2')
                     while (jxgDiv.firstChild) {
@@ -355,15 +362,15 @@ export class Main {
                     canv.id = 'jxgbox'
                     jxgDiv.appendChild(canv)
 
-
-                    console.log('runEditorCode', jsCode)
-                    Main.editor.runEditorCode(jsCode)
+                    // console.log('runEditorCode', jsCode)
+                    Main.editor.runEditorCode(jsCode)//, jsHidden, tsDecls)
                 },
 
                 //// these are the buttons on the Editor
                 runEditor() {
                     // console.log('clicked RUN #1')
-                    this.eraseFileExplorer()    // in case it is open (also resets '2D')
+                    console.log('runEditor');
+                    // this.eraseFileExplorer()    // in case it is open (also resets '2D')
 
                     let jxgDiv = document.getElementById('jxgbox')
                     // console.log('removing with method 1')
