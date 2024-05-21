@@ -21,7 +21,16 @@ export class OnClickSay {
         this.voices = this.synth.getVoices()
         if (this.voices.length !== 0) {
             // console.log('voices already loaded')
-            // console.log('voices', voices)
+            // console.log('voices', this.voices)
+            this.voices.forEach(voice => {
+                // console.log(voice.voiceURI)
+                if (voice.voiceURI.toLowerCase().indexOf('english') > 0) {
+                    // console.log(voice)
+                    this.englishVoices.push(voice)
+                }
+            })
+            console.log('english voices', this.englishVoices)
+
         } else {
             // console.log('loading voices')
             setTimeout(() => {
@@ -37,19 +46,7 @@ export class OnClickSay {
             return
         }
 
-        this.voices = this.synth.getVoices()
 
-        // console.log(this.voices);
-
-        this.voices.forEach(voice => {
-            // console.log(voice.voiceURI)
-            if (voice.voiceURI.toLowerCase().indexOf('english') > 0) {
-                // console.log(voice)
-                this.englishVoices.push(voice)
-            }
-        })
-
-        // console.log(this.englishVoices);
 
         // if (this.synthRunning) {     // someone clicked, likelywants to STOP the playback
         //     this.synthCancelled = true
@@ -140,7 +137,7 @@ export class OnClickSay {
             this.synthRunning = true // try to prevent a second speaker from starting
             // split the line on colon, exclaim, question, dash, rejoin on period, and finally split on period
             // BUT NOT COMMA, it makes the text disjointed
-            let sentences = text.split(':').join('.').split('!').join('.').split('?').join('.').split(' - ').join('.').split('.')
+            let sentences = text.split(':').join('.').split('!').join('.').split('?').join('.').split(' - ').join('\n').split('.')
             // i think i could have split with regex, but
             for (let i = 0; i < sentences.length; i++) {
 

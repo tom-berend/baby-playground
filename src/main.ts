@@ -215,8 +215,17 @@ export class Main {
                     // console.log('hidden code', this.hiddenCode)
                 },
 
-                logAnswerToQuestion: (paragraphUniq: string, bakery0: string) => {
-                    console.log('in logAnswerToQuestion()');
+                logAnswerToQuestion: (paragraphUniq: string, textbook: string,  bakery0: string, questionType: string) => {
+
+                    let answer:string
+
+                    if(questionType == 'SingleLongAnswer')
+                        answer = (document.getElementById(bakery0) as HTMLTextAreaElement).value  // : HTMLElement or null
+
+                    console.log('in logAnswerToQuestion()', bakery0);
+
+
+                    writeMoodleLog({ 'datacode': 'LOG_Answer', 'id': main.moodleID, 'textbook': textbook, 'data01': paragraphUniq, 'data02': answer })
                 },
 
                 // MathcodeAPI.onClickSay("u00051",voice,"step","activity","topic")
