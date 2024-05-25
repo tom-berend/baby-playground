@@ -50,6 +50,8 @@ export interface HostMsg {
     datacode: string;
     id: number;              // moodleID
     textbook: string;       // one day will have multiple textbooks running
+    paragraph?: string;
+    step?:string,
     data01?: string;
     data02?: string;
     data03?: string;
@@ -57,7 +59,6 @@ export interface HostMsg {
     data05?: string;
     data06?: string;
 
-    uniq?: string;
 }
 
 
@@ -215,18 +216,37 @@ export class Main {
                     // console.log('hidden code', this.hiddenCode)
                 },
 
-                logAnswerToQuestion: (paragraphUniq: string, textbook: string,  bakery0: string, questionType: string) => {
+                logAnswerToQuestion: (paragraphUniq: string, textbook: string, bakery0: string, questionType: string, question: string) => {
 
-                    let answer:string
+                    let answer: string
 
-                    if(questionType == 'SingleLongAnswer')
+                    if (questionType == 'SingleLongAnswer')
                         answer = (document.getElementById(bakery0) as HTMLTextAreaElement).value  // : HTMLElement or null
+                    else
+                        answer = (document.getElementById(bakery0) as HTMLElement).innerText
 
-                    console.log('in logAnswerToQuestion()', bakery0);
-
-
-                    writeMoodleLog({ 'datacode': 'LOG_Answer', 'id': main.moodleID, 'textbook': textbook, 'data01': paragraphUniq, 'data02': answer })
+                    writeMoodleLog({ 'datacode': 'LOG_Answer', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraphUniq, 'data01': answer, 'data02': question })
                 },
+
+
+                submitEditor: (stepUniq: string, textbook: string) => {
+
+                    console.log(`submitEditor: (${stepUniq}: string, ${textbook}: string)`)
+
+                    // need a callback, this is an async functin
+                    let blob = new Blob([this.editor.editor.getValue()], { type: "text/plain" })
+                    let reader = new FileReader();
+                    reader.readAsText(blob);
+                    reader.onloadend = function() {
+                        let result = reader.result
+                        if (typeof result == 'string') {    // because might be ArrayBuffer
+                            let base64 =  Buffer.from(result, 'utf8').toString('base64');
+                            writeMoodleLog({ 'datacode': 'LOG_Answer', 'id': main.moodleID, 'textbook': textbook, 'data01': stepUniq, 'data02': base64 })
+                        }
+                    }
+
+                },
+
 
                 // MathcodeAPI.onClickSay("u00051",voice,"step","activity","topic")
                 onClickSay: (utterID: string, voiceN: number, paragraph: string, textbook: string) => {
@@ -234,10 +254,9 @@ export class Main {
 
                     let sayThis = document.getElementById(utterID)  // : HTMLElement or null
                     if (!sayThis) {     // might be null
-                        writeMoodleLog({ 'datacode': 'LOG_Error', 'id': main.moodleID, 'textbook': textbook, 'data01': `could not find HTML ID '${utterID}' for paragraph '${paragraph}'` })
+                        writeMoodleLog({ 'datacode': 'LOG_Error', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, 'data01': `could not find HTML ID '${utterID}' for paragraph '${paragraph}'` })
                     } else {
-
-                        writeMoodleLog({ 'datacode': 'LOG_ClickSay', 'id': main.moodleID, 'textbook': textbook, 'data01': sayThis.innerHTML.substring(0, 40), 'uniq': paragraph })
+                        writeMoodleLog({ 'datacode': 'LOG_ClickSay', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, 'data01': sayThis.innerHTML.substring(0, 40) })
 
                         if (!this.onClickSay)
                             this.onClickSay = new OnClickSay()
@@ -323,27 +342,27 @@ export class Main {
 
                     if (!readyToReflect) {
                         // if NOT ready, then use 1001, data01 describes what is missing
-                        writeMoodleLog({ 'datacode': 'LOG_NotReadyToReflect', 'id': main.moodleID, 'textbook': textbook, 'data01': 'code challenge', 'uniq': step })
+                        writeMoodleLog({ 'datacode': 'LOG_NotReadyToReflect', 'id': main.moodleID, 'textbook': textbook, 'data01': 'code challenge', 'step': step })
                         alert('checking whether you are reading to finish ' + step.toString())
                     } else {
                         // if ready, then use 1002.  and set a flag so don't have to check again
-                        writeMoodleLog({ 'datacode': 'Log_ReadyToReflect', 'id': main.moodleID, 'textbook': textbook, 'uniq': step })
+                        writeMoodleLog({ 'datacode': 'Log_ReadyToReflect', 'id': main.moodleID, 'textbook': textbook, 'step': step })
                     }
                     return readyToReflect
                 },
 
 
                 // MathcodeAPI.completeStep("00051","step","activity","topic")
-                completeStep: (id: string, uniq: string, textbook: string) => {
+                completeStep: (id: string, paragraph: string, textbook: string) => {
                     // alert('complete step')
-                    writeMoodleLog({ 'datacode': 'Log_CompleteStep', 'id': main.moodleID, 'textbook': textbook, 'uniq': uniq, })
+                    writeMoodleLog({ 'datacode': 'Log_CompleteStep', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, })
                     return (true)  // whetherh we can go ahead
                 },
 
 
                 copyToEditor(paragraph: string, textbook: string, code: string) {
                     let codeString = window.atob(code)
-                    writeMoodleLog({ 'datacode': 'Log_CopyToEditor', 'id': main.moodleID, 'textbook': textbook, 'uniq': paragraph, data01: code })
+                    writeMoodleLog({ 'datacode': 'Log_CopyToEditor', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: code })
 
                     // // refresh the editor before we copy, clearing any old hidden stuff
 
@@ -355,7 +374,7 @@ export class Main {
                     // console.log('runInCanvas',code)
                     let tsCode = window.atob(code)
 
-                    writeMoodleLog({ 'datacode': 'Log_RunInCanvas', 'id': main.moodleID, 'textbook': textbook, 'uniq': paragraph, data01: tsCode })
+                    writeMoodleLog({ 'datacode': 'Log_RunInCanvas', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: tsCode })
                     let jsCode = ts.transpile(tsCode);
 
                     // before we do anything else, we WIPE OUT any previous
@@ -406,13 +425,10 @@ export class Main {
                         throw 'stop'
                     } catch (e) { }  // we intentionally throwed, no error msg required
                 },
-                submitEditor(s: string) {
-                    console.log('arrived in Submit')
-                },
 
-                snapQuestion(uniq: string, textbook: string, bakery: number, question: string, answer: string) {
+                snapQuestion(paragraphUniq: string, textbook: string, bakery: number, question: string, answer: string) {
                     // expose the answer and write it to the log
-                    console.log('snapQuestion()', uniq, textbook, bakery, question, answer)
+                    console.log('snapQuestion()', paragraphUniq, textbook, bakery, question, answer)
                     // id  Annn is input text
                     //     Bnnn is answer (hidden, make visibility:visible)
                     //     Cnnn is verify button (visible, make visiblility:hidden)
@@ -424,7 +440,7 @@ export class Main {
                     B.style.display = 'block'
                     C.style.display = 'none'
 
-                    writeMoodleLog({ 'datacode': 'LOG_SnapQuestion', 'id': main.moodleID, 'textbook': textbook, 'data01': question, 'data02': answer, 'data03': myAnswer, 'uniq': uniq })
+                    writeMoodleLog({ 'datacode': 'LOG_SnapQuestion', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraphUniq, 'data01': question, 'data02': answer, 'data03': myAnswer })
                 },
 
                 // sometimes the host wants to write without a refresh
@@ -559,10 +575,10 @@ export class Main {
         // but we want to be able to query the log for all records
         // so we simply use the PREVIOUS UNIQ (usually that got us here)
 
-        if (payload.uniq == undefined)
-            payload.uniq = main.prevUniq
+        if (payload.paragraph == undefined)
+            payload.paragraph = main.prevUniq
         else
-            main.prevUniq = payload.uniq
+            main.prevUniq = payload.paragraph
 
 
 
@@ -698,10 +714,10 @@ function writeMoodleLog(payload: HostMsg) {
     // but we want to be able to query the log for all records
     // so we simply use the PREVIOUS UNIQ (usually that got us here)
 
-    if (payload.uniq == undefined)
-        payload.uniq = prevUniq
+    if (payload.paragraph == undefined)
+        payload.paragraph = prevUniq
     else
-        prevUniq = payload.uniq
+        prevUniq = payload.paragraph
 
 
 
