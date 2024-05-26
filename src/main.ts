@@ -51,7 +51,7 @@ export interface HostMsg {
     id: number;              // moodleID
     textbook: string;       // one day will have multiple textbooks running
     paragraph?: string;
-    step?:string,
+    step?: string,
     data01?: string;
     data02?: string;
     data03?: string;
@@ -229,19 +229,19 @@ export class Main {
                 },
 
 
-                submitEditor: (stepUniq: string, textbook: string) => {
+                submitChallenge: (stepUniq: string, textbook: string) => {
 
                     console.log(`submitEditor: (${stepUniq}: string, ${textbook}: string)`)
 
-                    // need a callback, this is an async functin
-                    let blob = new Blob([this.editor.editor.getValue()], { type: "text/plain" })
+                    // need a callback, this is an async function
+                    let blob = new Blob([Main.editor.editor.getValue()], { type: "text/plain" })
                     let reader = new FileReader();
                     reader.readAsText(blob);
                     reader.onloadend = function() {
                         let result = reader.result
                         if (typeof result == 'string') {    // because might be ArrayBuffer
-                            let base64 =  Buffer.from(result, 'utf8').toString('base64');
-                            writeMoodleLog({ 'datacode': 'LOG_Answer', 'id': main.moodleID, 'textbook': textbook, 'data01': stepUniq, 'data02': base64 })
+                            let base64 = Buffer.from(result, 'utf8').toString('base64');
+                            writeMoodleLog({ 'datacode': 'LOG_Challenge', 'id': main.moodleID, 'textbook': textbook, 'data01': stepUniq, 'data02': base64 })
                         }
                     }
 
@@ -374,7 +374,7 @@ export class Main {
                     // console.log('runInCanvas',code)
                     let tsCode = window.atob(code)
 
-                    writeMoodleLog({ 'datacode': 'Log_RunInCanvas', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: tsCode })
+                    writeMoodleLog({ 'datacode': 'Log_RunIcon', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: tsCode })
                     let jsCode = ts.transpile(tsCode);
 
                     // before we do anything else, we WIPE OUT any previous
@@ -395,9 +395,21 @@ export class Main {
                 },
 
                 //// these are the buttons on the Editor
-                runEditor() {
-                    // console.log('clicked RUN #1')
-                    console.log('runEditor');
+                runEditor(stepUniq: string, textbook: string) {
+
+                    // write log with a callback, this is an async function
+                    let blob = new Blob([Main.editor.editor.getValue()], { type: "text/plain" })
+                    let reader = new FileReader();
+                    reader.readAsText(blob);
+                    reader.onloadend = function() {
+                        let result = reader.result
+                        if (typeof result == 'string') {    // because might be ArrayBuffer
+                            let base64 = Buffer.from(result, 'utf8').toString('base64');
+                            writeMoodleLog({ 'datacode': 'LOG_RunCode', 'id': main.moodleID, 'textbook': textbook, 'data01': stepUniq, 'data02': base64 })
+                        }
+                    }
+
+
                     // this.eraseFileExplorer()    // in case it is open (also resets '2D')
 
                     let jxgDiv = document.getElementById('jxgbox')
@@ -410,11 +422,13 @@ export class Main {
                     canv.id = 'jxgbox'
                     jxgDiv.appendChild(canv)
 
+
                     try {
                         Main.editor.transpile(main.hiddenCode)  // also runs
                     } catch (e) {   // transpile error.  show it in an alert
                         alert(e);
                     }
+
                 },
                 //// these are the buttons on the Editor
                 stopEditor() {
