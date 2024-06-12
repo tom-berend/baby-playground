@@ -17,7 +17,7 @@ declare namespace TXG {
         /** Width of the element's stroke. */
         strokeWidth?: Number;
         /** If false the element won't be visible on the board, otherwise it is shown. */
-        visible?: Boolean;
+        visible?: Boolean | Function;
         /** Determines the elements border-style. Possible values are: 0 for a solid line 1 for a dotted line 2 for a line with small dashes 3 for a line with medium dashes 4 for a line with big dashes 5 for a line with alternating medium and big dashes and large gaps 6 for a line with alternating medium and big dashes and small gaps 7 for a dotted line. Needs JXG.GeometryElement#linecap set to ”round” for round dots.The dash patterns are defined in JXG.AbstractRenderer#dashArray. */
         dash?: Number;
         /** If true the element is fixed and can not be dragged around. The element will be repositioned on zoom and moveOrigin events. */
@@ -32,6 +32,8 @@ declare namespace TXG {
         useKatex?: Boolean;
         /** Snaps the element or its parents to the grid. Currently only relevant for points, circles, and lines. Points are snapped to grid directly, on circles and lines it's only the parent points that are snapped */
         snapToGrid?: Boolean;
+        /** Is this element checked (only applies to checkboxes) */
+        checked?: Boolean;
         /** Draw label for this Element? */
         drawLabels?: Boolean;
         /** Size in pixels */
@@ -170,6 +172,8 @@ declare namespace TXG {
         face?: String;
         /** If true, the infobox is shown on mouse/pen over, if false not. If the value is 'inherit', the value of JXG.Board#showInfobox is taken. true | false | 'inherit' */
         showInfobox?: Boolean | String;
+        /** If set to true, the point will snap to a grid of integer multiples of Point#snapSizeX and Point#snapSizeY (in user coordinates).The coordinates of the grid points are either integer multiples of snapSizeX and snapSizeY (given in user coordinates, not pixels) or are the intersection points of the major ticks of the boards default axes in case that snapSizeX, snapSizeY are negative. */
+        snapToGrid?: Boolean;
         /** This attribute was used to determined the point layout. It was derived from GEONExT and was replaced by Point#face and Point#size. */
         style?: Number;
     }
@@ -880,7 +884,7 @@ declare namespace TXG {
         /** Array of Points */
         polygon(pointArray: Pointpoint[], attributes?: PolygonAttributes): Polygon;
         /** Construct and handle texts. The coordinates can either be abslute (i.e. respective to the coordinate system of the board) or be relative to the coordinates of an element given in Text#anchor. HTML, MathJaX, KaTeX and GEONExT syntax can be handled. There are two ways to display texts: using the text element of the renderer (canvas or svg). In most cases this is the suitable approach if speed matters. However, advanced rendering like MathJax, KaTeX or HTML/CSS are not possible. using HTML <div>. This is the most flexible approach. The drawback is that HTML can only be display ”above” the geometry elements. If HTML should be displayed in an inbetween layer, conder to use an element of type ForeignObject (available in svg renderer, only). */
-        text(x: Number | Function, y: Number | Function, string: String | Function, attributes?: TextAttributes): Text;
+        text(position: NumberFunction[], label: String | Function, attributes?: TextAttributes): Text;
         /** A circular sector is a subarea of the area enclosed by a circle. It is enclosed by two radii and an arc. */
         sector(P1: Point | point, P2: Point | point, P3: Point | point, attributes?: SectorAttributes): Sector;
         /** Vector field. Plot a vector field either given by two functions f1(x, y) and f2(x,y) or by a function f(x, y) returning an array of size 2. */
@@ -921,11 +925,11 @@ declare namespace TXG {
         /** Bisect a Line defined with two points */
         bisectorlines(l1: Line, l2: Line, attributes?: BisectorlinesAttributes): Bisectorlines;
         /** create a button */
-        button(x: Number | Function, y: Number | Function, label: String, handler: Function, attributes?: ButtonAttributes): Button;
+        button(position: NumberFunction[], label: String, handler: Function, attributes?: ButtonAttributes): Button;
         /** This element is used to provide a constructor for cardinal spline curves. Create a dynamic cardinal spline interpolated curve given by sample points p_1 to p_n. */
         cardinalspline(data: Point[] | number[][], funct: Function, splineType: `uniform` | `centripetal`, attributes?: CardinalsplineAttributes): Curve;
         /** This element is used to provide a constructor for special texts containing a form checkbox element. For this element, the attribute ”display” has to have the value 'html' (which is the default). The underlying HTML checkbox element can be accessed through the sub-object 'rendNodeCheck', e.g. to add event listeners. */
-        checkbox(x: Number | Function, y: Number | Function, label: String | Function, attributes?: CheckboxAttributes): Checkbox;
+        checkbox(position: NumberFunction[], label: String | Function, attributes?: CheckboxAttributes): Checkbox;
         /** Creates a Point at the center of a circle defined by 3 points */
         circumcenter(p1: Point | point, p2: Point | point, p3: Point | point, attributes?: CircumcenterAttributes): Circumcenter;
         /** Draw a circle defined by 3 points */
@@ -965,7 +969,7 @@ declare namespace TXG {
         /** Creates an area indicating the solution of a linear inequality or an inequality of a function graph, i.e. an inequality of type y */
         inequality(boundaryLine: Line | line | Curve, attributes?: InequalityAttributes): Inequality;
         /** This element is used to provide a constructor for special texts containing a HTML form input element. If the width of element is set with the attribute ”cssStyle”, the width of the label must be added. For this element, the attribute ”display” has to have the value 'html' (which is the default). The underlying HTML input field can be accessed through the sub-object 'rendNodeInput', e.g. to add event listeners. */
-        input(x: Number | Function, y: Number | Function, prompt: String, initial: String, attributes?: InputAttributes): Input;
+        input(position: NumberFunction[], label: String | Function, initial: String, attributes?: InputAttributes): Input;
         /** This element is used to visualize the integral of a given curve over a given interval. */
         integral(range: Number[], curve: Curve, attributes?: IntegralAttributes): Integral;
         /** An intersection point is a point which lives on two JSXGraph elements, i.e. it is one point of the set consisting of the intersection points of the two elements. The following element types can be (mutually) intersected: line, circle, curve, polygon, polygonal chain. */
@@ -1066,8 +1070,6 @@ declare namespace TXG {
         removeAllTicks(): Object;
         /** Add an element as a child to the current element. */
         addChild(): GeometryElement;
-        /** Alias of JXG.EventEmitter.on. */
-        addEvent(): Number;
         /** Adds ids of elements to the array this.parents. */
         addParents(): Object;
         /** Rotate texts or images by a given degree. */
@@ -1759,7 +1761,9 @@ declare namespace TXG {
     export class Checkbox extends Text {
         constructor(className: string, params: any[], attrs: Object);
         /** Returns the value of the checkbox element */
-        Value(): String;
+        Value(): Boolean;
+        /**  */
+        onChange(action: Function): void;
     }
     export class Circumcenter extends Point {
         constructor(className: string, params: any[], attrs: Object);
@@ -1836,6 +1840,8 @@ declare namespace TXG {
         set(): GeometryElement;
         /** Returns the value (content) of the input element */
         Value(): String;
+        /**  */
+        onChange(action: Function): void;
     }
     export class Integral extends Curve {
         constructor(className: string, params: any[], attrs: Object);

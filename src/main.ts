@@ -201,6 +201,7 @@ export class Main {
                 //      let TSX = TXG.TSXGraph.initBoard('jxgbox')
                 TSXGraph: (canvas: string): TXG.TSXGraph => {
                     // console.log('mathcodeAPI initBoard', canvas);
+
                     return TXG.TSXGraph.initBoard(canvas, { keepAspectRatio: true })
                 },
 
@@ -209,7 +210,7 @@ export class Main {
 
                     let b = Buffer.from(hidden64, 'base64')
                     main.hiddenCode = b.toString()
-                    b = Buffer.from(hidden64, 'base64')
+                    b = Buffer.from(decl64, 'base64')
                     main.hiddenDecl = b.toString()
 
                     main.setupMonacoEditor(main.hiddenCode, main.hiddenDecl)
@@ -373,14 +374,15 @@ export class Main {
                 runInCanvas(paragraph: string, textbook: string, code: string) {   // convert from TS to JS first !!
                     // console.log('runInCanvas',code)
                     let tsCode = window.atob(code)
+                    console.log('runInCanvas',tsCode)
 
                     writeMoodleLog({ 'datacode': 'Log_RunIcon', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: tsCode })
                     let jsCode = ts.transpile(tsCode);
 
+                    /*
                     // before we do anything else, we WIPE OUT any previous
                     // content of <div id='jxgbox'>
                     // then add back a simple canvas
-
                     let jxgDiv = document.getElementById('jxgbox')
                     // console.log('removing with method 2')
                     while (jxgDiv.firstChild) {
@@ -389,6 +391,9 @@ export class Main {
                     let canv = document.createElement("jxgbox")
                     canv.id = 'jxgbox'
                     jxgDiv.appendChild(canv)
+                    */
+
+
 
                     // console.log('runEditorCode', jsCode)
                     Main.editor.runEditorCode(jsCode)//, jsHidden, tsDecls)
@@ -411,19 +416,20 @@ export class Main {
 
 
                     // this.eraseFileExplorer()    // in case it is open (also resets '2D')
-
-                    let jxgDiv = document.getElementById('jxgbox')
-                    // console.log('removing with method 1')
-                    while (jxgDiv.lastElementChild) {
-                        // console.log('removing', jxgDiv.lastElementChild)
-                        jxgDiv.removeChild(jxgDiv.lastElementChild);
-                    }
-                    let canv = document.createElement("jxgbox")
-                    canv.id = 'jxgbox'
-                    jxgDiv.appendChild(canv)
-
+                    /*
+                                        let jxgDiv = document.getElementById('jxgbox')
+                                        // console.log('removing with method 1')
+                                        while (jxgDiv.lastElementChild) {
+                                            // console.log('removing', jxgDiv.lastElementChild)
+                                            jxgDiv.removeChild(jxgDiv.lastElementChild);
+                                        }
+                                        let canv = document.createElement("jxgbox")
+                                        canv.id = 'jxgbox'
+                                        jxgDiv.appendChild(canv)
+                    */
 
                     try {
+                        Main.editor.transpileLog(main.hiddenCode)  // also runs
                         Main.editor.transpile(main.hiddenCode)  // also runs
                     } catch (e) {   // transpile error.  show it in an alert
                         alert(e);
@@ -637,6 +643,8 @@ export class Main {
             console.log('%cSTARTING EDITOR', 'background-color:blue;color:white;')
 
             Main.editor = new Editor(this.editorDiv, this.template, hiddenCode, hiddenDecl);  // static !!
+            console.log('%cSTARTING EDITOR','background-color:blue;color:white;','editorDiv',this.editorDiv,'template',this.template,'hiddenCode',hiddenCode,'hiddenDecl',hiddenDecl)
+
 
             console.log('%c seems to have started', 'background-color:blue;color:white;')
 

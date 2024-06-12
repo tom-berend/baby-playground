@@ -21,7 +21,7 @@ declare var WebGLObject: {
 import * as monaco from "monaco-editor";
 // import * as BABYLON from 'babylonjs';
 import * as PlanetCute from './planetcute'
-import { TXG } from './tsxgraph'
+// import { TXG } from './tsxgraph'
 
 import lib_es5 from "./extraLibs/lib.es5.d.ts.txt";
 // import lib_baby from "./extraLibs/baby.d.ts.txt";
@@ -127,10 +127,8 @@ export class Editor {
     // prefixCode = ''     // hidden code for THIS instance of the editor
 
     editorCode = ''
-    commandCode = ''
 
     constructor(el: HTMLElement, initFile: string, hiddenCode: string = '', hiddenDecl: string = '') {
-        // console.log('%cSTARTING EDITOR','background-color:blue;color:white;')
         // return;
         this.el = el
         this.initFile = initFile
@@ -223,43 +221,15 @@ export class Editor {
 
         // TYPESCRIPT preloaded into editor
         this.systemDeclTS =
-            `
-            // const doc = document
-            // const Mathcode = window.Mathcode
-            // const JXG = window.JXG   // (window as any).JXG
-            // const BABYLON = window.BABYLON
-            // const Matter = window.Matter
-            // const document = window.document
-            // let _canvas = document.getElementById("canvas") as HTMLCanvasElement
-            // let canvas = document.getElementById("canvas") as HTMLCanvasElement
-            // let jxgbox = document.getElementById("jxgbox")
-            // let canvas2D = document.getElementById("canvas2D") as HTMLCanvasElement
-            // let canvas3D = document.getElementById("canvas3D") as HTMLCanvasElement
-            // var ctx = canvas.getContext("2d")!   // this causes WebGL to fail
-            // const window.PlanetCute = new PlanetCute()
-            // const PlanetCute = window.PlanetCute
-            // const engine = new BABYLON.Engine(canvas, true);
-
-            // const Mathcode:Mathcode = window.Mathcode
-            // const VT = Mathcode.VT52()
-
-            const TSX: TXG.TSXBoard;        // might not ever get used
-            `
+            `const TSX: TXG.TSXBoard;        // might not ever get used\r\n`
             + this.hiddenDecl;
 
+
         // must be JAVASCRIPT, not TYPESCRIPT
-        this.systemDeclJS =
-            `
-            const Mathcode = window.Mathcode
-            const document = window.documentattach
-            let VT = Mathcode.VT52()
+        this.systemDeclJS = this.hiddenCode;
 
-            // console.log('mathcode',mathcode.window)
-            // console.log('mathcode.TSX',mathcode.TSX)
-
-                        `
-            + this.hiddenCode;
-
+        // console.log('%csystemDeclJS', 'color:red;', this.systemDeclJS)
+        // console.log('%csystemDeclTS','color:red;',this.systemDeclTS)
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(this.systemDeclTS)
 
@@ -313,7 +283,8 @@ export class Editor {
         input.click();
     }
 
-    copyToEditor(code: string, hidden:string, decls:string) {
+    copyToEditor(code: string, hidden: string, decls: string) {
+        console.log('%ccopyToEditor', 'color:red;', 'hiddencode:', hidden, 'hiddendecl', decls)
         this.hiddenCode = hidden
         this.hiddenDecl = decls
         this.editor.setValue(code)
@@ -326,13 +297,29 @@ export class Editor {
 
 
 
+    transpileLog(hiddenCode: string) {
+
+        console.log('transpile()\n', hiddenCode)
+
+        console.log('%csystemDeclJS', 'color:red;', this.systemDeclJS)
+        console.log('%csystemDeclTS', 'color:red;', this.systemDeclTS)
+
+    }
+
+
     async transpile(hiddenCode: string) {
 
+        // console.log('transpile()\n', hiddenCode)
+
+        // console.log('%csystemDeclJS', 'color:red;', this.systemDeclJS)
+        // console.log('%csystemDeclTS', 'color:red;', this.systemDeclTS)
+
+
         // const args = names.map((key) => scope[key]);
-        const model = this.editor.getModel();   // typescript needs a typeguard to be happy
+        const model = this.editor.getModel();
         // console.log('model from editor is', model)
 
-        if (model !== null) {
+        if (model !== null) {    // typescript needs a typeguard to be happy
             const resource = model.uri;  // returns an ITextModel
 
             const errors = monaco.editor.getModelMarkers({ resource })
@@ -360,8 +347,8 @@ export class Editor {
             const output = await client.getEmitOutput(resource.toString());
             const sourceCode = await client.getScriptText(resource.toString())
 
-            const line = this.editor.getPosition()!.lineNumber
-            const col = this.editor.getPosition()!.column;
+            // const line = this.editor.getPosition()!.lineNumber
+            // const col = this.editor.getPosition()!.column;
 
             // console.log(sourceCode)
             // Log.writeMoodleLog({'datacode': 'LOG_EditorRun', data01: sourceCode, data02: line.toString(), data03: col.toString() })
@@ -377,27 +364,82 @@ export class Editor {
     runEditorCode(editorCode: string) {
         // console.log('runeditorcode', editorCode, hiddenCode)
 
-        let code = ''
-        code += this.systemDeclJS + "\r\n"
-        // code += hiddenCode + "\r\n"
-        code += '{ ' + "\r\n" + editorCode + "\r\n" + ' }'
-        code += this.commandCode + "\r\n"
 
-        console.log('code', code)
+        // console.log('code', code)
+
+
+
+        //////////////////////////
+        // try popup
+        //////////////////////////
+
+        let plotWindow = window.open("", "jxg", "popup=true,left=100,top=100,width=320,height=320");
+        let html = '';
+        html += '<html>';
+        html += '<head>';
+        html += '<title>JSXGraph </title>';
+
+        html += this.generateSourceCode(editorCode)
+
+        html += '<body>';
+        html += '</html>';
+
+        console.log('code to write:', html)
+        plotWindow.document.open();
+        plotWindow.document.write(html);
+        plotWindow.document.close();
+
+        //////////////////////////
+        // end popup
+        //////////////////////////
+
+
 
         // wipe any observables from the last run
-        Observable.resetUserObservers()
+        // Observable.resetUserObservers()
 
         // eval() is crazy dangerous because it runs in the local context
-        // Function() is a bit safer, but not much
+        // Function() is a bit safer
 
-        try {
-            let f = new Function(code)
-            f()
-        }
-        catch (err) {
-            alert(err.message);
-        }
+        // eval(code)
+
+        // try {
+        //     let f = new Function(code)
+        //     f()
+        // }
+        // catch (err) {
+        //     alert(err.message);
+        // }
+
+
+    }
+
+    /** create <script></script>  */
+    generateSourceCode(editorCode: string): string {
+        let html = ''
+        let code = ''
+
+        // code += this.systemDeclJS + "\r\n"
+        code += "\r\n" + this.hiddenCode + "\r\n"
+        code += "\r\n" + editorCode + "\r\n"
+
+        html += '<head>';
+        html += '<script type="text/javascript" charset="UTF-8" src="dist/jsxgraphcore.js"></script>'
+        html += '<link rel="stylesheet" type="text/css" href="dist/jsxgraph.css" />';
+        html += '</head>';
+        html += '<body>';
+        html += '<div id="jxgbox" class="jxgbox" style="width:750px; height:750px;"></div>';
+
+        html += '<script type="module" defer>'
+
+        html += code
+        html += '</script>';
+        html += '</body>';
+        html += '</head>';
+
+
+        console.log('%cgenerateSourceCode\n', 'color:lightblue;', html)
+        return html
     }
 
 
