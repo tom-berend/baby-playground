@@ -22,6 +22,14 @@ and limitations under the License.
 /////////////////////////////
 /// DOM APIs
 /////////////////////////////
+declare var Audio: {
+    new(src?: string): HTMLAudioElement;
+};
+
+declare var HTMLAudioElement: {
+    prototype: HTMLAudioElement;
+    new(): HTMLAudioElement;
+};
 
 
 /** A window containing a DOM document; the document property points to the DOM document loaded in that window. */

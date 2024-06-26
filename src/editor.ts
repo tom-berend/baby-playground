@@ -221,9 +221,10 @@ export class Editor {
 
         // TYPESCRIPT preloaded into editor
         this.systemDeclTS =
-            `const TSX: TXG.TSXBoard;        // might not ever get used\r\n`
+            ``
             + this.hiddenDecl;
 
+            //const TSX: TXG.TSXBoard;        // might not ever get used\r\n`
 
         // must be JAVASCRIPT, not TYPESCRIPT
         this.systemDeclJS = this.hiddenCode;
@@ -375,14 +376,14 @@ export class Editor {
 
         let plotWindow = window.open("", "jxg", "popup=true,left=100,top=100,width=320,height=320");
         let html = '';
-        html += '<html>';
-        html += '<head>';
-        html += '<title>JSXGraph </title>';
+        // html += '<html>';
+        // html += '<head>';
+        // html += '<title>JSXGraph </title>';
 
         html += this.generateSourceCode(editorCode)
 
-        html += '<body>';
-        html += '</html>';
+        // html += '<body>';
+        // html += '</html>';
 
         console.log('code to write:', html)
         plotWindow.document.open();
@@ -416,23 +417,28 @@ export class Editor {
 
     /** create <script></script>  */
     generateSourceCode(editorCode: string): string {
-        let html = ''
-        let code = ''
+        // let code = ''
+        // code += "\r\n" + this.hiddenCode + "\r\n"
+        // code += "\r\n" + editorCode + "\r\n"
 
-        // code += this.systemDeclJS + "\r\n"
-        code += "\r\n" + this.hiddenCode + "\r\n"
-        code += "\r\n" + editorCode + "\r\n"
-
+        let html = '<!DOCTYPE html>';
         html += '<head>';
         html += '<script type="text/javascript" charset="UTF-8" src="dist/jsxgraphcore.js"></script>'
         html += '<link rel="stylesheet" type="text/css" href="dist/jsxgraph.css" />';
         html += '</head>';
         html += '<body>';
-        html += '<div id="jxgbox" class="jxgbox" style="width:750px; height:750px;"></div>';
+        html += '<div id="jxgbox" class="jxgbox" style="width:850px; height:850px;"></div>';
 
         html += '<script type="module" defer>'
+        html += "\r\n" + this.hiddenCode   // before try/catch
+        html += "\r\n try {"
 
-        html += code
+        html += editorCode
+
+         html += "\r\n }"
+         html += "\r\n catch(error) {"
+        html += "\r\n alert(error);"
+        html += "\r\n }"
         html += '</script>';
         html += '</body>';
         html += '</head>';

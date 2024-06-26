@@ -96,7 +96,7 @@ class Sphere extends Obj {
         this.radius = radius;
     }
 
-    rayIntersect(orig: V3, dir: V3) {
+    rayIntersect(orig: V3, dir: V3):[boolean,number] {
         let L = minus(this.center, orig); //center-orig
         let tca = dot(L, dir); //L*dir
         let d2 = dot(L, L) - tca * tca; // L*L - tca*tca
@@ -117,7 +117,7 @@ function sceneIntersect(orig: V3, dir: V3, spheres: Sphere[]): [boolean, V3, V3,
     let N: V3, hit: V3, material: Material, spheres_dist = 1000;
     for (let i = 0; i < spheres.length; ++i) {
         let [intersects, dist_i] = spheres[i].rayIntersect(orig, dir);
-        if (intersects && dist_i <= spheres_dist) {
+        if (intersects && dist_i <= 0+spheres_dist) {
             spheres_dist = Number(dist_i);   // it might have been boolean
             hit = plus(orig, scalarmult(dir, Number(dist_i)));
             N = normalize(minus(hit, spheres[i].center));
