@@ -16,7 +16,7 @@ import { PlanetCute } from "./planetcute";
 
 
 import { testTree, treeviewComponent } from "./components/treeview";
-import { DOMclass } from "./DOM";
+// import { DOMclass } from "./DOM";
 import { talk_to_moodle } from './moodle'
 
 import { tsFS } from './tsFS'
@@ -163,7 +163,7 @@ export class Main {
             (window as any).MathcodeAPI = {
                 version: '1.1',
 
-                DOM: new DOMclass(),   // exposes the DOM utilities
+                // DOM: new DOMclass(),   // exposes the DOM utilities
 
                 loader: (courseInfo: string, moodleID: number) => {
                     console.log('%cMathcodeAPI.loader successful', 'background-color:red;color:white;')

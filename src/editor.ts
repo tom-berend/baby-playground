@@ -25,8 +25,8 @@ import * as PlanetCute from './planetcute'
 
 import lib_es5 from "./extraLibs/lib.es5.d.ts.txt";
 // import lib_baby from "./extraLibs/baby.d.ts.txt";
-import lib_dom_mini from "./extraLibs/lib.dom_mini.d.ts.txt";
-// import lib_dom from "./extraLibs/lib.dom.d.ts.txt";
+// import lib_dom_mini from "./extraLibs/lib.dom_mini.d.ts.txt";
+import lib_dom from "./extraLibs/lib.dom.d.ts.txt";
 import lib_promise from "./extraLibs/lib.es2015.promise.d.ts.txt";
 
 import lib_es2015_collection from "./extraLibs/lib.es2015.collection.d.ts.txt"
@@ -172,6 +172,11 @@ export class Editor {
             noLib: true,                        // don't bring in everything
         });
 
+        // monaco.languages.typescript.javascriptDefaults.setExtraLibs({
+        //     filePath: "lib.es5.d.ts"
+        //     content: libSource,
+        //   });
+
         monaco.editor.defineTheme('myTheme', {
             base: 'vs',
             inherit: true,
@@ -188,8 +193,8 @@ export class Editor {
 
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_baby_plus, "lib.baby.d.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es5, "lib.es5.d.ts");
-        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom_mini, "lib.dom_mini.d.ts");
-        // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom, "lib.dom.d.ts");
+        // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom_mini, "lib.dom_mini.d.ts");
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom, "lib.dom.d.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_promise, "lib.es2015.promise.d.ts");
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_collection)

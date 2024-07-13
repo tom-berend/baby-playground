@@ -1,26 +1,28 @@
 {
-  "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "noImplicitAny": true,
-    "module": "amd",
-    "target": "es2022",
-    "moduleResolution": "node",
-    "allowJs": true,
-    "skipLibCheck": true,
-    "sourceMap": true,
-    "esModuleInterop": true
-  },
-  "files": [
-    "src/index.ts"
-  ],
-  "typeRoots": [
-    "node_modules/@types"
-  ],
-  "include": [
-    "src/**/*.ts", "planetcute/planetcute.d.ts", "src/jxg.ts",
-  ],
-  "exclude": [
-    "node_modules",
-    "**/*.spec.ts"
-  ],
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "noImplicitAny": true,
+        "module": "amd",
+        "target": "ESNext",
+        "lib":["es2022"],
+        "moduleResolution": "node",
+        "allowJs": true,
+        "skipLibCheck": true,
+        "sourceMap": true,
+        "esModuleInterop": true
+    },
+    "files": [
+        "src/index.ts"
+    ],
+    "typeRoots": [
+        "node_modules/@types"
+    ],
+    "include": [
+        "src/**/*.ts",
+        "planetcute/planetcute.d.ts",
+    ],
+    "exclude": [
+        "node_modules",
+        "**/*.spec.ts"
+    ],
 }
