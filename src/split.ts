@@ -19,11 +19,13 @@ export function dragElement(element: HTMLElement, direction: 'H' | 'V') {
         let canvas = document.getElementById("canvas") as HTMLCanvasElement
         // console.log('lesson, editor, canvas', lesson, editor, canvas)
 
+        let lessonOffsetWidth = lesson?lesson.offsetWidth : 0
+
         mouseDown = {
             e: e,
             offsetLeft: element.offsetLeft,
             offsetTop: element.offsetTop,
-            lessonWidth: lesson.offsetWidth,
+            lessonWidth:lessonOffsetWidth,
             editorWidth: editor.offsetWidth,
             editorHeight: editor.offsetHeight,
         };
@@ -59,7 +61,9 @@ export function dragElement(element: HTMLElement, direction: 'H' | 'V') {
         {
             element.style.left = mouseDown.offsetLeft + delta.y + "px";
             editor.style.height = (mouseDown.editorHeight + delta.y) + "px";
-            canvas.style.height = (mouseDown.editorHeight - delta.y) + "px";
+
+            // don't need canvas anymore, we moved into an iframe
+            // canvas.style.height = (mouseDown.editorHeight - delta.y) + "px";
         }
 
     }

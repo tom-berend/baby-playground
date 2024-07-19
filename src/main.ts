@@ -168,15 +168,10 @@ export class Main {
 
                 loader: (courseInfo: string, moodleID: number) => {
                     console.log('%cMathcodeAPI.loader successful', 'background-color:red;color:white;')
-                    console.log('courseInfo(raw): ', courseInfo, 'moodleID', moodleID)
+                    // console.log('courseInfo(raw): ', courseInfo, 'moodleID', moodleID)
 
                     main.moodleID = moodleID;
 
-                    // (window as any).TSX = new JSXGraph()
-                    // console.log('%cassiigned JSXGraph() to window.TSX', 'background-color:blue;color:white;')
-
-                    // testAsciiMath()  // needs element 'testmath'
-                    // testMindMap()  // needs element 'canvas'
 
                     // attach the dragger
                     let h = document.getElementById("hsplitbar")
@@ -291,6 +286,33 @@ export class Main {
                 },
 
 
+                findFileExplorer: () => {
+                    this.editor.upload()
+                },
+
+
+                saveFileExplorer: (s: string) => {
+                    this.editor.download('JSXgraph_Snippet.ts')
+
+                    // let data = 'you saved me'
+                    // let type = 'js'
+                    // let filename = 'JSXgraph_Snippet.ts'
+                    // let blob = new Blob([Main.editor.editor.getValue()], { type: "text/plain" })
+
+                    // let a = document.createElement("a"),
+                    //     url = URL.createObjectURL(blob);
+                    // a.href = url;
+                    // a.download = filename;
+                    // document.body.appendChild(a);
+                    // a.click();
+                    // setTimeout(function() {
+                    //     document.body.removeChild(a);
+                    //     window.URL.revokeObjectURL(url);
+                    // }, 0);
+                },
+
+
+
                 // //////// these functions are for the file explorer
                 // refreshFileExplorer: (n: number) => {
                 //     let fs = new tsFS()
@@ -375,7 +397,7 @@ export class Main {
                 runInCanvas(paragraph: string, textbook: string, code: string) {   // convert from TS to JS first !!
                     // console.log('runInCanvas',code)
                     let tsCode = window.atob(code)
-                    console.log('runInCanvas',tsCode)
+                    console.log('runInCanvas', tsCode)
 
                     writeMoodleLog({ 'datacode': 'Log_RunIcon', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: tsCode })
                     let jsCode = ts.transpile(tsCode);
@@ -643,7 +665,7 @@ export class Main {
             console.log('%cSTARTING EDITOR', 'background-color:blue;color:white;')
 
             Main.editor = new Editor(this.editorDiv, this.template, hiddenCode, hiddenDecl);  // static !!
-            console.log('%cSTARTING EDITOR','background-color:blue;color:white;','editorDiv',this.editorDiv,'template',this.template,'hiddenCode',hiddenCode,'hiddenDecl',hiddenDecl)
+            console.log('%cSTARTING EDITOR', 'background-color:blue;color:white;', 'editorDiv', this.editorDiv, 'template', this.template, 'hiddenCode', hiddenCode, 'hiddenDecl', hiddenDecl)
 
 
             console.log('%c seems to have started', 'background-color:blue;color:white;')

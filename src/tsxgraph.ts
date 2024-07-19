@@ -21,7 +21,7 @@
         //
         /////////////////////////////////////////////////////////////////////////////
 
-        //   Generated on July 14, 2024, 1:04 am 
+        //   Generated on July 19, 2024, 9:02 pm 
 
 
 
@@ -1187,6 +1187,90 @@
 
 
         }
+
+        type spaceIcon =
+            '../icons/alien-1.png' |
+            '../icons/alien-2.png' |
+            '../icons/alien-3.png' |
+            '../icons/alien-4.png' |
+            '../icons/alien-5.png' |
+            '../icons/alien-abduction.png' |
+            '../icons/alien-ship-2.png' |
+            '../icons/alien-ship-beam.png' |
+            '../icons/alien-ship.png' |
+            '../icons/asteroid-2.png' |
+            '../icons/asteroid.png' |
+            '../icons/astronaut-helmet.png' |
+            '../icons/atom.png' |
+            '../icons/atronaut.png' |
+            '../icons/bb-8.png' |
+            '../icons/big-dipper.png' |
+            '../icons/black-hole.png' |
+            '../icons/brain-slug.png' |
+            '../icons/cassiopeia.png' |
+            '../icons/chewbacca.png' |
+            '../icons/comet.png' |
+            '../icons/cylon-raider.png' |
+            '../icons/darth-vader.png' |
+            '../icons/death-star.png' |
+            '../icons/earth.png' |
+            '../icons/falling-asteroid.png' |
+            '../icons/falling-space-capsule.png' |
+            '../icons/falling-star.png' |
+            '../icons/flag.png' |
+            '../icons/fly\ icon\ licence.png' |
+            '../icons/flyicon.png' |
+            '../icons/galaxy.png' |
+            '../icons/intl-space-station.png' |
+            '../icons/jupiter.png' |
+            '../icons/landing-space-capsule.png' |
+            '../icons/laser-gun.png' |
+            '../icons/mars.png' |
+            '../icons/millennium-falcon.png' |
+            '../icons/mission-control.png' |
+            '../icons/moon-full-almost.png' |
+            '../icons/moon-full-moon.png' |
+            '../icons/moon-last-quarter.png' |
+            '../icons/moon-new-moon.png' |
+            '../icons/moon-waning-cresent.png' |
+            '../icons/moon-waning-gibbous.png' |
+            '../icons/morty.png' |
+            '../icons/neptune.png' |
+            '../icons/pluto.png' |
+            '../icons/princess-leia.png' |
+            '../icons/rick.png' |
+            '../icons/ring-ship.png' |
+            '../icons/rocket-launch.png' |
+            '../icons/rocket.png' |
+            '../icons/satellite.png' |
+            '../icons/saturn.png' |
+            '../icons/solar-system.png' |
+            '../icons/space-capsule.png' |
+            '../icons/space-cockpit.png' |
+            '../icons/space-invader.png' |
+            '../icons/space-observatory.png' |
+            '../icons/space-rocket.png' |
+            '../icons/space-rover-1.png' |
+            '../icons/space-rover-2.png' |
+            '../icons/space-satellite-dish.png' |
+            '../icons/space-ship_1.png' |
+            '../icons/space-ship_2.png' |
+            '../icons/space-ship_3.png' |
+            '../icons/space-ship.png' |
+            '../icons/space-shuttle-launch.png' |
+            '../icons/space-shuttle.png' |
+            '../icons/sputnick-1.png' |
+            '../icons/sputnick-2.png' |
+            '../icons/star.png' |
+            '../icons/stars.png' |
+            '../icons/stormtrooper.png' |
+            '../icons/sun.png' |
+            '../icons/telescope.png' |
+            '../icons/uranus.png' |
+            '../icons/venus.png' |
+            '../icons/moon-dreamy.png'
+        
+
  interface ConicIface {
  z_ignore: Object,
  /** Line defined by solution to a*z + b*y +c*y== 0 */
@@ -1698,7 +1782,7 @@ group(pointArray:Point[], attributes: GroupAttributes ={} ):Group{return new Gro
 
 
  /** Displays an image. */
-image(url:String, lowerLeft:point, widthHeight:[Number,Number], attributes: ImageAttributes ={} ):Image{return new Image('Image', [url,lowerLeft,widthHeight,], attributes)
+image(url:String|spaceIcon, lowerLeft:point, widthHeight:[Number,Number], attributes: ImageAttributes ={} ):Image{return new Image('Image', [url,lowerLeft,widthHeight,], attributes)
 }
 
  /** An implicit curve is a plane curve defined by an implicit equation relating two coordinate variables, commonly x and y. For example, the unit circle is defined by the implicit equation x2 + y2 = 1. In general, every implicit curve is defined by an equation of the form f(x, y) = 0 for some function f of two variables. */
@@ -1741,7 +1825,7 @@ image(url:String, lowerLeft:point, widthHeight:[Number,Number], attributes: Imag
                                 By setting additional properties a line can be used as an arrow and/or axis.
                                 
 *```js
-                                TSX.line([3,2],[3,3], {strokeColor:'blue',strokeWidth:5, strokeOpacity:.5})
+                                TSX.line([3,2],[3,3],{strokeColor:'blue',strokeWidth:5, strokeOpacity:.5})
                                 let P1 = TSX.point([3,2])
                                 TSX.line(p1,[3,3])
                                 

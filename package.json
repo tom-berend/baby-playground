@@ -3,9 +3,10 @@
     "scripts": {
         "comment00": "==== run the course",
         "comment01": "npm watch is at localhost/baby...., NOT at :8080",
-        "build": "rm -rf dist/ && tsc --noEmit && webpack --config webpack.player.config.js && npm run copy2moodle",
+        "build": "rm -rf dist/ && tsc --noEmit && webpack --config webpack.player.config.js && npm run copy2moodle && npm run copy2playground",
         "watch": "webpack --watch --config webpack.player.config.js",
         "copy2moodle": "mkdir -p ../../moodle/mod/mathcode/dist && cp -R dist/* ../../moodle/mod/mathcode/dist && cp -R lib/* ../../moodle/mod/mathcode/dist",
+        "copy2playground": "mkdir -p ../../TSXGraph/playground/dist && cp -R dist/* ../../TSXGraph/playground/dist && cp -R lib/* ../../TSXGraph/playground/dist",
         "comment02": "==== run the editor",
         "buildeditor": "rm -rf dist_editor && webpack --config webpack.editor.config.js && npm run copyeditor",
         "watcheditor": "webpack --watch --config webpack.editor.config.js",
