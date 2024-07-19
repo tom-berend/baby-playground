@@ -20,10 +20,11 @@ declare var WebGLObject: {
 
 import * as monaco from "monaco-editor";
 // import * as BABYLON from 'babylonjs';
-import * as PlanetCute from './planetcute'
+// import * as PlanetCute from './planetcute'
 // import { TXG } from './tsxgraph'
 
 import lib_es5 from "./extraLibs/lib.es5.d.ts.txt";
+import lib_es6 from "./extraLibs/lib.es6.d.ts.txt";  // not sure why i need both but parseInt() fails without es5
 // import lib_baby from "./extraLibs/baby.d.ts.txt";
 // import lib_dom_mini from "./extraLibs/lib.dom_mini.d.ts.txt";
 import lib_dom from "./extraLibs/lib.dom.d.ts.txt";
@@ -53,7 +54,7 @@ import mathcode from "./extraLibs/mathcode.d.ts.txt"
 // import matter from "./extraLibs/matter.d.ts.txt"
 
 // import { RuntimeAnimation } from "babylonjs/Animations/runtimeAnimation";
-import { Observable } from "./observer";
+// import { Observable } from "./observer";
 
 // let x = JXG         // just to make sure webpack loads them
 // let y = BABYLON
@@ -160,6 +161,7 @@ export class Editor {
             noImplicitThis: true,
             noImplicitReturns: true,
             target: monaco.languages.typescript.ScriptTarget.ES2020,
+
         });
 
         monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
@@ -168,8 +170,9 @@ export class Editor {
         });
 
         monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-            target: monaco.languages.typescript.ScriptTarget.ES2020,
-            noLib: true,                        // don't bring in everything
+            target: monaco.languages.typescript.ScriptTarget.ESNext,
+            noLib: true,                        // don't bring DOM into intellisense
+            strictNullChecks: true,
         });
 
         // monaco.languages.typescript.javascriptDefaults.setExtraLibs({
@@ -193,6 +196,7 @@ export class Editor {
 
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_baby_plus, "lib.baby.d.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es5, "lib.es5.d.ts");
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es6, "lib.es6.d.ts");
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom_mini, "lib.dom_mini.d.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom, "lib.dom.d.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_promise, "lib.es2015.promise.d.ts");
@@ -229,7 +233,7 @@ export class Editor {
             ``
             + this.hiddenDecl;
 
-            //const TSX: TXG.TSXBoard;        // might not ever get used\r\n`
+        //const TSX: TXG.TSXBoard;        // might not ever get used\r\n`
 
         // must be JAVASCRIPT, not TYPESCRIPT
         this.systemDeclJS = this.hiddenCode;
@@ -440,8 +444,8 @@ export class Editor {
 
         html += editorCode
 
-         html += "\r\n }"
-         html += "\r\n catch(error) {"
+        html += "\r\n }"
+        html += "\r\n catch(error) {"
         html += "\r\n alert(error);"
         html += "\r\n }"
         html += '</script>';

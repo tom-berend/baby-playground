@@ -12,14 +12,14 @@
         "esModuleInterop": true
     },
     "files": [
-        "src/index.ts"
+        "src/main.ts"
     ],
     "typeRoots": [
         "node_modules/@types"
     ],
     "include": [
         "src/**/*.ts",
-        "planetcute/planetcute.d.ts",
+        "planetcute/planetcute.d.ts", "src/views/studentLesson.ts.unused",
     ],
     "exclude": [
         "node_modules",

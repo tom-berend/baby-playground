@@ -12,21 +12,16 @@
         "copyeditor": "cp src_editor/runtime/index.php dist_editor/index.php  && cp src_editor/runtime/3d.css dist_editor && cp -R assets dist_editor/assets"
     },
     "dependencies": {
-        "@types/babylonjs": "^2.4.1",
         "@types/jsdom": "^16.2.12",
-        "@types/node": "^18.7.16",
-        "@types/react": "^18.0.19",
         "buffer": "^6.0.3",
         "css-loader": "^3.5.3",
         "expose-loader": "^1.0.3",
         "file-loader": "^6.2.0",
         "lzstring.ts": "^2.0.2",
-        "mathlive": "^0.69.9",
         "mini-css-extract-plugin": "^2.6.1",
         "monaco-editor": "^0.50.0",
         "monaco-editor-webpack-plugin": "^7.1.0",
         "npm": "^8.19.1",
-        "path-browserify": "^1.0.1",
         "raw-loader": "^4.0.2",
         "style-loader": "^1.2.1",
         "ts-loader": "^8.0.14",
@@ -34,8 +29,5 @@
         "url-loader": "^3.0.0",
         "webpack": "^5.74.0",
         "webpack-cli": "^4.10.0"
-    },
-        "devDependencies": {
-        "@types/path-browserify": "^1.0.0"
     }
 }

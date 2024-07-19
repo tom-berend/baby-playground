@@ -5,7 +5,7 @@ const WorkboxWebpackPlugin = require('workbox-webpack-plugin');
 
 const isProduction = process.env.NODE_ENV == 'production';
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+// const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 
 const config = {
@@ -49,7 +49,7 @@ const config = {
             {   {
                 //         test: /\.ttf$/,
                 //         use: ['file-loader']
-        
+
                 test: /\.txt$/i,
                 exclude: '/node_modules/',
                 use: 'raw-loader'

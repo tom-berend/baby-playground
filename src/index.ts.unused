@@ -9,8 +9,8 @@ import { OnClickSay } from "./onClickSay"
 // import {TerminalJS } from './terminal'
 // import { asciiMath, testAsciiMath } from './ASCIIMathML'
 
-import { DOM } from './DOM'
-import { MForms } from './mforms'
+// import { DOM } from './DOM'
+// import { MForms } from './mforms'
 
 // import { XMLHttpRequest } from 'xmlhttprequest-ts'
 import * as monaco from "monaco-editor";

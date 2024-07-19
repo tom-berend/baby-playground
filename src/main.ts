@@ -7,23 +7,24 @@ import ts from 'typescript';
 
 import { Editor } from "./editor";
 import { OnClickSay } from "./onClickSay"
-import { asciiMath, testAsciiMath } from './ASCIIMathML'
-
-import { VT52 } from './vt52'
 import { TXG } from './tsxgraph'
-import { Draw, V3, Ray } from './draw'
-import { PlanetCute } from "./planetcute";
-
-
-import { testTree, treeviewComponent } from "./components/treeview";
-// import { DOMclass } from "./DOM";
 import { talk_to_moodle } from './moodle'
-
-import { tsFS } from './tsFS'
-import { LangString } from './lang'
 import { dragElement } from './split'
-import { Raytracer } from './raytracer'
-import { Observable } from './observer';
+
+// import { asciiMath, testAsciiMath } from './ASCIIMathML'
+
+// import { VT52 } from './vt52'
+// import { Draw, V3, Ray } from './draw'
+// import { PlanetCute } from "./planetcute";
+
+
+// import { testTree, treeviewComponent } from "./components/treeview";
+// import { DOMclass } from "./DOM";
+
+// import { tsFS } from './tsFS'
+// import { LangString } from './lang'
+// import { Raytracer } from './raytracer'
+// import { Observable } from './observer';
 // import { mindmap, testMindMap } from './mindmap';
 import { Buffer } from "buffer";
 
@@ -125,36 +126,36 @@ export class Main {
         // remember to add these to NAMESPACE in mathcoode.d.ts.txt
         (window as any).Mathcode = {
 
-            VT52: (): VT52 => {
-                return new VT52()
-            },
+            // VT52: (): VT52 => {
+            //     return new VT52()
+            // },
 
-            addObserver: (type: string, handler: Function) => {
-                Observable.addObserver('user', type, handler)
-            },
+            // addObserver: (type: string, handler: Function) => {
+            //     Observable.addObserver('user', type, handler)
+            // },
 
 
-            Draw: (width: number = 800): Draw => {
-                console.log('in mathcode')
-                return new Draw(width)
-            },
-            V3: (x: number, y: number, z: number): V3 => {
-                return new V3(x, y, z)
-            },
-            // Point3 and Color are just aliases for V3
-            Point3: (x: number, y: number, z: number): V3 => {
-                return new V3(x, y, z)
-            },
-            Color: (x: number, y: number, z: number): V3 => {
-                return new V3(x, y, z)
-            },
+            // Draw: (width: number = 800): Draw => {
+            //     console.log('in mathcode')
+            //     return new Draw(width)
+            // },
+            // V3: (x: number, y: number, z: number): V3 => {
+            //     return new V3(x, y, z)
+            // },
+            // // Point3 and Color are just aliases for V3
+            // Point3: (x: number, y: number, z: number): V3 => {
+            //     return new V3(x, y, z)
+            // },
+            // Color: (x: number, y: number, z: number): V3 => {
+            //     return new V3(x, y, z)
+            // },
 
-            Ray: (origin: V3, direction: V3): Ray => {
-                return new Ray(origin, direction)
-            },
-            PlanetCute: (): PlanetCute => {
-                return new PlanetCute()
-            }
+            // Ray: (origin: V3, direction: V3): Ray => {
+            //     return new Ray(origin, direction)
+            // },
+            // PlanetCute: (): PlanetCute => {
+            //     return new PlanetCute()
+            // }
         },
 
 
@@ -290,40 +291,40 @@ export class Main {
                 },
 
 
-                //////// these functions are for the file explorer
-                refreshFileExplorer: (n: number) => {
-                    let fs = new tsFS()
-                    fs.eraseFileExplorer()
-                    fs.fileExplorer(n)
-                },
-                eraseFileExplorer: () => {    // erases the canvas
-                    let fs = new tsFS()
-                    fs.eraseFileExplorer()
-                },
-                findFileExplorer: (s: string) => {
-                    let fs = new tsFS()
-                    fs.findFileExplorer(s)
-                },
-                saveFileExplorer: (s: string) => {
-                    let fs = new tsFS()
-                    fs.saveFileExplorer(s)
-                },
+                // //////// these functions are for the file explorer
+                // refreshFileExplorer: (n: number) => {
+                //     let fs = new tsFS()
+                //     fs.eraseFileExplorer()
+                //     fs.fileExplorer(n)
+                // },
+                // eraseFileExplorer: () => {    // erases the canvas
+                //     let fs = new tsFS()
+                //     fs.eraseFileExplorer()
+                // },
+                // findFileExplorer: (s: string) => {
+                //     let fs = new tsFS()
+                //     fs.findFileExplorer(s)
+                // },
+                // saveFileExplorer: (s: string) => {
+                //     let fs = new tsFS()
+                //     fs.saveFileExplorer(s)
+                // },
 
-                trashfileFileExplorer: (s: string) => {
-                    let fs = new tsFS()
-                    fs.trashfileFileExplorer(parseInt(s))
-                },
-                trashdirFileExplorer: (s: string) => {
-                    let fs = new tsFS()
-                    fs.trashfileFileExplorer(parseInt(s))
-                },
+                // trashfileFileExplorer: (s: string) => {
+                //     let fs = new tsFS()
+                //     fs.trashfileFileExplorer(parseInt(s))
+                // },
+                // trashdirFileExplorer: (s: string) => {
+                //     let fs = new tsFS()
+                //     fs.trashfileFileExplorer(parseInt(s))
+                // },
 
-                mindmap: (content: string, canvas: string) => {
-                    // console.log('drawing mindmap', content, canvas)
-                    // let pm = new mindmap(content, canvas)
-                    // pm.drawMindMap()
-                    // testMindMap()
-                },
+                // mindmap: (content: string, canvas: string) => {
+                //     // console.log('drawing mindmap', content, canvas)
+                //     // let pm = new mindmap(content, canvas)
+                //     // pm.drawMindMap()
+                //     // testMindMap()
+                // },
 
 
                 // // expose the Split library...
@@ -441,7 +442,7 @@ export class Main {
                     try {
                         console.log('clicked STOP')
                         this.eraseFileExplorer()    // in case it is open (also resets '2D')
-                        Observable.resetUserObservers()
+                        // Observable.resetUserObservers()
                         throw 'stop'
                     } catch (e) { }  // we intentionally throwed, no error msg required
                 },
@@ -507,11 +508,10 @@ export class Main {
         Main.attachMathCodeAPI();
 
         /** attaches the kybd and mouse events */
-        // Observable.setupObservables()
-        addEventListener('keydown', (e) => Observable.notifyObservers('keydown', e))
-        addEventListener('keypress', (e) => Observable.notifyObservers('keypress', e))
-        addEventListener('mousedown', (e) => Observable.notifyObservers('mousedown', e))
-        addEventListener('click', (e) => Observable.notifyObservers('click', e))
+        // addEventListener('keydown', (e) => Observable.notifyObservers('keydown', e))
+        // addEventListener('keypress', (e) => Observable.notifyObservers('keypress', e))
+        // addEventListener('mousedown', (e) => Observable.notifyObservers('mousedown', e))
+        // addEventListener('click', (e) => Observable.notifyObservers('click', e))
 
         // let str = new LangString()
         // str.testGetString()
