@@ -269,7 +269,7 @@ export class Editor {
     }
 
     download(fileName: string) {
-        console.log('clicked on upload')
+        // console.log('clicked on upload')
         const data = new Blob([this.editor.getValue()], { type: "text/plain" });
         if (this.initFile) {
             window.URL.revokeObjectURL(this.initFile);
@@ -282,7 +282,7 @@ export class Editor {
     }
 
     upload() {
-        console.log('clicked on upload')
+        // console.log('clicked on upload')
         const input = document.createElement("input");
         input.type = "file";
         input.onchange = () => {
@@ -294,7 +294,7 @@ export class Editor {
     }
 
     copyToEditor(code: string, hidden: string, decls: string) {
-        console.log('%ccopyToEditor', 'color:red;', 'hiddencode:', hidden, 'hiddendecl', decls)
+        // console.log('%ccopyToEditor', 'color:red;', 'hiddencode:', hidden, 'hiddendecl', decls)
         this.hiddenCode = hidden
         this.hiddenDecl = decls
         this.editor.setValue(code)
@@ -302,17 +302,17 @@ export class Editor {
 
 
     command(fileName: string) {
-        console.log('clicked on command')
+        // console.log('clicked on command')
     }
 
 
 
     transpileLog(hiddenCode: string) {
 
-        console.log('transpile()\n', hiddenCode)
+        // console.log('transpile()\n', hiddenCode)
 
-        console.log('%csystemDeclJS', 'color:red;', this.systemDeclJS)
-        console.log('%csystemDeclTS', 'color:red;', this.systemDeclTS)
+        // console.log('%csystemDeclJS', 'color:red;', this.systemDeclJS)
+        // console.log('%csystemDeclTS', 'color:red;', this.systemDeclTS)
 
     }
 
@@ -333,7 +333,7 @@ export class Editor {
             const resource = model.uri;  // returns an ITextModel
 
             const errors = monaco.editor.getModelMarkers({ resource })
-            console.log('errors', errors);
+            // console.log('errors', errors);
 
             let errorString = ''
             errors.forEach(m => {
@@ -348,6 +348,7 @@ export class Editor {
             if (errorString.length > 0) {
                 // alert('errors coming')
                 alert(errorString)    //
+                console.log(errors);
                 return
             }
 
@@ -394,7 +395,7 @@ export class Editor {
         // html += '<body>';
         // html += '</html>';
 
-        console.log('code to write:', html)
+        // console.log('code to write:', html)
         plotWindow.document.open();
         plotWindow.document.write(html);
         plotWindow.document.close();
@@ -447,13 +448,13 @@ export class Editor {
         html += "\r\n }"
         html += "\r\n catch(error) {"
         html += "\r\n alert(error);"
+        html += "\r\n console.log(error);"
         html += "\r\n }"
         html += '</script>';
         html += '</body>';
         html += '</head>';
 
-
-        console.log('%cgenerateSourceCode\n', 'color:lightblue;', html)
+        // console.log('%cgenerateSourceCode\n', 'color:lightblue;', html)
         return html
     }
 

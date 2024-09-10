@@ -21,7 +21,7 @@
         //
         /////////////////////////////////////////////////////////////////////////////
 
-        //   Generated on July 19, 2024, 9:02 pm 
+        //   Generated on September 1, 2024, 11:55 pm 
 
 
 
@@ -31,19 +31,19 @@
  /** used by V2 vector math library */
  scaleXY?: Number 
  /** Color of the element. */
- color?: String
+ color?: string|Function
  /** Opacity of the element (between 0 and 1). */
- opacity?: Number
+ opacity?: number|Function
  /** The fill color of this geometry element. */
- fillColor?: String
+ fillColor?: string|Function
  /** Opacity for fill color. */
- fillOpacity?: Number
+ fillOpacity?: number|Function
  /** The stroke color of the given geometry element. */
- strokeColor?: String
+ strokeColor?: string|Function
  /** Opacity for element's stroke color. */
- strokeOpacity?: Number
+ strokeOpacity?: number|Function
  /** Width of the element's stroke. */
- strokeWidth?: Number
+ strokeWidth?: number|Function
  /** If false the element won't be visible on the board, otherwise it is shown. */
  visible?: Boolean|Function
  /** Determines the elements border-style. Possible values are: 0 for a solid line 1 for a dotted line 2 for a line with small dashes 3 for a line with medium dashes 4 for a line with big dashes 5 for a line with alternating medium and big dashes and large gaps 6 for a line with alternating medium and big dashes and small gaps 7 for a dotted line. Needs JXG.GeometryElement#linecap set to ”round” for round dots.The dash patterns are defined in JXG.AbstractRenderer#dashArray. */
@@ -52,6 +52,10 @@
  fixed?: Boolean
  /** If true a label will display the element's name. */
  withLabel?: Boolean
+ /** Display tag for this element. */
+ labeled?: string|Function
+ /** Display tag for this element. */
+ labelled?: string|Function
  /** Attributes for the line label. */
  label?: LabelAttributes
  /** If enabled:true the (stroke) element will get a customized shadow.Customize color and opacity: If the object's RGB stroke color is [r,g,b] and its opacity is op, and the shadow parameters color is given as [r', g', b'] and opacity as op' the shadow will receive the RGB color[blend*r + r', blend*g + g', blend*b + b']and its opacity will be equal to op * op'. Further, the parameters blur and offset can be adjusted.This attribute is only available with SVG, not with canvas. */
@@ -129,8 +133,6 @@
   center?: GeometryElementAttributes
  /** If true, moving the mouse over inner points triggers hasPoint. */
   hasInnerPoints?: Boolean
- /** Attributes for circle label. */
-  label?: LabelAttributes
  /** Attributes for center point. */
   point?: Point
  /** Attributes for center point. */
@@ -670,7 +672,7 @@
   label?: LabelAttributes
  }
 
- interface IntersectionAttributes extends GeometryElementAttributes {
+ interface IntersectionAttributes extends PointAttributes {
  /**  */
   alwaysIntersect?: Boolean
  }
@@ -970,9 +972,7 @@
         type NumberFunction = Number|Function
 
         /** A 'point' has a position in space.  The only characteristic that distinguishes one point from another is its position. */
-        type point = NumberFunction[]
-
-        type Pointpoint = Point|point  // so I can have an array of them
+        type point = [NumberFunction,NumberFunction] | NumberFunction[] // allow tuples or arrays
 
 
         /** A Vector has both magnitude and direction, but no fixed position in space. */
@@ -1005,6 +1005,9 @@
             face?:String
         }
 
+        interface VertexAttributes{
+            visible?:Boolean
+        }
 
         interface PanAttributes{
             enabled?: Boolean
@@ -1181,6 +1184,17 @@
                         (attrs as any)[property] = (TSXGraph.defaultAttrs as any)[property]
                     }
                 }
+
+
+                // if the user specifies the attribute 'labeled', then use it instead of 'name'
+                if((attrs.hasOwnProperty('labeled'))){
+                    (attrs as any).name = (attrs as any).labeled
+                    }
+                if((attrs.hasOwnProperty('labelled'))){      // also brit spelling?
+                    (attrs as any).name = (attrs as any).labelled
+                }
+
+                // console.log(attrs)
                 return attrs
             }
 
@@ -1188,93 +1202,93 @@
 
         }
 
-        type spaceIcon =
-            '../icons/alien-1.png' |
-            '../icons/alien-2.png' |
-            '../icons/alien-3.png' |
-            '../icons/alien-4.png' |
-            '../icons/alien-5.png' |
-            '../icons/alien-abduction.png' |
-            '../icons/alien-ship-2.png' |
-            '../icons/alien-ship-beam.png' |
-            '../icons/alien-ship.png' |
-            '../icons/asteroid-2.png' |
-            '../icons/asteroid.png' |
-            '../icons/astronaut-helmet.png' |
-            '../icons/atom.png' |
-            '../icons/atronaut.png' |
-            '../icons/bb-8.png' |
-            '../icons/big-dipper.png' |
-            '../icons/black-hole.png' |
-            '../icons/brain-slug.png' |
-            '../icons/cassiopeia.png' |
-            '../icons/chewbacca.png' |
-            '../icons/comet.png' |
-            '../icons/cylon-raider.png' |
-            '../icons/darth-vader.png' |
-            '../icons/death-star.png' |
-            '../icons/earth.png' |
-            '../icons/falling-asteroid.png' |
-            '../icons/falling-space-capsule.png' |
-            '../icons/falling-star.png' |
-            '../icons/flag.png' |
-            '../icons/fly\ icon\ licence.png' |
-            '../icons/flyicon.png' |
-            '../icons/galaxy.png' |
-            '../icons/intl-space-station.png' |
-            '../icons/jupiter.png' |
-            '../icons/landing-space-capsule.png' |
-            '../icons/laser-gun.png' |
-            '../icons/mars.png' |
-            '../icons/millennium-falcon.png' |
-            '../icons/mission-control.png' |
-            '../icons/moon-full-almost.png' |
-            '../icons/moon-full-moon.png' |
-            '../icons/moon-last-quarter.png' |
-            '../icons/moon-new-moon.png' |
-            '../icons/moon-waning-cresent.png' |
-            '../icons/moon-waning-gibbous.png' |
-            '../icons/morty.png' |
-            '../icons/neptune.png' |
-            '../icons/pluto.png' |
-            '../icons/princess-leia.png' |
-            '../icons/rick.png' |
-            '../icons/ring-ship.png' |
-            '../icons/rocket-launch.png' |
-            '../icons/rocket.png' |
-            '../icons/satellite.png' |
-            '../icons/saturn.png' |
-            '../icons/solar-system.png' |
-            '../icons/space-capsule.png' |
-            '../icons/space-cockpit.png' |
-            '../icons/space-invader.png' |
-            '../icons/space-observatory.png' |
-            '../icons/space-rocket.png' |
-            '../icons/space-rover-1.png' |
-            '../icons/space-rover-2.png' |
-            '../icons/space-satellite-dish.png' |
-            '../icons/space-ship_1.png' |
-            '../icons/space-ship_2.png' |
-            '../icons/space-ship_3.png' |
-            '../icons/space-ship.png' |
-            '../icons/space-shuttle-launch.png' |
-            '../icons/space-shuttle.png' |
-            '../icons/sputnick-1.png' |
-            '../icons/sputnick-2.png' |
-            '../icons/star.png' |
-            '../icons/stars.png' |
-            '../icons/stormtrooper.png' |
-            '../icons/sun.png' |
-            '../icons/telescope.png' |
-            '../icons/uranus.png' |
-            '../icons/venus.png' |
-            '../icons/moon-dreamy.png'
-        
+        export type spaceIcon =
+            'icons/alien-1.png' |
+            'icons/alien-2.png' |
+            'icons/alien-3.png' |
+            'icons/alien-4.png' |
+            'icons/alien-5.png' |
+            'icons/alien-abduction.png' |
+            'icons/alien-ship-2.png' |
+            'icons/alien-ship-beam.png' |
+            'icons/alien-ship.png' |
+            'icons/asteroid-2.png' |
+            'icons/asteroid.png' |
+            'icons/astronaut-helmet.png' |
+            'icons/atom.png' |
+            'icons/atronaut.png' |
+            'icons/bb-8.png' |
+            'icons/big-dipper.png' |
+            'icons/black-hole.png' |
+            'icons/brain-slug.png' |
+            'icons/cassiopeia.png' |
+            'icons/chewbacca.png' |
+            'icons/comet.png' |
+            'icons/cylon-raider.png' |
+            'icons/darth-vader.png' |
+            'icons/death-star.png' |
+            'icons/earth.png' |
+            'icons/falling-asteroid.png' |
+            'icons/falling-space-capsule.png' |
+            'icons/falling-star.png' |
+            'icons/flag.png' |
+            'icons/fly\ icon\ licence.png' |
+            'icons/flyicon.png' |
+            'icons/galaxy.png' |
+            'icons/intl-space-station.png' |
+            'icons/jupiter.png' |
+            'icons/landing-space-capsule.png' |
+            'icons/laser-gun.png' |
+            'icons/mars.png' |
+            'icons/millennium-falcon.png' |
+            'icons/mission-control.png' |
+            'icons/moon-full-almost.png' |
+            'icons/moon-full-moon.png' |
+            'icons/moon-last-quarter.png' |
+            'icons/moon-new-moon.png' |
+            'icons/moon-waning-cresent.png' |
+            'icons/moon-waning-gibbous.png' |
+            'icons/morty.png' |
+            'icons/neptune.png' |
+            'icons/pluto.png' |
+            'icons/princess-leia.png' |
+            'icons/rick.png' |
+            'icons/ring-ship.png' |
+            'icons/rocket-launch.png' |
+            'icons/rocket.png' |
+            'icons/satellite.png' |
+            'icons/saturn.png' |
+            'icons/solar-system.png' |
+            'icons/space-capsule.png' |
+            'icons/space-cockpit.png' |
+            'icons/space-invader.png' |
+            'icons/space-observatory.png' |
+            'icons/space-rocket.png' |
+            'icons/space-rover-1.png' |
+            'icons/space-rover-2.png' |
+            'icons/space-satellite-dish.png' |
+            'icons/space-ship_1.png' |
+            'icons/space-ship_2.png' |
+            'icons/space-ship_3.png' |
+            'icons/space-ship.png' |
+            'icons/space-shuttle-launch.png' |
+            'icons/space-shuttle.png' |
+            'icons/sputnick-1.png' |
+            'icons/sputnick-2.png' |
+            'icons/star.png' |
+            'icons/stars.png' |
+            'icons/stormtrooper.png' |
+            'icons/sun.png' |
+            'icons/telescope.png' |
+            'icons/uranus.png' |
+            'icons/venus.png' |
+            'icons/moon-dreamy.png'
+
 
  interface ConicIface {
  z_ignore: Object,
- /** Line defined by solution to a*z + b*y +c*y== 0 */
-   line( a:Number|Function, b:Number|Function, c:Number|Function,attributes?:LineAttributes):Line
+ /** Line defined by solution to a*x + b*y = c */
+   line( a:Number|Function, b:Number|Function, c?:Number|Function ,attributes?:LineAttributes):Line
  /** Just as two (distinct) points determine a line, five points (no three collinear) determine a conic. */
    fivePoints( A:Point|point, B:Point|point, C:Point|point, D:Point|point, E:Point|point,attributes?:ConicAttributes):Conic
  /** Build a plane algebraic curve from six numbers that satisfies Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0, and A,B,C not all zero.  This might be a circle, ellipse, parabola, or hyperbola. */
@@ -1393,6 +1407,52 @@
 
  interface NumericsJSXMathIface {
  CardinalSpline(pointArray:Point[],tau:Function):Function[],
+ } 
+
+ interface StatisticsJSXMathIface {
+ /** Generate value of a standard normal random variable with given mean and standard deviation.
+                                   See {@link https://en.wikipedia.org/wiki/Normal_distribution} */
+ randomNormal(mean:number,stdDev:number):number,
+ /** Generate value of a uniform distributed random variable in the interval [a, b]. */
+ randomUniform(a:number,b:number):number,
+ /** Generate value of a random variable with exponential distribution.
+                                    See {@link https://en.wikipedia.org/wiki/Exponential_distribution}.
+                                    Algorithm: D.E. Knuth, TAOCP 2, p. 128. */
+ randomExponential(lambda:number):number,
+ /** Generate value of a random variable with gamma distribution of order alpha.  Default scale is 1. Default threshold is 0.
+                                   See {@link https://en.wikipedia.org/wiki/Gamma_distribution}.
+                                   Algorithm: D.E. Knuth, TAOCP 2, p. 129. */
+ randomGamma(shape:number,scale?:number,threshold?:number):number,
+ /** Generate value of a random variable with beta distribution with shape parameters alpha and beta.
+                                    See {@link https://en.wikipedia.org/wiki/Beta_distribution}. */
+ randomBeta(alpha:number,beta:number):number,
+ /** Generate value of a random variable with chi-square distribution with k (>0) degrees of freedom.
+                                    See {@link https://en.wikipedia.org/wiki/Chi-squared_distribution}. */
+ randomChisquare(k:number):number,
+ /** Generate value of a random variable with F-distribution with d1 and d2 degrees of freedom.
+                                    See {@link https://en.wikipedia.org/wiki/F-distribution}. */
+ randomF(d1:number,d2:number):number,
+ /** Generate value of a random variable with Students-t-distribution with v degrees of freedom.
+                                    See {@link https://en.wikipedia.org/wiki/Student%27s_t-distribution}. */
+ randomT(v:number):number,
+ /** Generate values for a random variable in binomial distribution with parameters n and p
+                                    See {@link https://en.wikipedia.org/wiki/Binomial_distribution}. */
+ randomBinomial(n:number,p:number):number,
+ /** Generate values for a random variable in geometric distribution with propability <i>p</i>.
+                                    See {@link https://en.wikipedia.org/wiki/Geometric_distribution}. */
+ randomGeometric(p:number):number,
+ /** Generate values for a random variable in Poisson distribution with mean <i>mu</i>..
+                                    See {@link https://en.wikipedia.org/wiki/Poisson_distribution}. */
+ randomPoisson(mu:number):number,
+ /** Generate values for a random variable in hypergeometric distribution.
+                                    See {@link https://en.wikipedia.org/wiki/Hypergeometric_distribution}
+                                    Samples are drawn from a hypergeometric distribution with specified parameters, <i>good</i> (ways to make a good selection),
+                                    <i>bad</i> (ways to make a bad selection), and <i>samples</i> (number of items sampled, which is less than or equal to <i>good + bad</i>). */
+ randomHypergeometric(good:number,bad:number,samples:number):number,
+ /** Compute the histogram of a dataset.  Range can be false or [min(x), max(x)]. If density is true then normalize the counts by dividing by sum(counts). Returns [number[],number[]], the first array contains start value of bins, the second array countains the counts. */
+ histogram(data:number[], bins?:number, range?:boolean|[number,number], density?:boolean, cumulative?:boolean):[number[],number[]],
+ /** Determines the absolute value of every given value.  */
+ abs(arr:number[]|number):Number[]|Number,
  } 
 
 
@@ -1594,6 +1654,7 @@
  MatrixMath:MatrixJSXMathIface
  GeometryMath:GeometryJSXMathIface
  NumericsMath:NumericsJSXMathIface
+ StatisticsMath:StatisticsJSXMathIface
 
            constructor(){
             this.board = null
@@ -1602,8 +1663,8 @@
  this.conic = {
  /** @protected */ 
  z_ignore: {}, 
-   /** Line defined by solution to a*z + b*y +c*y== 0 */
-   line( a:Number|Function, b:Number|Function, c:Number|Function,attributes: LineAttributes ={}) : Line {
+   /** Line defined by solution to a*x + b*y = c */
+   line( a:Number|Function, b:Number|Function, c:Number|Function = 1,attributes: LineAttributes ={}) : Line {
  return new Line('Line',[a, b, c, ],attributes) as Line
  },
    /** Just as two (distinct) points determine a line, five points (no three collinear) determine a conic. */
@@ -1753,6 +1814,52 @@
  CardinalSpline(pointArray:Point[],tau:Function):Function[] { return (window as any).JXG.Math.Numerics.CardinalSpline(TSXGraph.dereference(pointArray),tau)  as Function[]} ,
  } 
 
+ this.StatisticsMath = { 
+ /** Generate value of a standard normal random variable with given mean and standard deviation.
+                                   See {@link https://en.wikipedia.org/wiki/Normal_distribution} */
+ randomNormal(mean:number,stdDev:number):number { return (window as any).JXG.Math.Statistics.randomNormal(mean,stdDev)  as number} ,
+ /** Generate value of a uniform distributed random variable in the interval [a, b]. */
+ randomUniform(a:number,b:number):number { return (window as any).JXG.Math.Statistics.randomUniform(a,b)  as number} ,
+ /** Generate value of a random variable with exponential distribution.
+                                    See {@link https://en.wikipedia.org/wiki/Exponential_distribution}.
+                                    Algorithm: D.E. Knuth, TAOCP 2, p. 128. */
+ randomExponential(lambda:number):number { return (window as any).JXG.Math.Statistics.randomExponential(lambda)  as number} ,
+ /** Generate value of a random variable with gamma distribution of order alpha.  Default scale is 1. Default threshold is 0.
+                                   See {@link https://en.wikipedia.org/wiki/Gamma_distribution}.
+                                   Algorithm: D.E. Knuth, TAOCP 2, p. 129. */
+ randomGamma(shape:number,scale?:number,threshold?:number):number { return (window as any).JXG.Math.Statistics.randomGamma(shape,scale,threshold)  as number} ,
+ /** Generate value of a random variable with beta distribution with shape parameters alpha and beta.
+                                    See {@link https://en.wikipedia.org/wiki/Beta_distribution}. */
+ randomBeta(alpha:number,beta:number):number { return (window as any).JXG.Math.Statistics.randomBeta(alpha,beta)  as number} ,
+ /** Generate value of a random variable with chi-square distribution with k (>0) degrees of freedom.
+                                    See {@link https://en.wikipedia.org/wiki/Chi-squared_distribution}. */
+ randomChisquare(k:number):number { return (window as any).JXG.Math.Statistics.randomChisquare(k)  as number} ,
+ /** Generate value of a random variable with F-distribution with d1 and d2 degrees of freedom.
+                                    See {@link https://en.wikipedia.org/wiki/F-distribution}. */
+ randomF(d1:number,d2:number):number { return (window as any).JXG.Math.Statistics.randomF(d1,d2)  as number} ,
+ /** Generate value of a random variable with Students-t-distribution with v degrees of freedom.
+                                    See {@link https://en.wikipedia.org/wiki/Student%27s_t-distribution}. */
+ randomT(v:number):number { return (window as any).JXG.Math.Statistics.randomT(v)  as number} ,
+ /** Generate values for a random variable in binomial distribution with parameters n and p
+                                    See {@link https://en.wikipedia.org/wiki/Binomial_distribution}. */
+ randomBinomial(n:number,p:number):number { return (window as any).JXG.Math.Statistics.randomBinomial(n,p)  as number} ,
+ /** Generate values for a random variable in geometric distribution with propability <i>p</i>.
+                                    See {@link https://en.wikipedia.org/wiki/Geometric_distribution}. */
+ randomGeometric(p:number):number { return (window as any).JXG.Math.Statistics.randomGeometric(p)  as number} ,
+ /** Generate values for a random variable in Poisson distribution with mean <i>mu</i>..
+                                    See {@link https://en.wikipedia.org/wiki/Poisson_distribution}. */
+ randomPoisson(mu:number):number { return (window as any).JXG.Math.Statistics.randomPoisson(mu)  as number} ,
+ /** Generate values for a random variable in hypergeometric distribution.
+                                    See {@link https://en.wikipedia.org/wiki/Hypergeometric_distribution}
+                                    Samples are drawn from a hypergeometric distribution with specified parameters, <i>good</i> (ways to make a good selection),
+                                    <i>bad</i> (ways to make a bad selection), and <i>samples</i> (number of items sampled, which is less than or equal to <i>good + bad</i>). */
+ randomHypergeometric(good:number,bad:number,samples:number):number { return (window as any).JXG.Math.Statistics.randomHypergeometric(good,bad,samples)  as number} ,
+ /** Compute the histogram of a dataset.  Range can be false or [min(x), max(x)]. If density is true then normalize the counts by dividing by sum(counts). Returns [number[],number[]], the first array contains start value of bins, the second array countains the counts. */
+ histogram(data:number[], bins?:number, range?:boolean|[number,number], density?:boolean, cumulative?:boolean):[number[],number[]] { return (window as any).JXG.Math.Statistics.histogram(data,{bins:bins??10, range:range??false, density:density??true, cumulative:cumulative??false})  as [number[],number[]]} ,
+ /** Determines the absolute value of every given value.  */
+ abs(arr:number[]|number):Number[]|Number { return (window as any).JXG.Math.Statistics.abs(arr)  as Number[]|Number} ,
+ } 
+
 }
 
  /** create a chart */
@@ -1760,7 +1867,17 @@ chart(f:Number[], attributes: ChartAttributes ={} ):Chart{return new Chart('Char
 }
 
 
- /** This element is used to provide a constructor for a circle. */
+ /** A circle can be constructed by providing a center and a point on the circle,
+                         or a center and a radius (given as a number, function, line, or circle).
+                         If the radius is a negative value, its absolute values is taken.
+                
+*```js
+                TSX.circle(P1,1])
+                TSX.circle([0,0],[1,0])
+                
+*```
+                
+Also see: Circumcircle is a circle described by three points.  An Arc is a segment of a circle. */
 circle(centerPoint:Point|point, remotePoint:Point|point|Line|line|Number|Function|Circle, attributes: CircleAttributes ={} ):Circle{
   let newObject:any  // special case for circle with immediate segment eg:  circle(point,[[1,2],[3,4]]  )
                             if (Array.isArray(remotePoint) && Array.isArray(remotePoint[0] ) && Array.isArray(remotePoint[1] )) {
@@ -1781,13 +1898,22 @@ group(pointArray:Point[], attributes: GroupAttributes ={} ):Group{return new Gro
 }
 
 
- /** Displays an image. */
-image(url:String|spaceIcon, lowerLeft:point, widthHeight:[Number,Number], attributes: ImageAttributes ={} ):Image{return new Image('Image', [url,lowerLeft,widthHeight,], attributes)
+ /** Display an image.  The first element is the location URL of the image.
+                A collection of space icons is provided, press CTRL+I to show the list.
+                The second parameter sets the lower left point of the image, you may need to shift the image location to center it.
+                
+*```js
+                TSX.image('../icons/sun.png',[0,0])
+                let P1 = TSX.point([3,2],{opacity:0})
+                TSX.image(p1,[3-offest,3-offset])
+                
+*``` */
+image(url:String|spaceIcon, lowerLeft:point, widthHeight:[Number,Number]=[1,1], attributes: ImageAttributes ={} ):Image{return new Image('Image', [url,lowerLeft,widthHeight,], attributes)
 }
 
  /** An implicit curve is a plane curve defined by an implicit equation relating two coordinate variables, commonly x and y. For example, the unit circle is defined by the implicit equation x2 + y2 = 1. In general, every implicit curve is defined by an equation of the form f(x, y) = 0 for some function f of two variables. */
- implicitcurve(f:Function|String,  attributes?: ImplicitcurveAttributes):Implicitcurve 
- implicitcurve(f:Function|String, dfx:Function|String, dfy:Function|String,  attributes?: ImplicitcurveAttributes):Implicitcurve 
+ implicitcurve(f:Function|String,  attributes?:ImplicitcurveAttributes):Implicitcurve 
+ implicitcurve(f:Function|String, dfx:Function|String, dfy:Function|String,  attributes?:ImplicitcurveAttributes):Implicitcurve 
 
             // implementation of signature,  hidden from user
             implicitcurve(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Implicitcurve {
@@ -1825,14 +1951,14 @@ image(url:String|spaceIcon, lowerLeft:point, widthHeight:[Number,Number], attrib
                                 By setting additional properties a line can be used as an arrow and/or axis.
                                 
 *```js
-                                TSX.line([3,2],[3,3],{strokeColor:'blue',strokeWidth:5, strokeOpacity:.5})
+                                TSX.line([3,2],[3,3],{strokeColor:'blue',strokeWidth:5,strokeOpacity:.5})
                                 let P1 = TSX.point([3,2])
                                 TSX.line(p1,[3,3])
                                 
 *```
                                 
  also create lines with Segment, Arrow, Transform.Point, Circumcenter, Glider, and others.
-                                Look at .conic.line() for a line defined by the equation 'az +bx +cy = 0'
+                                 Look at .conic.line() for a line defined by the equation 'az +bx +cy = 0'
                     */
 line(p1:Point|point, p2:Point|point, attributes: LineAttributes ={} ):Line{return new Line('Line', [p1,p2,], attributes)
 }
@@ -1841,8 +1967,8 @@ line(p1:Point|point, p2:Point|point, attributes: LineAttributes ={} ):Line{retur
  /** Create a point. If any parent elements are functions or the attribute 'fixed' is true then point will be constrained.
             
 *```js
-             TSX.point([3,2], {strokeColor:'blue',strokeWidth:5, strokeOpacity:.5})
-             TSX.point([3,3]), {fixed:true, showInfobox:true}
+             TSX.point([3,2],{strokeColor:'blue',strokeWidth:5,strokeOpacity:.5})
+             TSX.point([3,3]),{fixed:true, showInfobox:true}
              TSX.point([()=>p1.X()+2,()=>p1.Y()+2]) // 2 up 2 right from p1
              TSX.point([1,2,2])  // three axis definition - [z,x,y]
             
@@ -1855,7 +1981,7 @@ point(position:NumberFunction[], attributes: PointAttributes ={} ):Point{
 
 
  /** Array of Points */
-polygon(pointArray:Pointpoint[], attributes: PolygonAttributes ={} ):Polygon{return new Polygon('Polygon', [pointArray,], attributes)
+polygon(pointArray:Point[]|point[], attributes: PolygonAttributes ={} ):Polygon{return new Polygon('Polygon', [pointArray,], attributes)
 }
 
 
@@ -1892,9 +2018,9 @@ vectorfield(fxfy:Function[], horizontalMesh:Number[]=[-6,25,6], verticalMesh:Num
  type=='auto':  a square is displayed if the angle is near orthogonal.
                                 
  If no name is provided the angle label is automatically set to a lower greek letter. */
- angle(from:Point|point, around:Point|point, to:Point|point,  attributes?: AngleAttributes):Angle 
- angle(line1:Line|line, line2:Line|line, direction1:[Number,Number], direction2:[Number,Number],  attributes?: AngleAttributes):Angle 
- angle(line1:Line|line, line2:Line|line, dirPlusMinus1:Number, dirPlusMinus2:Number,  attributes?: AngleAttributes):Angle 
+ angle(from:Point|point, around:Point|point, to:Point|point,  attributes?:AngleAttributes):Angle 
+ angle(line1:Line|line, line2:Line|line, direction1:[Number,Number], direction2:[Number,Number],  attributes?:AngleAttributes):Angle 
+ angle(line1:Line|line, line2:Line|line, dirPlusMinus1:Number, dirPlusMinus2:Number,  attributes?:AngleAttributes):Angle 
 
             // implementation of signature,  hidden from user
             angle(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Angle {
@@ -1948,13 +2074,21 @@ arc(origin:Point|point, from:Point|point, to:Point|point, attributes: ArcAttribu
 }
 
 
- /** Arrow defined by two points (like a Segment) with arrow at P2 */
+ /** Arrow defined by two points (like a Segment) with arrow at P2
+                            
+*```js
+                            
+ let arrow = TSX.arrow([-8,5],[-4,5])
+                            
+*```
+                            
+ */
 arrow(p1:Point|point, p2:Point|point, attributes: ArrowAttributes ={} ):Arrow{return new Arrow('Arrow', [p1,p2,], attributes)
 }
 
  /** A line parallel to a given line, through a point. */
- parallel(line:Line|[Point,Point], point:Point|point,  attributes?: ParallelAttributes):Parallel 
- parallel(lineP1:Point|point, lineP2:Point|point, Point:Point|point,  attributes?: ParallelAttributes):Parallel 
+ parallel(line:Line|[Point,Point], point:Point|point,  attributes?:ParallelAttributes):Parallel 
+ parallel(lineP1:Point|point, lineP2:Point|point, Point:Point|point,  attributes?:ParallelAttributes):Parallel 
 
             // implementation of signature,  hidden from user
             parallel(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Parallel {
@@ -2089,16 +2223,46 @@ ellipse(p1:Point|point, p2:Point|point, radius:Number|Function, attributes: Elli
 functiongraph(funct:Function, leftBorder?:Number, rightBorder?:Number, attributes: FunctiongraphAttributes ={} ):Functiongraph{return new Functiongraph('Functiongraph', [funct,leftBorder,rightBorder,], attributes)
 }
 
+ /** A GeometryElement like Line, Circle, or Curve, and optionally a starting point defined by [X,Y] */
+ glider(hostElement:GeometryElement,  attributes?:GliderAttributes):Glider 
+ glider(hostElement:GeometryElement, initial:number[],  attributes?:GliderAttributes):Glider 
+ glider( attributes?:GliderAttributes):Glider 
 
- /** This element is used to provide a constructor for a glider point. */
-glider(hostElement:GeometryElement, initial:number[] = [0,0], attributes: GliderAttributes ={} ):Glider{
- (initial as any).push(hostElement);
-                        return new Glider('Glider', initial ,TSXGraph.defaultAttributes(attributes));
-}
-
+            // implementation of signature,  hidden from user
+            glider(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Glider {
+ let newObject: Glider = {} as Glider // just so it is initialized
+   let params = []
+   let attrs = {}
+   if (arguments.length == 1){
+      if(isJSXAttribute(a)){
+          attrs = TSXGraph.defaultAttributes(a)
+          params = TSXGraph.dereference([])
+      }else{
+          params = TSXGraph.dereference([a,])
+      }
+   }
+   if (arguments.length == 2){
+      if(isJSXAttribute(b)){
+          attrs = TSXGraph.defaultAttributes(b)
+          params = TSXGraph.dereference([a,])
+      }else{
+          params = TSXGraph.dereference([a,b,])
+      }
+   }
+   if (arguments.length == 3){
+      if(isJSXAttribute(c)){
+          attrs = TSXGraph.defaultAttributes(c)
+          params = TSXGraph.dereference([a,b,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,])
+      }
+   }
+params = b? TSXGraph.dereference([b[0]??0,b[1]??0,a]):TSXGraph.dereference([0,0,a])
+                        return new Glider('Glider', params ,TSXGraph.defaultAttributes(attrs));
+ }
  /** Creates a grid to support the user with element placement or to improve determination of position. */
- grid(axis1:Axis, axis2:Axis,  attributes?: GridAttributes):Grid 
- grid( attributes?: GridAttributes):Grid 
+ grid(axis1:Axis, axis2:Axis,  attributes?:GridAttributes):Grid 
+ grid( attributes?:GridAttributes):Grid 
 
             // implementation of signature,  hidden from user
             grid(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Grid {
@@ -2179,7 +2343,7 @@ integral(range:Number[], curve:Curve, attributes: IntegralAttributes ={} ):Integ
 
  /** An intersection point is a point which lives on two JSXGraph elements, i.e. it is one point of the set consisting of the intersection points of the two elements. The following element types can be (mutually) intersected: line, circle, curve, polygon, polygonal chain. */
 intersection(element1:Line|Circle|Curve, element2:Line|Circle, attributes: IntersectionAttributes ={} ):Point{
- return new Intersection('intersection', TSXGraph.dereference([element1,element2,0]), TSXGraph.defaultAttributes(attributes)) as Point
+ return new Intersection('intersection', TSXGraph.dereference([element1,element2,0]), TSXGraph.defaultAttributes(attributes)) as TXG.Point
 }
 
 
@@ -2193,8 +2357,8 @@ majorSector(p1:Point|point, p2:Point|point, p3:Point|point, attributes: MajorSec
 }
 
  /** A point in the middle of two given points or a line segment. */
- midpoint(p1:Point, p2:Point,  attributes?: MidpointAttributes):Midpoint 
- midpoint(line:Line,  attributes?: MidpointAttributes):Midpoint 
+ midpoint(p1:Point, p2:Point,  attributes?:MidpointAttributes):Midpoint 
+ midpoint(line:Line,  attributes?:MidpointAttributes):Midpoint 
 
             // implementation of signature,  hidden from user
             midpoint(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Midpoint {
@@ -2253,8 +2417,8 @@ nonReflexAngle(point1:Point, point2:Point, point3:Point, attributes: NonReflexAn
 }
 
  /** A line through a given point on an element of type line, circle, curve, or turtle and orthogonal (at right angle) to that object. */
- normal(object:Line|Circle|Curve|Turtle, point:Point,  attributes?: NormalAttributes):Normal 
- normal(glider:Glider,  attributes?: NormalAttributes):Normal 
+ normal(object:Line|Circle|Curve|Turtle, point:Point,  attributes?:NormalAttributes):Normal 
+ normal(glider:Glider,  attributes?:NormalAttributes):Normal 
 
             // implementation of signature,  hidden from user
             normal(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Normal {
@@ -2335,7 +2499,7 @@ polePoint(conic:Conic|Circle, line:Line, attributes: PolePointAttributes ={} ):P
 
 
  /** Array of Points */
-polygonalChain(pointArray:Pointpoint[], attributes: PolygonalChainAttributes ={} ):PolygonalChain{return new PolygonalChain('PolygonalChain', [pointArray,], attributes)
+polygonalChain(pointArray:Point[]|point[], attributes: PolygonalChainAttributes ={} ):PolygonalChain{return new PolygonalChain('PolygonalChain', [pointArray,], attributes)
 }
 
 
@@ -2375,8 +2539,8 @@ slider(StartPoint:Point|point, EndPoint:Point|point, minimum_initial_maximum:[nu
 }
 
  /** A slope triangle is an imaginary triangle that helps you find the slope of a line or a line segment (use the method '.Value()' ). The hypotenuse of the triangle (the diagonal) is the line you are interested in finding the slope of. The two 'legs' of the triangle are the 'rise' and 'run' used in the slope formula. */
- slopetriangle(tangent:Tangent,  attributes?: SlopetriangleAttributes):Slopetriangle 
- slopetriangle(line:Line, point:Point,  attributes?: SlopetriangleAttributes):Slopetriangle 
+ slopetriangle(tangent:Tangent,  attributes?:SlopetriangleAttributes):Slopetriangle 
+ slopetriangle(line:Line, point:Point,  attributes?:SlopetriangleAttributes):Slopetriangle 
 
             // implementation of signature,  hidden from user
             slopetriangle(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Slopetriangle {
@@ -2415,11 +2579,41 @@ spline(points:Point[]|number[][], attributes: SplineAttributes ={} ):Curve{
  return new Spline('spline', TSXGraph.dereference(points), TSXGraph.defaultAttributes(attributes))
 }
 
+ /** A tangent is always constructed by a point on a line, circle, or curve and describes the tangent in the point on that line, circle, or curve. */
+ tangent(point:Glider,  attributes?:TangentAttributes):Tangent 
+ tangent(point:Point, curve:Circle|Curve,  attributes?:TangentAttributes):Tangent 
 
- /** With the element tangent the slope of a line, circle, or curve in a certain point can be visualized. A tangent is always constructed by a glider on a line, circle, or curve and describes the tangent in the glider point on that line, circle, or curve. */
-tangent(glider:Glider, attributes: TangentAttributes ={} ):Tangent{return new Tangent('Tangent', [glider,], attributes)
-}
-
+            // implementation of signature,  hidden from user
+            tangent(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Tangent {
+ let newObject: Tangent = {} as Tangent // just so it is initialized
+   let params = []
+   let attrs = {}
+   if (arguments.length == 1){
+      if(isJSXAttribute(a)){
+          attrs = TSXGraph.defaultAttributes(a)
+          params = TSXGraph.dereference([])
+      }else{
+          params = TSXGraph.dereference([a,])
+      }
+   }
+   if (arguments.length == 2){
+      if(isJSXAttribute(b)){
+          attrs = TSXGraph.defaultAttributes(b)
+          params = TSXGraph.dereference([a,])
+      }else{
+          params = TSXGraph.dereference([a,b,])
+      }
+   }
+   if (arguments.length == 3){
+      if(isJSXAttribute(c)){
+          attrs = TSXGraph.defaultAttributes(c)
+          params = TSXGraph.dereference([a,b,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,])
+      }
+   }
+   return new Tangent('tangent', params, TSXGraph.defaultAttributes(attrs)) // as Tangent
+ }
 
  /** A tape measure can be used to measure distances between points. */
 tapemeasure(P1:Point|point, P2:Point|point, attributes: TapemeasureAttributes ={} ):Tapemeasure{return new Tapemeasure('Tapemeasure', [P1,P2,], attributes)
@@ -3748,8 +3942,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  /** Attributes for the polygon vertices. */
- public get vertices():Number[] {
-  return (this.elValue as any).vertices as Number[]
+ public get vertices():VertexAttributes {
+  return (this.elValue as any).vertices as VertexAttributes
 }
 
  /** Uses the boards renderer to update the polygon. */
@@ -4483,7 +4677,7 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 }
 
- export class Intersection extends GeometryElement {
+ export class Intersection extends Point {
  constructor(className:string, params:any[], attrs: Object){
    super(className, params, attrs)
 }
@@ -4884,6 +5078,11 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
  /**  */
  intersectioncircle3D(sphere1:Sphere3D,sphere2:Sphere3D,attributes:Object={}): Circle3D {
   return (this.elValue as any).create("intersectioncircle3d",TSXGraph.dereference([sphere1,sphere2,]),attributes) as Circle3D
+}
+
+ /**  */
+ intersectionline3D(plane1:Plane3D,plane2:Plane3D,attributes:Object={}): Line3D {
+  return (this.elValue as any).create("intersectionline3d",TSXGraph.dereference([plane1,plane2,]),attributes) as Line3D
 }
 
  /**  */

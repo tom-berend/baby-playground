@@ -610,7 +610,7 @@ export class Main {
 
     static writeMoodleLog(payload: HostMsg) {
 
-        console.log('in writeMoodleLog', payload)
+        // console.log('in writeMoodleLog', payload)
 
         // a bit of a hack.  sometimes we don't know the UNIQ who called us
         // (for example, working in the editor and running code)
@@ -625,7 +625,7 @@ export class Main {
 
 
         let JsonData = JSON.stringify(payload)
-        console.log('JsonData:', JsonData)
+        // console.log('JsonData:', JsonData)
 
         /*
         let xhr = new XMLHttpRequest();
@@ -650,7 +650,7 @@ export class Main {
         // The main use case for the Beacon API is to send analytics such as client-side events or session data to the server.
 
         let base64 = Buffer.from(JsonData, 'utf8').toString('base64');
-        console.log('base64', base64)
+        // console.log('base64', base64)
         navigator.sendBeacon("ajax.php?payload=" + base64);
     }
 
@@ -660,15 +660,15 @@ export class Main {
         // monaco.editor.createModel(lib_baby, 'typescript', monaco.Uri.parse(babyUri));
 
         this.editorDiv = document.getElementById("editor") as HTMLDivElement
-        console.log('%clooking for editor div element', 'background-color:blue;color:white;')
+        // console.log('%clooking for editor div element', 'background-color:blue;color:white;')
         if (this.editorDiv) {  // if page has an editor div
-            console.log('%cSTARTING EDITOR', 'background-color:blue;color:white;')
+            // console.log('%cSTARTING EDITOR', 'background-color:blue;color:white;')
 
             Main.editor = new Editor(this.editorDiv, this.template, hiddenCode, hiddenDecl);  // static !!
-            console.log('%cSTARTING EDITOR', 'background-color:blue;color:white;', 'editorDiv', this.editorDiv, 'template', this.template, 'hiddenCode', hiddenCode, 'hiddenDecl', hiddenDecl)
+            // console.log('%cSTARTING EDITOR', 'background-color:blue;color:white;', 'editorDiv', this.editorDiv, 'template', this.template, 'hiddenCode', hiddenCode, 'hiddenDecl', hiddenDecl)
 
 
-            console.log('%c seems to have started', 'background-color:blue;color:white;')
+            // console.log('%c seems to have started', 'background-color:blue;color:white;')
 
             // this.game = undefined //new GameLauncher(800, 600);
             this.download = document.getElementById("download") as HTMLButtonElement;
@@ -690,15 +690,15 @@ export class Main {
 
             if (this.run) {
                 this.run.onclick = async () => {
-                    console.log('clicked RUN #2')
+                    // console.log('clicked RUN #2')
                     // this.run.disabled = false;  // was true
                     // this.stop.disabled = false;
                     // this.pause.disabled = false;
                     // this.command.disabled = false;
                     let jxgDiv = document.getElementById('jxgbox')
-                    console.log('removing with method 1')
+                    // console.log('removing with method 1')
                     while (jxgDiv.lastElementChild) {
-                        console.log('removing', jxgDiv.lastElementChild)
+                        // console.log('removing', jxgDiv.lastElementChild)
                         jxgDiv.removeChild(jxgDiv.lastElementChild);
                     }
 
@@ -751,7 +751,7 @@ let main = new Main()
 let prevUniq = '';
 function writeMoodleLog(payload: HostMsg) {
 
-    console.log('in writeMoodleLog', payload)
+    // console.log('in writeMoodleLog', payload)
 
     // a bit of a hack.  sometimes we don't know the UNIQ who called us
     // (for example, working in the editor and running code)
@@ -766,7 +766,7 @@ function writeMoodleLog(payload: HostMsg) {
 
 
     let JsonData = JSON.stringify(payload)
-    console.log('JsonData:', JsonData)
+    // console.log('JsonData:', JsonData)
 
     /*
     let xhr = new XMLHttpRequest();
@@ -791,7 +791,7 @@ function writeMoodleLog(payload: HostMsg) {
     // The main use case for the Beacon API is to send analytics such as client-side events or session data to the server.
 
     let base64 = Buffer.from(JsonData, 'utf8').toString('base64');
-    console.log('base64', base64)
+    // console.log('base64', base64)
     navigator.sendBeacon("ajax.php?payload=" + base64);
 }
 

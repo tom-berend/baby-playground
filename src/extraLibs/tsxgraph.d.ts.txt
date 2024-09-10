@@ -3,19 +3,19 @@ declare namespace TXG {
         /** used by V2 vector math library */
         scaleXY?: Number;
         /** Color of the element. */
-        color?: String;
+        color?: string | Function;
         /** Opacity of the element (between 0 and 1). */
-        opacity?: Number;
+        opacity?: number | Function;
         /** The fill color of this geometry element. */
-        fillColor?: String;
+        fillColor?: string | Function;
         /** Opacity for fill color. */
-        fillOpacity?: Number;
+        fillOpacity?: number | Function;
         /** The stroke color of the given geometry element. */
-        strokeColor?: String;
+        strokeColor?: string | Function;
         /** Opacity for element's stroke color. */
-        strokeOpacity?: Number;
+        strokeOpacity?: number | Function;
         /** Width of the element's stroke. */
-        strokeWidth?: Number;
+        strokeWidth?: number | Function;
         /** If false the element won't be visible on the board, otherwise it is shown. */
         visible?: Boolean | Function;
         /** Determines the elements border-style. Possible values are: 0 for a solid line 1 for a dotted line 2 for a line with small dashes 3 for a line with medium dashes 4 for a line with big dashes 5 for a line with alternating medium and big dashes and large gaps 6 for a line with alternating medium and big dashes and small gaps 7 for a dotted line. Needs JXG.GeometryElement#linecap set to ”round” for round dots.The dash patterns are defined in JXG.AbstractRenderer#dashArray. */
@@ -24,6 +24,10 @@ declare namespace TXG {
         fixed?: Boolean;
         /** If true a label will display the element's name. */
         withLabel?: Boolean;
+        /** Display tag for this element. */
+        labeled?: string | Function;
+        /** Display tag for this element. */
+        labelled?: string | Function;
         /** Attributes for the line label. */
         label?: LabelAttributes;
         /** If enabled:true the (stroke) element will get a customized shadow.Customize color and opacity: If the object's RGB stroke color is [r,g,b] and its opacity is op, and the shadow parameters color is given as [r', g', b'] and opacity as op' the shadow will receive the RGB color[blend*r + r', blend*g + g', blend*b + b']and its opacity will be equal to op * op'. Further, the parameters blur and offset can be adjusted.This attribute is only available with SVG, not with canvas. */
@@ -72,8 +76,6 @@ declare namespace TXG {
         center?: GeometryElementAttributes;
         /** If true, moving the mouse over inner points triggers hasPoint. */
         hasInnerPoints?: Boolean;
-        /** Attributes for circle label. */
-        label?: LabelAttributes;
         /** Attributes for center point. */
         point?: Point;
         /** Attributes for center point. */
@@ -501,7 +503,7 @@ declare namespace TXG {
         /** Attributes for integral label. */
         label?: LabelAttributes;
     }
-    interface IntersectionAttributes extends GeometryElementAttributes {
+    interface IntersectionAttributes extends PointAttributes {
         /**  */
         alwaysIntersect?: Boolean;
     }
@@ -709,8 +711,7 @@ declare namespace TXG {
     }
     type NumberFunction = Number | Function;
     /** A 'point' has a position in space.  The only characteristic that distinguishes one point from another is its position. */
-    type point = NumberFunction[];
-    type Pointpoint = Point | point;
+    type point = [NumberFunction, NumberFunction] | NumberFunction[];
     type line = [Point | point, Point | point];
     type arrayNumber = Number[];
     type arrayNumber2 = arrayNumber | Number;
@@ -730,6 +731,9 @@ declare namespace TXG {
     interface DisplayPoint extends ParallelpointAttributes {
         size?: Number;
         face?: String;
+    }
+    interface VertexAttributes {
+        visible?: Boolean;
     }
     interface PanAttributes {
         enabled?: Boolean;
@@ -808,10 +812,11 @@ declare namespace TXG {
         static dereference(params: any | any[]): any[];
         static defaultAttributes(attrs: Object): Object;
     }
+    export type spaceIcon = 'icons/alien-1.png' | 'icons/alien-2.png' | 'icons/alien-3.png' | 'icons/alien-4.png' | 'icons/alien-5.png' | 'icons/alien-abduction.png' | 'icons/alien-ship-2.png' | 'icons/alien-ship-beam.png' | 'icons/alien-ship.png' | 'icons/asteroid-2.png' | 'icons/asteroid.png' | 'icons/astronaut-helmet.png' | 'icons/atom.png' | 'icons/atronaut.png' | 'icons/bb-8.png' | 'icons/big-dipper.png' | 'icons/black-hole.png' | 'icons/brain-slug.png' | 'icons/cassiopeia.png' | 'icons/chewbacca.png' | 'icons/comet.png' | 'icons/cylon-raider.png' | 'icons/darth-vader.png' | 'icons/death-star.png' | 'icons/earth.png' | 'icons/falling-asteroid.png' | 'icons/falling-space-capsule.png' | 'icons/falling-star.png' | 'icons/flag.png' | 'icons/fly\ icon\ licence.png' | 'icons/flyicon.png' | 'icons/galaxy.png' | 'icons/intl-space-station.png' | 'icons/jupiter.png' | 'icons/landing-space-capsule.png' | 'icons/laser-gun.png' | 'icons/mars.png' | 'icons/millennium-falcon.png' | 'icons/mission-control.png' | 'icons/moon-full-almost.png' | 'icons/moon-full-moon.png' | 'icons/moon-last-quarter.png' | 'icons/moon-new-moon.png' | 'icons/moon-waning-cresent.png' | 'icons/moon-waning-gibbous.png' | 'icons/morty.png' | 'icons/neptune.png' | 'icons/pluto.png' | 'icons/princess-leia.png' | 'icons/rick.png' | 'icons/ring-ship.png' | 'icons/rocket-launch.png' | 'icons/rocket.png' | 'icons/satellite.png' | 'icons/saturn.png' | 'icons/solar-system.png' | 'icons/space-capsule.png' | 'icons/space-cockpit.png' | 'icons/space-invader.png' | 'icons/space-observatory.png' | 'icons/space-rocket.png' | 'icons/space-rover-1.png' | 'icons/space-rover-2.png' | 'icons/space-satellite-dish.png' | 'icons/space-ship_1.png' | 'icons/space-ship_2.png' | 'icons/space-ship_3.png' | 'icons/space-ship.png' | 'icons/space-shuttle-launch.png' | 'icons/space-shuttle.png' | 'icons/sputnick-1.png' | 'icons/sputnick-2.png' | 'icons/star.png' | 'icons/stars.png' | 'icons/stormtrooper.png' | 'icons/sun.png' | 'icons/telescope.png' | 'icons/uranus.png' | 'icons/venus.png' | 'icons/moon-dreamy.png';
     interface ConicIface {
         z_ignore: Object;
-        /** Line defined by solution to a*z + b*y +c*y== 0 */
-        line(a: Number | Function, b: Number | Function, c: Number | Function, attributes?: LineAttributes): Line;
+        /** Line defined by solution to a*x + b*y = c */
+        line(a: Number | Function, b: Number | Function, c?: Number | Function, attributes?: LineAttributes): Line;
         /** Just as two (distinct) points determine a line, five points (no three collinear) determine a conic. */
         fivePoints(A: Point | point, B: Point | point, C: Point | point, D: Point | point, E: Point | point, attributes?: ConicAttributes): Conic;
         /** Build a plane algebraic curve from six numbers that satisfies Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0, and A,B,C not all zero.  This might be a circle, ellipse, parabola, or hyperbola. */
@@ -926,6 +931,51 @@ declare namespace TXG {
     interface NumericsJSXMathIface {
         CardinalSpline(pointArray: Point[], tau: Function): Function[];
     }
+    interface StatisticsJSXMathIface {
+        /** Generate value of a standard normal random variable with given mean and standard deviation.
+                                          See {@link https://en.wikipedia.org/wiki/Normal_distribution} */
+        randomNormal(mean: number, stdDev: number): number;
+        /** Generate value of a uniform distributed random variable in the interval [a, b]. */
+        randomUniform(a: number, b: number): number;
+        /** Generate value of a random variable with exponential distribution.
+                                           See {@link https://en.wikipedia.org/wiki/Exponential_distribution}.
+                                           Algorithm: D.E. Knuth, TAOCP 2, p. 128. */
+        randomExponential(lambda: number): number;
+        /** Generate value of a random variable with gamma distribution of order alpha.  Default scale is 1. Default threshold is 0.
+                                          See {@link https://en.wikipedia.org/wiki/Gamma_distribution}.
+                                          Algorithm: D.E. Knuth, TAOCP 2, p. 129. */
+        randomGamma(shape: number, scale?: number, threshold?: number): number;
+        /** Generate value of a random variable with beta distribution with shape parameters alpha and beta.
+                                           See {@link https://en.wikipedia.org/wiki/Beta_distribution}. */
+        randomBeta(alpha: number, beta: number): number;
+        /** Generate value of a random variable with chi-square distribution with k (>0) degrees of freedom.
+                                           See {@link https://en.wikipedia.org/wiki/Chi-squared_distribution}. */
+        randomChisquare(k: number): number;
+        /** Generate value of a random variable with F-distribution with d1 and d2 degrees of freedom.
+                                           See {@link https://en.wikipedia.org/wiki/F-distribution}. */
+        randomF(d1: number, d2: number): number;
+        /** Generate value of a random variable with Students-t-distribution with v degrees of freedom.
+                                           See {@link https://en.wikipedia.org/wiki/Student%27s_t-distribution}. */
+        randomT(v: number): number;
+        /** Generate values for a random variable in binomial distribution with parameters n and p
+                                           See {@link https://en.wikipedia.org/wiki/Binomial_distribution}. */
+        randomBinomial(n: number, p: number): number;
+        /** Generate values for a random variable in geometric distribution with propability <i>p</i>.
+                                           See {@link https://en.wikipedia.org/wiki/Geometric_distribution}. */
+        randomGeometric(p: number): number;
+        /** Generate values for a random variable in Poisson distribution with mean <i>mu</i>..
+                                           See {@link https://en.wikipedia.org/wiki/Poisson_distribution}. */
+        randomPoisson(mu: number): number;
+        /** Generate values for a random variable in hypergeometric distribution.
+                                           See {@link https://en.wikipedia.org/wiki/Hypergeometric_distribution}
+                                           Samples are drawn from a hypergeometric distribution with specified parameters, <i>good</i> (ways to make a good selection),
+                                           <i>bad</i> (ways to make a bad selection), and <i>samples</i> (number of items sampled, which is less than or equal to <i>good + bad</i>). */
+        randomHypergeometric(good: number, bad: number, samples: number): number;
+        /** Compute the histogram of a dataset.  Range can be false or [min(x), max(x)]. If density is true then normalize the counts by dividing by sum(counts). Returns [number[],number[]], the first array contains start value of bins, the second array countains the counts. */
+        histogram(data: number[], bins?: number, range?: boolean | [number, number], density?: boolean, cumulative?: boolean): [number[], number[]];
+        /** Determines the absolute value of every given value.  */
+        abs(arr: number[] | number): Number[] | Number;
+    }
     export class TSXBoard {
         board: TSXBoard | null;
         private printLineNumber;
@@ -965,17 +1015,37 @@ declare namespace TXG {
         MatrixMath: MatrixJSXMathIface;
         GeometryMath: GeometryJSXMathIface;
         NumericsMath: NumericsJSXMathIface;
+        StatisticsMath: StatisticsJSXMathIface;
         constructor();
         /** create a chart */
         chart(f: Number[], attributes?: ChartAttributes): Chart;
-        /** This element is used to provide a constructor for a circle. */
+        /** A circle can be constructed by providing a center and a point on the circle,
+                                or a center and a radius (given as a number, function, line, or circle).
+                                If the radius is a negative value, its absolute values is taken.
+
+       *```js
+                       TSX.circle(P1,1])
+                       TSX.circle([0,0],[1,0])
+
+       *```
+
+       Also see: Circumcircle is a circle described by three points.  An Arc is a segment of a circle. */
         circle(centerPoint: Point | point, remotePoint: Point | point | Line | line | Number | Function | Circle, attributes?: CircleAttributes): Circle;
         /** This element is used to provide a constructor for curve, which is just a wrapper for element Curve. A curve is a mapping from R to R^2. t mapsto (x(t),y(t)). The graph is drawn for t in the interval [a,b]. The following types of curves can be plotted: parametric curves: t mapsto (x(t),y(t)), where x() and y() are univariate functions. polar curves: curves commonly written with polar equations like spirals and cardioids. data plots: plot line segments through a given list of coordinates. */
         curve(xArray: Number[] | Function, yArray: Number[] | Function, left?: NumberFunction, right?: NumberFunction, attributes?: CurveAttributes): Curve;
         /** Array of Points */
         group(pointArray: Point[], attributes?: GroupAttributes): Group;
-        /** Displays an image. */
-        image(url: String, lowerLeft: point, widthHeight: [Number, Number], attributes?: ImageAttributes): Image;
+        /** Display an image.  The first element is the location URL of the image.
+                       A collection of space icons is provided, press CTRL+I to show the list.
+                       The second parameter sets the lower left point of the image, you may need to shift the image location to center it.
+
+       *```js
+                       TSX.image('../icons/sun.png',[0,0])
+                       let P1 = TSX.point([3,2],{opacity:0})
+                       TSX.image(p1,[3-offest,3-offset])
+
+       *``` */
+        image(url: String | spaceIcon, lowerLeft: point, widthHeight?: [Number, Number], attributes?: ImageAttributes): Image;
         /** An implicit curve is a plane curve defined by an implicit equation relating two coordinate variables, commonly x and y. For example, the unit circle is defined by the implicit equation x2 + y2 = 1. In general, every implicit curve is defined by an equation of the form f(x, y) = 0 for some function f of two variables. */
         implicitcurve(f: Function | String, attributes?: ImplicitcurveAttributes): Implicitcurve;
         implicitcurve(f: Function | String, dfx: Function | String, dfy: Function | String, attributes?: ImplicitcurveAttributes): Implicitcurve;
@@ -983,21 +1053,21 @@ declare namespace TXG {
                                        By setting additional properties a line can be used as an arrow and/or axis.
 
        *```js
-                                       TSX.line([3,2],[3,3], {strokeColor:'blue',strokeWidth:5, strokeOpacity:.5})
+                                       TSX.line([3,2],[3,3],{strokeColor:'blue',strokeWidth:5,strokeOpacity:.5})
                                        let P1 = TSX.point([3,2])
                                        TSX.line(p1,[3,3])
 
        *```
 
         also create lines with Segment, Arrow, Transform.Point, Circumcenter, Glider, and others.
-                                       Look at .conic.line() for a line defined by the equation 'az +bx +cy = 0'
+                                        Look at .conic.line() for a line defined by the equation 'az +bx +cy = 0'
                            */
         line(p1: Point | point, p2: Point | point, attributes?: LineAttributes): Line;
         /** Create a point. If any parent elements are functions or the attribute 'fixed' is true then point will be constrained.
 
        *```js
-                    TSX.point([3,2], {strokeColor:'blue',strokeWidth:5, strokeOpacity:.5})
-                    TSX.point([3,3]), {fixed:true, showInfobox:true}
+                    TSX.point([3,2],{strokeColor:'blue',strokeWidth:5,strokeOpacity:.5})
+                    TSX.point([3,3]),{fixed:true, showInfobox:true}
                     TSX.point([()=>p1.X()+2,()=>p1.Y()+2]) // 2 up 2 right from p1
                     TSX.point([1,2,2])  // three axis definition - [z,x,y]
 
@@ -1006,7 +1076,7 @@ declare namespace TXG {
         also create points with Intersection, Midpoint, Transform.Point, Circumcenter, Glider, and others. */
         point(position: NumberFunction[], attributes?: PointAttributes): Point;
         /** Array of Points */
-        polygon(pointArray: Pointpoint[], attributes?: PolygonAttributes): Polygon;
+        polygon(pointArray: Point[] | point[], attributes?: PolygonAttributes): Polygon;
         /** Display a message
 
        *```js
@@ -1083,8 +1153,10 @@ declare namespace TXG {
         ellipse(p1: Point | point, p2: Point | point, radius: Number | Function, attributes?: EllipseAttributes): Ellipse;
         /** This element is used to provide a constructor for functiongraph, which is just a wrapper for element Curve with JXG.Curve#X() set to x. The graph is drawn for x in the interval [a,b]. */
         functiongraph(funct: Function, leftBorder?: Number, rightBorder?: Number, attributes?: FunctiongraphAttributes): Functiongraph;
-        /** This element is used to provide a constructor for a glider point. */
-        glider(hostElement: GeometryElement, initial?: number[], attributes?: GliderAttributes): Glider;
+        /** A GeometryElement like Line, Circle, or Curve, and optionally a starting point defined by [X,Y] */
+        glider(hostElement: GeometryElement, attributes?: GliderAttributes): Glider;
+        glider(hostElement: GeometryElement, initial: number[], attributes?: GliderAttributes): Glider;
+        glider(attributes?: GliderAttributes): Glider;
         /** Creates a grid to support the user with element placement or to improve determination of position. */
         grid(axis1: Axis, axis2: Axis, attributes?: GridAttributes): Grid;
         grid(attributes?: GridAttributes): Grid;
@@ -1143,7 +1215,7 @@ declare namespace TXG {
         /** This element is used to provide a constructor for the pole point of a line with respect to a conic or a circle. */
         polePoint(conic: Conic | Circle, line: Line, attributes?: PolePointAttributes): PolePoint;
         /** Array of Points */
-        polygonalChain(pointArray: Pointpoint[], attributes?: PolygonalChainAttributes): PolygonalChain;
+        polygonalChain(pointArray: Point[] | point[], attributes?: PolygonalChainAttributes): PolygonalChain;
         /** This element is used to provide a constructor for the radical axis with respect to two circles with distinct centers. The angular bisector of the polar lines of the circle centers with respect to the other circle is always the radical axis. The radical axis passes through the intersection points when the circles intersect. When a circle about the midpoint of circle centers, passing through the circle centers, intersects the circles, the polar lines pass through those intersection points. */
         radicalAxis(circle1: Circle, circle2: Circle, attributes?: RadicalAxisAttributes): RadicalAxis;
         /** A reflex angle is the neither acute nor obtuse instance of an angle. It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
@@ -1173,8 +1245,9 @@ declare namespace TXG {
         slopetriangle(line: Line, point: Point, attributes?: SlopetriangleAttributes): Slopetriangle;
         /** This element is used to provide a constructor for (natural) cubic spline curves. Create a dynamic spline interpolated curve given by sample points p_1 to p_n. */
         spline(points: Point[] | number[][], attributes?: SplineAttributes): Curve;
-        /** With the element tangent the slope of a line, circle, or curve in a certain point can be visualized. A tangent is always constructed by a glider on a line, circle, or curve and describes the tangent in the glider point on that line, circle, or curve. */
-        tangent(glider: Glider, attributes?: TangentAttributes): Tangent;
+        /** A tangent is always constructed by a point on a line, circle, or curve and describes the tangent in the point on that line, circle, or curve. */
+        tangent(point: Glider, attributes?: TangentAttributes): Tangent;
+        tangent(point: Point, curve: Circle | Curve, attributes?: TangentAttributes): Tangent;
         /** A tape measure can be used to measure distances between points. */
         tapemeasure(P1: Point | point, P2: Point | point, attributes?: TapemeasureAttributes): Tapemeasure;
         /** This element is used to provide a constructor for trace curve (simple locus curve), which is realized as a special curve. */
@@ -1704,7 +1777,7 @@ declare namespace TXG {
         /** Attributes for the polygon border lines. */
         get borders(): Number[];
         /** Attributes for the polygon vertices. */
-        get vertices(): Number[];
+        get vertices(): VertexAttributes;
         /** Uses the boards renderer to update the polygon. */
         updateRenderer(): any;
     }
@@ -2022,7 +2095,7 @@ declare namespace TXG {
         /** Returns the current value of the integral. */
         Value(): Point;
     }
-    export class Intersection extends GeometryElement {
+    export class Intersection extends Point {
         constructor(className: string, params: any[], attrs: Object);
     }
     export class Label extends Text {
@@ -2215,6 +2288,8 @@ declare namespace TXG {
         parametricsurface3D(xFunction: Function, yFunction: Function, zFunction: Function, xRange: NumberFunction[], yRange: NumberFunction[], attributes?: Object): Curve3D;
         /**  */
         intersectioncircle3D(sphere1: Sphere3D, sphere2: Sphere3D, attributes?: Object): Circle3D;
+        /**  */
+        intersectionline3D(plane1: Plane3D, plane2: Plane3D, attributes?: Object): Line3D;
         /**  */
         animateAzimuth(): Object;
         /** Creates a new 3D element of type elementType. */
