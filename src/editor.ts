@@ -1,3 +1,6 @@
+import { HostMsg,writeMoodleLog } from './writeMoodleLog';
+
+
 /****  I had to add this to node_modules/babylonjs/babylon.module.d.ts
  * issue is latest version of typescript vs latest version of babylon
  *
@@ -15,8 +18,6 @@ declare var WebGLObject: {
 };
 
 */
-
-
 
 import * as monaco from "monaco-editor";
 // import * as BABYLON from 'babylonjs';
@@ -191,9 +192,6 @@ export class Editor {
         });
 
 
-        var console: Console;
-
-
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_baby_plus, "lib.baby.d.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es5, "lib.es5.d.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es6, "lib.es6.d.ts");
@@ -255,6 +253,16 @@ export class Editor {
             }
         });
         let safeTimeout: number;
+
+
+        //tbtb
+        monaco.editor.onDidCreateEditor(()=>{
+            console.log('%cMonaco editor created','color:white;background-color:red;')
+
+        })
+
+
+
         this.editor.onDidChangeModelContent(() => {
             if (safeTimeout) {
                 clearTimeout(safeTimeout);
@@ -361,10 +369,12 @@ export class Editor {
             // const line = this.editor.getPosition()!.lineNumber
             // const col = this.editor.getPosition()!.column;
 
-            // console.log(sourceCode)
-            // Log.writeMoodleLog({'datacode': 'LOG_EditorRun', data01: sourceCode, data02: line.toString(), data03: col.toString() })
 
             this.editorCode = output.outputFiles[0].text as string;
+
+            // TODO, get correct ID and textbook
+            // writeMoodleLog({'datacode': 'LOG_EditorRun', id:0, textbook:'', data05: sourceCode})
+
             this.runEditorCode(this.editorCode)      // and run the whole mess
         }
 

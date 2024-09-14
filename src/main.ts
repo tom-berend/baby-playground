@@ -10,6 +10,7 @@ import { OnClickSay } from "./onClickSay"
 import { TXG } from './tsxgraph'
 import { talk_to_moodle } from './moodle'
 import { dragElement } from './split'
+import { HostMsg } from './writeMoodleLog';
 
 // import { asciiMath, testAsciiMath } from './ASCIIMathML'
 
@@ -44,22 +45,6 @@ import { Buffer } from "buffer";
 // test moodle async
 async function test_talk_to_moodle() {
     await talk_to_moodle()
-}
-
-// a HostMsg is really just a log entry
-export interface HostMsg {
-    datacode: string;
-    id: number;              // moodleID
-    textbook: string;       // one day will have multiple textbooks running
-    paragraph?: string;
-    step?: string,
-    data01?: string;
-    data02?: string;
-    data03?: string;
-    data04?: string;
-    data05?: string;
-    data06?: string;
-
 }
 
 
@@ -202,16 +187,6 @@ export class Main {
                 },
 
 
-                hiddencode: (hidden64: string, decl64: string) => {
-
-                    let b = Buffer.from(hidden64, 'base64')
-                    main.hiddenCode = b.toString()
-                    b = Buffer.from(decl64, 'base64')
-                    main.hiddenDecl = b.toString()
-
-                    main.setupMonacoEditor(main.hiddenCode, main.hiddenDecl)
-                    // console.log('hidden code', this.hiddenCode)
-                },
 
                 logAnswerToQuestion: (paragraphUniq: string, textbook: string, bakery0: string, questionType: string, question: string) => {
 
@@ -383,8 +358,24 @@ export class Main {
                     return (true)  // whetherh we can go ahead
                 },
 
+                hiddencode: (hidden64: string, decl64: string) => {
+
+                    let b = Buffer.from(hidden64, 'base64')
+                    main.hiddenCode = b.toString()
+                    b = Buffer.from(decl64, 'base64')
+                    main.hiddenDecl = b.toString()
+
+                    
+                    main.setupMonacoEditor(main.hiddenCode, main.hiddenDecl)
+                    console.log('hidden code', main.hiddenCode)
+                    console.log('hidden decl', main.hiddenDecl)
+                },
+
 
                 copyToEditor(paragraph: string, textbook: string, code: string) {
+
+                    console.log('copytoEditor code:', code);
+
                     let codeString = window.atob(code)
                     writeMoodleLog({ 'datacode': 'Log_CopyToEditor', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: code })
 
@@ -423,7 +414,7 @@ export class Main {
                 },
 
                 //// these are the buttons on the Editor
-                runEditor(stepUniq: string, textbook: string) {
+                runEditor(stepUniq: string, textbook: string, shareKey: string = '') {
 
                     // write log with a callback, this is an async function
                     let blob = new Blob([Main.editor.editor.getValue()], { type: "text/plain" })
@@ -432,8 +423,10 @@ export class Main {
                     reader.onloadend = function() {
                         let result = reader.result
                         if (typeof result == 'string') {    // because might be ArrayBuffer
-                            let base64 = Buffer.from(result, 'utf8').toString('base64');
-                            writeMoodleLog({ 'datacode': 'LOG_RunCode', 'id': main.moodleID, 'textbook': textbook, 'data01': stepUniq, 'data02': base64 })
+                            let codebase64 = Buffer.from(result, 'utf8').toString('base64');
+                            let hiddencodebase64 = Buffer.from(Main.editor.hiddenCode, 'utf8').toString('base64');
+                            let hiddendeclbase64 = Buffer.from(Main.editor.hiddenDecl, 'utf8').toString('base64');
+                            writeMoodleLog({ 'datacode': 'LOG_RunCode', 'id': main.moodleID, 'textbook': textbook, 'data01': stepUniq, 'data02': shareKey, 'data05': codebase64, 'data06': hiddencodebase64, 'data07': hiddendeclbase64 })
                         }
                     }
 
@@ -452,8 +445,10 @@ export class Main {
                     */
 
                     try {
-                        Main.editor.transpileLog(main.hiddenCode)  // also runs
+                        // Main.editor.transpileLog(main.hiddenCode)  // also runs
                         Main.editor.transpile(main.hiddenCode)  // also runs
+                        // writeMoodleLog({ 'datacode': 'SHARE', 'id': main.moodleID, 'textbook': textbook, 'paragraph': '0', 'data05': main.hiddenCode })
+
                     } catch (e) {   // transpile error.  show it in an alert
                         alert(e);
                     }
@@ -608,52 +603,6 @@ export class Main {
     // }
 
 
-    static writeMoodleLog(payload: HostMsg) {
-
-        // console.log('in writeMoodleLog', payload)
-
-        // a bit of a hack.  sometimes we don't know the UNIQ who called us
-        // (for example, working in the editor and running code)
-        // but we want to be able to query the log for all records
-        // so we simply use the PREVIOUS UNIQ (usually that got us here)
-
-        if (payload.paragraph == undefined)
-            payload.paragraph = main.prevUniq
-        else
-            main.prevUniq = payload.paragraph
-
-
-
-        let JsonData = JSON.stringify(payload)
-        // console.log('JsonData:', JsonData)
-
-        /*
-        let xhr = new XMLHttpRequest();
-        // let formData = new FormData(); // Currently empty
-
-        xhr.open("POST", "ajax.php?payload="+JsonData, true);
-        //Send the proper header information along with the request
-        // xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        xhr.setRequestHeader("Content-type", "application/json");
-
-        xhr.send();  // should be JsonData
-    */
-
-        /////////////////////
-
-        // same using Beacon API   https://developer.mozilla.org/en-US/docs/Web/API/Beacon_API
-
-        // The Beacon API is used to send an asynchronous and non-blocking request to a web server.
-        // The request does not expect a response. The browser guarantees to initiate beacon requests
-        // before the page is unloaded and to run them to completion.
-
-        // The main use case for the Beacon API is to send analytics such as client-side events or session data to the server.
-
-        let base64 = Buffer.from(JsonData, 'utf8').toString('base64');
-        // console.log('base64', base64)
-        navigator.sendBeacon("ajax.php?payload=" + base64);
-    }
-
 
 
     setupMonacoEditor(hiddenCode: string, hiddenDecl: string) {
@@ -667,8 +616,6 @@ export class Main {
             Main.editor = new Editor(this.editorDiv, this.template, hiddenCode, hiddenDecl);  // static !!
             // console.log('%cSTARTING EDITOR', 'background-color:blue;color:white;', 'editorDiv', this.editorDiv, 'template', this.template, 'hiddenCode', hiddenCode, 'hiddenDecl', hiddenDecl)
 
-
-            // console.log('%c seems to have started', 'background-color:blue;color:white;')
 
             // this.game = undefined //new GameLauncher(800, 600);
             this.download = document.getElementById("download") as HTMLButtonElement;
