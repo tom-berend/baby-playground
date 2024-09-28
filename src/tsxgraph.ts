@@ -21,7 +21,7 @@
         //
         /////////////////////////////////////////////////////////////////////////////
 
-        //   Generated on September 1, 2024, 11:55 pm 
+        //   Generated on September 27, 2024, 7:37 pm 
 
 
 
@@ -66,16 +66,22 @@
   snapToGrid?: Boolean
  /** If some size of an element is controlled by a function, like the circle radius or segments of fixed length, this attribute controls what happens if the value is negative. By default, the absolute value is taken. If true, the maximum of 0 and the value is used. */
   nonnegativeOnly?: Boolean
- /** Is this element checked (only applies to checkboxes) */
-  checked?: Boolean
  /** Draw label for this Element? */
  drawLabels?: Boolean
+ /** Control the attribute ”checked” of the HTML checkbox. */
+  checked?: Boolean
  /** Size in pixels */
  size?: Number
  /** Tick face for major ticks of finite length.By default (face: '|') this is a straight line. Possible other values are ''. These faces are used in JXG.Hatch for hatch marking parallel lines. */
   face?: String
  /** Include the the zero line in the grid */
   drawZero?: Boolean
+ /** The stroke color of the given geometry element when the user moves the mouse over it. */
+  highlightStrokeColor?: String
+ /** Opacity for stroke color when the object is highlighted. */
+  highlightStrokeOpacity?: Number
+ /** Width of the element's stroke when the mouse is pointed over it. */
+  highlightStrokeWidth?: Number
  /** Controls if an element can get the focus with the tab key. tabindex corresponds to the HTML attribute of the same name. See descriptiona at MDN. The additional value ”null” completely disables focus of an element. The value will be ignored if keyboard control of the board is not enabled or the element is fixed or not visible. */
   tabindex?: Number
  /** Set display name  */
@@ -184,6 +190,9 @@
   recursionDepthHigh?: Number
  /** Number of points used for plotting triggered by move events in case (i.e. lower quality plotting but fast) Curve#doAdvancedPlot is true. */
   recursionDepthLow?: Number
+ }
+
+ interface BezierCurveAttributes extends CurveAttributes {
  }
 
  interface Curve3DAttributes extends CurveAttributes {
@@ -614,6 +623,9 @@
  interface GliderAttributes extends PointAttributes {
  }
 
+ interface Glider3DAttributes extends Point3DAttributes {
+ }
+
  interface GridAttributes extends CurveAttributes {
  /** Include the the zero line in the grid */
  drawZero?: Boolean
@@ -967,6 +979,8 @@
  zPlaneRearXAxis?: Object
  /** Attributes of the 3D y-axis on the 3D plane orthogonal to the z-axis at the ”rear” of the cube. */
  zPlaneRearYAxis?: Object
+ /** Specify the user handling of the bank angle. */
+ bank?: Object
  }
 
         type NumberFunction = Number|Function
@@ -1014,6 +1028,7 @@
             needTwoFingers?:Boolean
         }
 
+        
         // utility function for determining whether an object is a JSX object (or part of this wrapper)
         function isJSXAttribute(maybe:any):Boolean{
             return (typeof (maybe) == 'object' && !Array.isArray(maybe) && !('elValue' in maybe) && !('elType' in maybe))
@@ -1406,7 +1421,9 @@
  } 
 
  interface NumericsJSXMathIface {
- CardinalSpline(pointArray:Point[],tau:Function):Function[],
+ bezier(points:Point[]):[Function,Function,number,Function],
+ bspline(points:Point[],order:number):any[],
+ CardinalSpline(points:Point[],tau:number|Function):Function[],
  } 
 
  interface StatisticsJSXMathIface {
@@ -1811,7 +1828,9 @@
  } 
 
  this.NumericsMath = { 
- CardinalSpline(pointArray:Point[],tau:Function):Function[] { return (window as any).JXG.Math.Numerics.CardinalSpline(TSXGraph.dereference(pointArray),tau)  as Function[]} ,
+ bezier(points:Point[]):[Function,Function,number,Function] { return (window as any).JXG.Math.Numerics.bezier(TSXGraph.dereference(points))  as [Function,Function,number,Function]} ,
+ bspline(points:Point[],order:number):any[] { return (window as any).JXG.Math.Numerics.bspline(TSXGraph.dereference(points),order)  as any[]} ,
+ CardinalSpline(points:Point[],tau:number|Function):Function[] { return (window as any).JXG.Math.Numerics.CardinalSpline(TSXGraph.dereference(points),tau)  as Function[]} ,
  } 
 
  this.StatisticsMath = { 
@@ -1887,9 +1906,81 @@ circle(centerPoint:Point|point, remotePoint:Point|point|Line|line|Number|Functio
                             }
 }
 
+ /** Plot a set of points or a function from arrays X and Y */
+ curve(xArray:number[], yArray:number[],  attributes?:CurveAttributes):Curve 
+ curve(xArray:Function, yArray:Function,  attributes?:CurveAttributes):Curve 
+ curve(xArray:number[]|Function, yArray:number[]|Function, left:NumberFunction, right:NumberFunction,  attributes?:CurveAttributes):Curve 
 
- /** This element is used to provide a constructor for curve, which is just a wrapper for element Curve. A curve is a mapping from R to R^2. t mapsto (x(t),y(t)). The graph is drawn for t in the interval [a,b]. The following types of curves can be plotted: parametric curves: t mapsto (x(t),y(t)), where x() and y() are univariate functions. polar curves: curves commonly written with polar equations like spirals and cardioids. data plots: plot line segments through a given list of coordinates. */
-curve(xArray:Number[]|Function, yArray:Number[]|Function, left:NumberFunction=-5, right:NumberFunction=5, attributes: CurveAttributes ={} ):Curve{return new Curve('Curve', [xArray,yArray,left,right,], attributes)
+            // implementation of signature,  hidden from user
+            curve(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Curve {
+ let newObject: Curve = {} as Curve // just so it is initialized
+   let params = []
+   let attrs = {}
+   if (arguments.length == 1){
+      if(isJSXAttribute(a)){
+          attrs = TSXGraph.defaultAttributes(a)
+          params = TSXGraph.dereference([])
+      }else{
+          params = TSXGraph.dereference([a,])
+      }
+   }
+   if (arguments.length == 2){
+      if(isJSXAttribute(b)){
+          attrs = TSXGraph.defaultAttributes(b)
+          params = TSXGraph.dereference([a,])
+      }else{
+          params = TSXGraph.dereference([a,b,])
+      }
+   }
+   if (arguments.length == 3){
+      if(isJSXAttribute(c)){
+          attrs = TSXGraph.defaultAttributes(c)
+          params = TSXGraph.dereference([a,b,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,])
+      }
+   }
+   if (arguments.length == 4){
+      if(isJSXAttribute(d)){
+          attrs = TSXGraph.defaultAttributes(d)
+          params = TSXGraph.dereference([a,b,c,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,d,])
+      }
+   }
+   if (arguments.length == 5){
+      if(isJSXAttribute(e)){
+          attrs = TSXGraph.defaultAttributes(e)
+          params = TSXGraph.dereference([a,b,c,d,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,d,e,])
+      }
+   }
+   return new Curve('curve', params, TSXGraph.defaultAttributes(attrs)) // as Curve
+ }
+
+ /** A cubic bezier curve.  The input is 3k + 1 points; those at positions k mod 3 = 0 (eg: 0, 3, 6 are the data points, the two points between each data points are the control points.
+                
+*```js
+    let points: TXG.Point[] = []
+    points.push(TSX.point([-2, -1], { size: 4, color: 'blue', name: '0' }))
+
+    points.push(TSX.point([-2, -2.5], { name: '1' }))
+    points.push(TSX.point([-1, -2.5], { name: '2' }))
+
+    points.push(TSX.point([2, -2], { size: 4, color: 'blue', name: '3' }))
+
+    let curve = TSX.bezierCurve(points, { strokeColor: 'orange', strokeWidth: 5, fixed: false }); // Draggable curve
+
+    // 'BezierCurve()' is just a shorthand for the following two lines:
+    // let bz = TSX.NumericsMath.bezier(points)
+    // let curve = TSX.curve(bz[0], bz[1])
+                
+*```
+
+                 */
+bezierCurve(points:Point[], attributes: BezierCurveAttributes ={} ):Curve{
+  return new Curve('curve', (window as any).JXG.Math.Numerics.bezier(this.dereference(points)), TSXGraph.defaultAttributes(attributes));
 }
 
 
@@ -1911,7 +2002,7 @@ group(pointArray:Point[], attributes: GroupAttributes ={} ):Group{return new Gro
 image(url:String|spaceIcon, lowerLeft:point, widthHeight:[Number,Number]=[1,1], attributes: ImageAttributes ={} ):Image{return new Image('Image', [url,lowerLeft,widthHeight,], attributes)
 }
 
- /** An implicit curve is a plane curve defined by an implicit equation relating two coordinate variables, commonly x and y. For example, the unit circle is defined by the implicit equation x2 + y2 = 1. In general, every implicit curve is defined by an equation of the form f(x, y) = 0 for some function f of two variables. */
+ /** An implicit curve is a plane curve defined by an implicit equation relating two coordinate variables, commonly x and y. For example, the unit circle is defined by the implicit equation x2 + y2 = 1. In general, every implicit curve is defined by an equation of the form f(x, y) = 0 for some function f of two variables.  IMPLICIT means that the equation is not expressed as a solution for either x in terms of y or vice versa. */
  implicitcurve(f:Function|String,  attributes?:ImplicitcurveAttributes):Implicitcurve 
  implicitcurve(f:Function|String, dfx:Function|String, dfy:Function|String,  attributes?:ImplicitcurveAttributes):Implicitcurve 
 
@@ -2086,7 +2177,7 @@ arc(origin:Point|point, from:Point|point, to:Point|point, attributes: ArcAttribu
 arrow(p1:Point|point, p2:Point|point, attributes: ArrowAttributes ={} ):Arrow{return new Arrow('Arrow', [p1,p2,], attributes)
 }
 
- /** A line parallel to a given line, through a point. */
+ /** A line parallel to a given line (or two points), through a point. */
  parallel(line:Line|[Point,Point], point:Point|point,  attributes?:ParallelAttributes):Parallel 
  parallel(lineP1:Point|point, lineP2:Point|point, Point:Point|point,  attributes?:ParallelAttributes):Parallel 
 
@@ -2151,7 +2242,7 @@ bisectorlines(l1:Line, l2:Line, attributes: BisectorlinesAttributes ={} ):Bisect
 
 
  /** create a button */
-button(position:NumberFunction[], label:String, handler:Function, attributes: ButtonAttributes ={} ):Button{
+button(position:NumberFunction[], label:String|Function, handler:Function, attributes: ButtonAttributes ={} ):Button{
  (position as any).push(label,handler);
                         return new Button('Button', position,TSXGraph.defaultAttributes(attributes));
 }
@@ -2219,13 +2310,16 @@ ellipse(p1:Point|point, p2:Point|point, radius:Number|Function, attributes: Elli
 }
 
 
- /** This element is used to provide a constructor for functiongraph, which is just a wrapper for element Curve with JXG.Curve#X() set to x. The graph is drawn for x in the interval [a,b]. */
+ /** A wrapper for element Curve with X() set to x. The graph is drawn for x in the interval [a,b] default -10 to 10.
+```js
+let f = TSX.functiongraph((x: number) => 3 * Math.pow(x, 2))
+``` */
 functiongraph(funct:Function, leftBorder?:Number, rightBorder?:Number, attributes: FunctiongraphAttributes ={} ):Functiongraph{return new Functiongraph('Functiongraph', [funct,leftBorder,rightBorder,], attributes)
 }
 
  /** A GeometryElement like Line, Circle, or Curve, and optionally a starting point defined by [X,Y] */
  glider(hostElement:GeometryElement,  attributes?:GliderAttributes):Glider 
- glider(hostElement:GeometryElement, initial:number[],  attributes?:GliderAttributes):Glider 
+ glider(hostElement:GeometryElement, initialPosition:number[],  attributes?:GliderAttributes):Glider 
  glider( attributes?:GliderAttributes):Glider 
 
             // implementation of signature,  hidden from user
@@ -2417,7 +2511,7 @@ nonReflexAngle(point1:Point, point2:Point, point3:Point, attributes: NonReflexAn
 }
 
  /** A line through a given point on an element of type line, circle, curve, or turtle and orthogonal (at right angle) to that object. */
- normal(object:Line|Circle|Curve|Turtle, point:Point,  attributes?:NormalAttributes):Normal 
+ normal(object:Line|Circle|Curve, point:Point,  attributes?:NormalAttributes):Normal 
  normal(glider:Glider,  attributes?:NormalAttributes):Normal 
 
             // implementation of signature,  hidden from user
@@ -2467,23 +2561,93 @@ otherIntersection(element1:Line|Circle, element2:Line|Circle, firstIntersection:
 parabola(focalPoint:Point|point, line:Line|line, attributes: ParabolaAttributes ={} ):Parabola{return new Parabola('Parabola', [focalPoint,line,], attributes)
 }
 
+ /** A parallel point is given by three points, or a line and a point. Taking the Euclidean vector from the first to the second point, the parallel point is determined by adding that vector to the third point. The line determined by the first two points is parallel to the line determined by the third point and the constructed point. */
+ parallelpoint(line:Line|[Point,Point], point:Point|point,  attributes?:ParallelpointAttributes):Parallelpoint 
+ parallelpoint(P1:Point, P2:Point, P3:Point,  attributes?:ParallelpointAttributes):Parallelpoint 
 
- /** This element is used to provide a constructor for a segment. It's strictly spoken just a wrapper for element Line with Line#straightFirst and Line#straightLast properties set to false. If there is a third variable then the segment has a fixed length (which may be a function, too). */
-segment(P1:Point|point, P2:Point|point, attributes: SegmentAttributes ={} ):Segment{return new Segment('Segment', [P1,P2,], attributes)
-}
+            // implementation of signature,  hidden from user
+            parallelpoint(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Parallelpoint {
+ let newObject: Parallelpoint = {} as Parallelpoint // just so it is initialized
+   let params = []
+   let attrs = {}
+   if (arguments.length == 2){
+      if(isJSXAttribute(b)){
+          attrs = TSXGraph.defaultAttributes(b)
+          params = TSXGraph.dereference([a,])
+      }else{
+          params = TSXGraph.dereference([a,b,])
+      }
+   }
+   if (arguments.length == 3){
+      if(isJSXAttribute(c)){
+          attrs = TSXGraph.defaultAttributes(c)
+          params = TSXGraph.dereference([a,b,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,])
+      }
+   }
+   if (arguments.length == 4){
+      if(isJSXAttribute(d)){
+          attrs = TSXGraph.defaultAttributes(d)
+          params = TSXGraph.dereference([a,b,c,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,d,])
+      }
+   }
+   return new Parallelpoint('parallelpoint', params, TSXGraph.defaultAttributes(attrs)) // as Parallelpoint
+ }
+ /** Create a line segment between two points. If there is a third variable then the segment has a fixed length (which may be a function) determined by the absolute value of that number. */
+ segment(P1:Point|point, P2:Point|point,  attributes?:SegmentAttributes):Segment 
+ segment(P1:Point|point, P2:Point|point, length:number|Function,  attributes?:SegmentAttributes):Segment 
 
+            // implementation of signature,  hidden from user
+            segment(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Segment {
+ let newObject: Segment = {} as Segment // just so it is initialized
+   let params = []
+   let attrs = {}
+   if (arguments.length == 2){
+      if(isJSXAttribute(b)){
+          attrs = TSXGraph.defaultAttributes(b)
+          params = TSXGraph.dereference([a,])
+      }else{
+          params = TSXGraph.dereference([a,b,])
+      }
+   }
+   if (arguments.length == 3){
+      if(isJSXAttribute(c)){
+          attrs = TSXGraph.defaultAttributes(c)
+          params = TSXGraph.dereference([a,b,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,])
+      }
+   }
+   if (arguments.length == 4){
+      if(isJSXAttribute(d)){
+          attrs = TSXGraph.defaultAttributes(d)
+          params = TSXGraph.dereference([a,b,c,])
+      }else{
+          params = TSXGraph.dereference([a,b,c,d,])
+      }
+   }
+   return new Segment('segment', params, TSXGraph.defaultAttributes(attrs)) // as Segment
+ }
 
  /**  */
 parallelogram(p1:Point|point, p2:Point|point, p3:Point|point, attributes: ParallelogramAttributes ={} ):Parallelogram{return new Parallelogram('Parallelogram', [p1,p2,p3,], attributes)
 }
 
 
- /** This element is used to provide a constructor for a perpendicular. */
+ /** Create a line orthogonal to a given line and containing a given point. If you want a Perpendicular to a Curve, look at Normal(). */
 perpendicular(line:Line|line, point:Point|point, attributes: PerpendicularAttributes ={} ):Perpendicular{return new Perpendicular('Perpendicular', [line,point,], attributes)
 }
 
 
- /** This element is used to provide a constructor for a perpendicular segment. */
+ /** Create a point on a line where a perpendicular to a given point would intersect that line. */
+perpendicularPoint(line:Line|line, point:Point|point, attributes: PerpendicularPointAttributes ={} ):PerpendicularPoint{return new PerpendicularPoint('PerpendicularPoint', [line,point,], attributes)
+}
+
+
+ /** Create a segment orthogonal to a given line and containing a given point.  If you want a Perpendicular to a Curve, look at Normal(). */
 perpendicularSegment(line:Line|line, point:Point|point, attributes: PerpendicularSegmentAttributes ={} ):PerpendicularSegment{return new PerpendicularSegment('PerpendicularSegment', [line,point,], attributes)
 }
 
@@ -2508,6 +2672,11 @@ radicalAxis(circle1:Circle, circle2:Circle, attributes: RadicalAxisAttributes ={
 }
 
 
+ /** A reflected element (point, polygon, line or curve) from an object of the same type and a line of reflection. */
+reflection(object:Point|Line|Curve|Polygon, reflectLine:Line, attributes: ReflectionAttributes ={} ):Reflection{return new Reflection('Reflection', [object,reflectLine,], attributes)
+}
+
+
  /** A reflex angle is the neither acute nor obtuse instance of an angle. It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
 reflexAngle(point1:Point, point2:Point, point3:Point, attributes: ReflexAngleAttributes ={} ):ReflexAngle{return new ReflexAngle('ReflexAngle', [point1,point2,point3,], attributes)
 }
@@ -2515,6 +2684,11 @@ reflexAngle(point1:Point, point2:Point, point3:Point, attributes: ReflexAngleAtt
 
  /** Constructs a regular polygon. It needs two points which define the base line and the number of vertices. */
 regularPolygon(P1:Point|point, P2:Point|point, nVertices:Number, attributes: RegularPolygonAttributes ={} ):RegularPolygon{return new RegularPolygon('RegularPolygon', [P1,P2,nVertices,], attributes)
+}
+
+
+ /** A semicircle is a special arc defined by two points. The arc hits both points. */
+semicircle(P1:Point|point, P2:Point|point, attributes: SemicircleAttributes ={} ):Semicircle{return new Semicircle('Semicircle', [P1,P2,], attributes)
 }
 
 
@@ -2538,8 +2712,13 @@ regularPolygon(P1:Point|point, P2:Point|point, nVertices:Number, attributes: Reg
 slider(StartPoint:Point|point, EndPoint:Point|point, minimum_initial_maximum:[number,number,number], attributes: SliderAttributes ={} ):Slider{return new Slider('Slider', [StartPoint,EndPoint,minimum_initial_maximum,], attributes)
 }
 
+
+ /** Slope field. Plot a slope field given by a function f(x, y) returning a number. */
+slopefield(func:Function, xData:NumberFunction[], yData:NumberFunction[], attributes: SlopefieldAttributes ={} ):Slopefield{return new Slopefield('Slopefield', [func,xData,yData,], attributes)
+}
+
  /** A slope triangle is an imaginary triangle that helps you find the slope of a line or a line segment (use the method '.Value()' ). The hypotenuse of the triangle (the diagonal) is the line you are interested in finding the slope of. The two 'legs' of the triangle are the 'rise' and 'run' used in the slope formula. */
- slopetriangle(tangent:Tangent,  attributes?:SlopetriangleAttributes):Slopetriangle 
+ slopetriangle(tangent:Point | Tangent,  attributes?:SlopetriangleAttributes):Slopetriangle 
  slopetriangle(line:Line, point:Point,  attributes?:SlopetriangleAttributes):Slopetriangle 
 
             // implementation of signature,  hidden from user
@@ -2579,9 +2758,9 @@ spline(points:Point[]|number[][], attributes: SplineAttributes ={} ):Curve{
  return new Spline('spline', TSXGraph.dereference(points), TSXGraph.defaultAttributes(attributes))
 }
 
- /** A tangent is always constructed by a point on a line, circle, or curve and describes the tangent in the point on that line, circle, or curve. */
+ /** A tangent to a point on a line, circle, or curve.  Usually the point is a Glider. */
  tangent(point:Glider,  attributes?:TangentAttributes):Tangent 
- tangent(point:Point, curve:Circle|Curve,  attributes?:TangentAttributes):Tangent 
+ tangent(point:Point, curve:Line|Circle|Curve,  attributes?:TangentAttributes):Tangent 
 
             // implementation of signature,  hidden from user
             tangent(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Tangent {
@@ -2701,8 +2880,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  /** Adds ids of elements to the array this.parents. */
- addParents(): Object {
-  return (this.elValue as any).addParents() as Object
+ addParents(parents:GeometryElement[]): Object {
+  return (this.elValue as any).addParents(TSXGraph.dereference(parents)) as Object
 }
 
  /** Rotate texts or images by a given degree. */
@@ -2893,6 +3072,11 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
  /** Checks if locale is enabled in the attribute. */
  useLocale(): Boolean {
   return (this.elValue as any).useLocale() as Boolean
+}
+
+ /**  */
+ on(event:string,handler:Function): any {
+  return (this.elValue as any).on(event,handler) as any
 }
 }
 
@@ -3368,6 +3552,12 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 }
 
+ export class BezierCurve extends Curve {
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
+}
+}
+
  export class Curve3D extends Curve {
  constructor(className:string, params:any[], attrs: Object){
    super(className, params, attrs)
@@ -3518,7 +3708,7 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 
  /** Adds ids of elements to the array this.parents. */
  addParents(parents:GeometryElement[]): Object {
-  return (this.elValue as any).addParents(parents) as Object
+  return (this.elValue as any).addParents(TSXGraph.dereference(parents)) as Object
 }
 
  /** Adds an Point to this group. */
@@ -3773,8 +3963,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  /**  */
- public get direction():Number[]|Function {
-  return (this.elValue as any).direction as Number[]|Function
+ public get direction():number[]|Function {
+  return (this.elValue as any).direction as number[]|Function
 }
 
  /**  */
@@ -3809,13 +3999,13 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  /**  */
- public get direction1():Number[]|Function {
-  return (this.elValue as any).direction1 as Number[]|Function
+ public get direction1():number[]|Function {
+  return (this.elValue as any).direction1 as number[]|Function
 }
 
  /**  */
- public get direction2():Number[]|Function {
-  return (this.elValue as any).direction2 as Number[]|Function
+ public get direction2():number[]|Function {
+  return (this.elValue as any).direction2 as number[]|Function
 }
 
  /**  */
@@ -3864,8 +4054,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
   return (this.elValue as any).coords() as Number[]
 }
 
- /**  */
- distance(toPoint:Point|point): number {
+ /** Calculates Euclidean distance for two Points, eg:  p1.Dist(p2) */
+ Dist(toPoint:Point|point): number {
   return (this.elValue as any).Dist(TSXGraph.dereference(toPoint)) as number
 }
 
@@ -3892,6 +4082,19 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
  /**  */
  Z(): number {
   return (this.elValue as any).Z() as number
+}
+
+ /** Moves an element towards coordinates, optionally tweening over time.  Time is in ms.  WATCH OUT, there
+                        is no AWAIT for the tween to finish, a second moveTo() starts immediately. Thats GOOD if you
+                        want to move two different points at the same time, BAD if you want to move the same point repeatedly.  EG:
+                        
+```js 
+
+P.moveTo([A.X(), A.Y()], 5000)
+
+``` */
+ moveTo(p:number[],time:number=0): any {
+  return (this.elValue as any).moveTo(TSXGraph.dereference(p),time) as any
 }
                     /** Point location in vector form [n,n] */
                     XY(): [number,number] {
@@ -4369,8 +4572,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  /** Set an angle to a prescribed value given in radians. */
- setAngle(): Object {
-  return (this.elValue as any).setAngle() as Object
+ setAngle(angle:number|Function): Object {
+  return (this.elValue as any).setAngle(angle) as Object
 }
 
  /** Returns the value of the angle. */
@@ -4459,6 +4662,25 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
  export class Button extends Text {
  constructor(className:string, params:any[], attrs: Object){
    super(className, params, attrs)
+}
+
+ /**  */
+ public get rendNodeButton():HTMLButtonElement {
+  return (this.elValue as any).rendNodeButton as HTMLButtonElement
+}
+
+ /** Add an event to trigger when button is pressed.
+```js
+    let isLeftRight = true;
+    let buttonMove = TSX.button([-2, 4], 'initial',
+        // use the button() codeblock to change the text and control a flag
+        () => { isLeftRight = !isLeftRight;
+             buttonMove.rendNodeButton.innerHTML = isLeftRight ? 'left' : 'right' })
+    // use onClick() to add actions to the button
+    buttonMove.onClick(() => {isLeftRight ? P.moveTo(up, 1000) : P.moveTo(dn, 1000)})
+``` */
+ onClick(action:Function): void {
+  (window as any).JXG.addEvent((this.elValue as any).rendNodeButton,`click`,action) as void
 }
 }
 
@@ -4581,6 +4803,12 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
  /** Animate the point. */
  startAnimation(direction:Number,stepCount:Number,delayMSec:Number): void {
   return (this.elValue as any).startAnimation(direction,stepCount,delayMSec) as void
+}
+}
+
+ export class Glider3D extends Point3D {
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
@@ -5047,6 +5275,11 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
  /** In 3D space, a circle consists of all points on a given plane with a given distance from a given point. The given point is called the center, and the given distance is called the radius. A circle can be constructed by providing a center, a normal vector, and a radius (given as a number or function). */
  circle3D(point:Point3D,normal:number[],radius:number,attributes:Object={}): Circle3D {
   return (this.elValue as any).create("circle3d",TSXGraph.dereference([point,normal,radius]),attributes) as Circle3D
+}
+
+ /** Glider3D is an alias for JSXGraph's Point3d(). */
+ glider3D(element:Curve3D, initial:number[]=[0,0,0],attributes:Object={}): Point3D {
+  return (this.elValue as any).create("point3d",[...initial,TSXGraph.dereference(element)],attributes) as Point3D
 }
 
  /** Create a 3D plane object defined by a point and two directions, and extending negative and positive distanced in those directions by a range.  Remember to set visible:true.

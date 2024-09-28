@@ -57,6 +57,7 @@ export class Main {
     prevUniq = ''        // best guess, in case we don't have one for a log record
     hiddenCode = ''      // prefix to code from the editor
     hiddenDecl = ''      // TS decl for hidden code
+    initVisibleCode = ''        // initial code
 
 
     editorDiv: HTMLDivElement
@@ -71,7 +72,7 @@ export class Main {
     command: HTMLButtonElement
     // fullscreen: HTMLButtonElement
 
-    template = "// for information about this editor visit https://microsoft.github.io/monaco-editor/"  // the code that appears first time
+    template = "// a playground for TSXGraph, the TypeScript wrapper for JSXGraph.   https://jsxgraph.uni-bayreuth.de/wp/index.html"  // the code that appears first time
 
     static onClickSay: OnClickSay      // we'll put an instance here
 
@@ -365,12 +366,37 @@ export class Main {
                     b = Buffer.from(decl64, 'base64')
                     main.hiddenDecl = b.toString()
 
-                    
+
                     main.setupMonacoEditor(main.hiddenCode, main.hiddenDecl)
                     console.log('hidden code', main.hiddenCode)
                     console.log('hidden decl', main.hiddenDecl)
                 },
 
+
+                // this combines 'hiddencode' and 'copyToEditor' for the playground
+                setupEditorWithCode: (hidden64: string, decl64: string, visible64: string) => {
+
+                    let b = Buffer.from(visible64, 'base64')
+                    main.initVisibleCode = b.toString()
+                    b = Buffer.from(hidden64, 'base64')
+                    main.hiddenCode = b.toString()
+                    b = Buffer.from(decl64, 'base64')
+                    main.hiddenDecl = b.toString()
+
+
+                    main.setupMonacoEditor(main.hiddenCode, main.hiddenDecl, main.initVisibleCode)
+                    // Main.editor.editor.setValue(main.initVisibleCode)
+
+                    //TODO:  write the hidden and visible code AFTER initialization
+
+                    // Main.editor.editor.onDidChangeModelContent((editor) => {
+                    // }, '');
+
+
+                    console.log('hidden code', main.hiddenCode)
+                    console.log('hidden decl', main.hiddenDecl)
+                    console.log('visible code', main.initVisibleCode)
+                },
 
                 copyToEditor(paragraph: string, textbook: string, code: string) {
 
@@ -605,7 +631,7 @@ export class Main {
 
 
 
-    setupMonacoEditor(hiddenCode: string, hiddenDecl: string) {
+    setupMonacoEditor(hiddenCode: string, hiddenDecl: string, visibleCode = '') {
         // monaco.editor.createModel(lib_baby, 'typescript', monaco.Uri.parse(babyUri));
 
         this.editorDiv = document.getElementById("editor") as HTMLDivElement
@@ -613,7 +639,7 @@ export class Main {
         if (this.editorDiv) {  // if page has an editor div
             // console.log('%cSTARTING EDITOR', 'background-color:blue;color:white;')
 
-            Main.editor = new Editor(this.editorDiv, this.template, hiddenCode, hiddenDecl);  // static !!
+            Main.editor = new Editor(this.editorDiv, this.template, hiddenCode, hiddenDecl, visibleCode);  // static !!
             // console.log('%cSTARTING EDITOR', 'background-color:blue;color:white;', 'editorDiv', this.editorDiv, 'template', this.template, 'hiddenCode', hiddenCode, 'hiddenDecl', hiddenDecl)
 
 

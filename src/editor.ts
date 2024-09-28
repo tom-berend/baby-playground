@@ -1,4 +1,4 @@
-import { HostMsg,writeMoodleLog } from './writeMoodleLog';
+import { HostMsg, writeMoodleLog } from './writeMoodleLog';
 
 
 /****  I had to add this to node_modules/babylonjs/babylon.module.d.ts
@@ -28,12 +28,13 @@ import lib_es5 from "./extraLibs/lib.es5.d.ts.txt";
 import lib_es6 from "./extraLibs/lib.es6.d.ts.txt";  // not sure why i need both but parseInt() fails without es5
 // import lib_baby from "./extraLibs/baby.d.ts.txt";
 // import lib_dom_mini from "./extraLibs/lib.dom_mini.d.ts.txt";
-import lib_dom from "./extraLibs/lib.dom.d.ts.txt";
-import lib_promise from "./extraLibs/lib.es2015.promise.d.ts.txt";
+// import lib_dom from "./extraLibs/lib.dom.d.ts.txt";
+// import lib_dom_iterable from "./extraLibs/dom.iterable.d.ts.txt";
 
 import lib_es2015_collection from "./extraLibs/lib.es2015.collection.d.ts.txt"
 import lib_es2015_core from "./extraLibs/lib.es2015.core.d.ts.txt"
 import lib_es2015_promise from "./extraLibs/lib.es2015.promise.d.ts.txt"
+import lib_es2015_iterable from "./extraLibs/lib.es2015.iterable.d.ts.txt"
 import lib_es2016_array_include from "./extraLibs/lib.es2016.array.include.d.ts.txt"
 import lib_es2017_string from "./extraLibs/lib.es2017.string.d.ts.txt"
 import lib_es2017_typedarrays from "./extraLibs/lib.es2017.typedarrays.d.ts.txt"
@@ -44,7 +45,7 @@ import lib_es2021_string from "./extraLibs/lib.es2021.string.d.ts.txt"
 import lib_es2022_array from "./extraLibs/lib.es2022.array.d.ts.txt"
 import lib_es2023_array from "./extraLibs/lib.es2023.array.d.ts.txt"
 
-import babylonjs from "./extraLibs/babylonjs.d.ts.txt"
+// import babylonjs from "./extraLibs/babylonjs.d.ts.txt"
 
 import lib_es2099 from "./extraLibs/lib.es2099.d.ts.txt"
 
@@ -121,16 +122,15 @@ export class Editor {
     safeDelay: number
     hiddenCode: string
     hiddenDecl: string
+    visibleCode: string
 
-    systemDeclTS = ''     // hidden stuff that goes into all editors
-    systemDeclJS = ''   // same hidden stuff in JS
 
     // prefixDecl = ''     // hidden decl for TS for THIS instance of the editor
     // prefixCode = ''     // hidden code for THIS instance of the editor
 
     editorCode = ''
 
-    constructor(el: HTMLElement, initFile: string, hiddenCode: string = '', hiddenDecl: string = '') {
+    constructor(el: HTMLElement, initFile: string, hiddenCode: string = '', hiddenDecl: string = '', visibleCode = '') {
         // return;
         this.el = el
         this.initFile = initFile
@@ -138,13 +138,17 @@ export class Editor {
         this.safeDelay = 5000
         this.hiddenCode = hiddenCode
         this.hiddenDecl = hiddenDecl
+        this.visibleCode = visibleCode
 
 
         monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
             allowNonTsExtensions: true,
             inlineSourceMap: true,
             inlineSources: true,
-            noLib: true,
+
+            // noLib: true,
+            lib: ["dom.iterable"],    // for some reason, dom.iterable is required for destructuring    [x,y] = [1,2]
+
             sourceMap: false,
             strict: false,
             alwaysStrict: false,
@@ -171,7 +175,7 @@ export class Editor {
         });
 
         monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-            target: monaco.languages.typescript.ScriptTarget.ESNext,
+            target: monaco.languages.typescript.ScriptTarget.ES2020,
             noLib: true,                        // don't bring DOM into intellisense
             strictNullChecks: true,
         });
@@ -196,11 +200,15 @@ export class Editor {
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es5, "lib.es5.d.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es6, "lib.es6.d.ts");
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom_mini, "lib.dom_mini.d.ts");
-        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom, "lib.dom.d.ts");
-        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_promise, "lib.es2015.promise.d.ts");
+        // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom, "lib.dom.d.ts");
+        // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom_iterable, "lib.dom.iterable.d.ts");
+
+        // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_promise, "lib.es2015.promise.d.ts");
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_collection)
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_core)
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_promise)
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_iterable)
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2016_array_include)
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2017_string)
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2017_typedarrays)
@@ -211,7 +219,7 @@ export class Editor {
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2022_array)
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2023_array)
 
-        monaco.languages.typescript.typescriptDefaults.addExtraLib(babylonjs)
+        // monaco.languages.typescript.typescriptDefaults.addExtraLib(babylonjs)
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2099)      // stuff that Typescript hasn't provided
 
@@ -226,20 +234,9 @@ export class Editor {
         // let TSX = TXG.TSXGraph.freeBoard(undefined)  // just to make sure webpack keeps it
 
 
-        // TYPESCRIPT preloaded into editor
-        this.systemDeclTS =
-            ``
-            + this.hiddenDecl;
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(this.hiddenDecl)
 
-        //const TSX: TXG.TSXBoard;        // might not ever get used\r\n`
-
-        // must be JAVASCRIPT, not TYPESCRIPT
-        this.systemDeclJS = this.hiddenCode;
-
-        // console.log('%csystemDeclJS', 'color:red;', this.systemDeclJS)
-        // console.log('%csystemDeclTS','color:red;',this.systemDeclTS)
-
-        monaco.languages.typescript.typescriptDefaults.addExtraLib(this.systemDeclTS)
+        console.log('value of this.visibleCode:', this.visibleCode)
 
         this.editor = monaco.editor.create(this.el, {
             automaticLayout: true,
@@ -247,20 +244,15 @@ export class Editor {
             // language: "javascript",
             scrollBeyondLastLine: true,
 
-            value: window.localStorage.getItem(this.storageKey) || this.initFile,
+            value: (this.visibleCode == '')
+                ? window.localStorage.getItem(this.storageKey) || this.initFile
+                : this.visibleCode,
+
             minimap: {
                 enabled: false
             }
         });
         let safeTimeout: number;
-
-
-        //tbtb
-        monaco.editor.onDidCreateEditor(()=>{
-            console.log('%cMonaco editor created','color:white;background-color:red;')
-
-        })
-
 
 
         this.editor.onDidChangeModelContent(() => {
@@ -319,18 +311,12 @@ export class Editor {
 
         // console.log('transpile()\n', hiddenCode)
 
-        // console.log('%csystemDeclJS', 'color:red;', this.systemDeclJS)
-        // console.log('%csystemDeclTS', 'color:red;', this.systemDeclTS)
-
     }
 
 
     async transpile(hiddenCode: string) {
 
         // console.log('transpile()\n', hiddenCode)
-
-        // console.log('%csystemDeclJS', 'color:red;', this.systemDeclJS)
-        // console.log('%csystemDeclTS', 'color:red;', this.systemDeclTS)
 
 
         // const args = names.map((key) => scope[key]);

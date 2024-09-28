@@ -19,7 +19,7 @@
 //    DEALINGS IN THE SOFTWARE.
 //
 /////////////////////////////////////////////////////////////////////////////
-//   Generated on September 1, 2024, 11:55 pm 
+//   Generated on September 27, 2024, 7:37 pm 
 export var TXG;
 (function (TXG) {
     // utility function for determining whether an object is a JSX object (or part of this wrapper)
@@ -408,7 +408,9 @@ export var TXG;
                 windingNumber() { return window.JXG.Math.Geometry.windingNumber(); },
             };
             this.NumericsMath = {
-                CardinalSpline(pointArray, tau) { return window.JXG.Math.Numerics.CardinalSpline(TSXGraph.dereference(pointArray), tau); },
+                bezier(points) { return window.JXG.Math.Numerics.bezier(TSXGraph.dereference(points)); },
+                bspline(points, order) { return window.JXG.Math.Numerics.bspline(TSXGraph.dereference(points), order); },
+                CardinalSpline(points, tau) { return window.JXG.Math.Numerics.CardinalSpline(TSXGraph.dereference(points), tau); },
             };
             this.StatisticsMath = {
                 /** Generate value of a standard normal random variable with given mean and standard deviation.
@@ -480,9 +482,80 @@ export var TXG;
                 return new Circle(`circle`, TSXGraph.dereference([centerPoint, remotePoint]), TSXGraph.defaultAttributes(attributes));
             }
         }
-        /** This element is used to provide a constructor for curve, which is just a wrapper for element Curve. A curve is a mapping from R to R^2. t mapsto (x(t),y(t)). The graph is drawn for t in the interval [a,b]. The following types of curves can be plotted: parametric curves: t mapsto (x(t),y(t)), where x() and y() are univariate functions. polar curves: curves commonly written with polar equations like spirals and cardioids. data plots: plot line segments through a given list of coordinates. */
-        curve(xArray, yArray, left = -5, right = 5, attributes = {}) {
-            return new Curve('Curve', [xArray, yArray, left, right,], attributes);
+        // implementation of signature,  hidden from user
+        curve(a, b, c, d, e, f, g, h, i) {
+            let newObject = {}; // just so it is initialized
+            let params = [];
+            let attrs = {};
+            if (arguments.length == 1) {
+                if (isJSXAttribute(a)) {
+                    attrs = TSXGraph.defaultAttributes(a);
+                    params = TSXGraph.dereference([]);
+                }
+                else {
+                    params = TSXGraph.dereference([a,]);
+                }
+            }
+            if (arguments.length == 2) {
+                if (isJSXAttribute(b)) {
+                    attrs = TSXGraph.defaultAttributes(b);
+                    params = TSXGraph.dereference([a,]);
+                }
+                else {
+                    params = TSXGraph.dereference([a, b,]);
+                }
+            }
+            if (arguments.length == 3) {
+                if (isJSXAttribute(c)) {
+                    attrs = TSXGraph.defaultAttributes(c);
+                    params = TSXGraph.dereference([a, b,]);
+                }
+                else {
+                    params = TSXGraph.dereference([a, b, c,]);
+                }
+            }
+            if (arguments.length == 4) {
+                if (isJSXAttribute(d)) {
+                    attrs = TSXGraph.defaultAttributes(d);
+                    params = TSXGraph.dereference([a, b, c,]);
+                }
+                else {
+                    params = TSXGraph.dereference([a, b, c, d,]);
+                }
+            }
+            if (arguments.length == 5) {
+                if (isJSXAttribute(e)) {
+                    attrs = TSXGraph.defaultAttributes(e);
+                    params = TSXGraph.dereference([a, b, c, d,]);
+                }
+                else {
+                    params = TSXGraph.dereference([a, b, c, d, e,]);
+                }
+            }
+            return new Curve('curve', params, TSXGraph.defaultAttributes(attrs)); // as Curve
+        }
+        /** A cubic bezier curve.  The input is 3k + 1 points; those at positions k mod 3 = 0 (eg: 0, 3, 6 are the data points, the two points between each data points are the control points.
+                       
+       *```js
+           let points: TXG.Point[] = []
+           points.push(TSX.point([-2, -1], { size: 4, color: 'blue', name: '0' }))
+       
+           points.push(TSX.point([-2, -2.5], { name: '1' }))
+           points.push(TSX.point([-1, -2.5], { name: '2' }))
+       
+           points.push(TSX.point([2, -2], { size: 4, color: 'blue', name: '3' }))
+       
+           let curve = TSX.bezierCurve(points, { strokeColor: 'orange', strokeWidth: 5, fixed: false }); // Draggable curve
+       
+           // 'BezierCurve()' is just a shorthand for the following two lines:
+           // let bz = TSX.NumericsMath.bezier(points)
+           // let curve = TSX.curve(bz[0], bz[1])
+                       
+       *```
+       
+                        */
+        bezierCurve(points, attributes = {}) {
+            return new Curve('curve', window.JXG.Math.Numerics.bezier(this.dereference(points)), TSXGraph.defaultAttributes(attributes));
         }
         /** Array of Points */
         group(pointArray, attributes = {}) {
@@ -768,7 +841,10 @@ export var TXG;
         ellipse(p1, p2, radius, attributes = {}) {
             return new Ellipse('Ellipse', [p1, p2, radius,], attributes);
         }
-        /** This element is used to provide a constructor for functiongraph, which is just a wrapper for element Curve with JXG.Curve#X() set to x. The graph is drawn for x in the interval [a,b]. */
+        /** A wrapper for element Curve with X() set to x. The graph is drawn for x in the interval [a,b] default -10 to 10.
+       ```js
+       let f = TSX.functiongraph((x: number) => 3 * Math.pow(x, 2))
+       ``` */
         functiongraph(funct, leftBorder, rightBorder, attributes = {}) {
             return new Functiongraph('Functiongraph', [funct, leftBorder, rightBorder,], attributes);
         }
@@ -991,19 +1067,87 @@ export var TXG;
         parabola(focalPoint, line, attributes = {}) {
             return new Parabola('Parabola', [focalPoint, line,], attributes);
         }
-        /** This element is used to provide a constructor for a segment. It's strictly spoken just a wrapper for element Line with Line#straightFirst and Line#straightLast properties set to false. If there is a third variable then the segment has a fixed length (which may be a function, too). */
-        segment(P1, P2, attributes = {}) {
-            return new Segment('Segment', [P1, P2,], attributes);
+        // implementation of signature,  hidden from user
+        parallelpoint(a, b, c, d, e, f, g, h, i) {
+            let newObject = {}; // just so it is initialized
+            let params = [];
+            let attrs = {};
+            if (arguments.length == 2) {
+                if (isJSXAttribute(b)) {
+                    attrs = TSXGraph.defaultAttributes(b);
+                    params = TSXGraph.dereference([a,]);
+                }
+                else {
+                    params = TSXGraph.dereference([a, b,]);
+                }
+            }
+            if (arguments.length == 3) {
+                if (isJSXAttribute(c)) {
+                    attrs = TSXGraph.defaultAttributes(c);
+                    params = TSXGraph.dereference([a, b,]);
+                }
+                else {
+                    params = TSXGraph.dereference([a, b, c,]);
+                }
+            }
+            if (arguments.length == 4) {
+                if (isJSXAttribute(d)) {
+                    attrs = TSXGraph.defaultAttributes(d);
+                    params = TSXGraph.dereference([a, b, c,]);
+                }
+                else {
+                    params = TSXGraph.dereference([a, b, c, d,]);
+                }
+            }
+            return new Parallelpoint('parallelpoint', params, TSXGraph.defaultAttributes(attrs)); // as Parallelpoint
+        }
+        // implementation of signature,  hidden from user
+        segment(a, b, c, d, e, f, g, h, i) {
+            let newObject = {}; // just so it is initialized
+            let params = [];
+            let attrs = {};
+            if (arguments.length == 2) {
+                if (isJSXAttribute(b)) {
+                    attrs = TSXGraph.defaultAttributes(b);
+                    params = TSXGraph.dereference([a,]);
+                }
+                else {
+                    params = TSXGraph.dereference([a, b,]);
+                }
+            }
+            if (arguments.length == 3) {
+                if (isJSXAttribute(c)) {
+                    attrs = TSXGraph.defaultAttributes(c);
+                    params = TSXGraph.dereference([a, b,]);
+                }
+                else {
+                    params = TSXGraph.dereference([a, b, c,]);
+                }
+            }
+            if (arguments.length == 4) {
+                if (isJSXAttribute(d)) {
+                    attrs = TSXGraph.defaultAttributes(d);
+                    params = TSXGraph.dereference([a, b, c,]);
+                }
+                else {
+                    params = TSXGraph.dereference([a, b, c, d,]);
+                }
+            }
+            return new Segment('segment', params, TSXGraph.defaultAttributes(attrs)); // as Segment
         }
         /**  */
         parallelogram(p1, p2, p3, attributes = {}) {
             return new Parallelogram('Parallelogram', [p1, p2, p3,], attributes);
         }
-        /** This element is used to provide a constructor for a perpendicular. */
+        /** Create a line orthogonal to a given line and containing a given point. If you want a Perpendicular to a Curve, look at Normal(). */
         perpendicular(line, point, attributes = {}) {
             return new Perpendicular('Perpendicular', [line, point,], attributes);
         }
-        /** This element is used to provide a constructor for a perpendicular segment. */
+        /** Create a point on a line where a perpendicular to a given point would intersect that line. */
+        perpendicularPoint(line, point, attributes = {}) {
+            return new PerpendicularPoint('PerpendicularPoint', [line, point,], attributes);
+        }
+        /** Create a segment orthogonal to a given line and containing a given point.  If you want a Perpendicular to a Curve, look at Normal(). */
         perpendicularSegment(line, point, attributes = {}) {
             return new PerpendicularSegment('PerpendicularSegment', [line, point,], attributes);
         }
@@ -1023,6 +1167,10 @@ export var TXG;
         radicalAxis(circle1, circle2, attributes = {}) {
             return new RadicalAxis('RadicalAxis', [circle1, circle2,], attributes);
         }
+        /** A reflected element (point, polygon, line or curve) from an object of the same type and a line of reflection. */
+        reflection(object, reflectLine, attributes = {}) {
+            return new Reflection('Reflection', [object, reflectLine,], attributes);
+        }
         /** A reflex angle is the neither acute nor obtuse instance of an angle. It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
         reflexAngle(point1, point2, point3, attributes = {}) {
             return new ReflexAngle('ReflexAngle', [point1, point2, point3,], attributes);
@@ -1030,6 +1178,10 @@ export var TXG;
         /** Constructs a regular polygon. It needs two points which define the base line and the number of vertices. */
         regularPolygon(P1, P2, nVertices, attributes = {}) {
             return new RegularPolygon('RegularPolygon', [P1, P2, nVertices,], attributes);
+        }
+        /** A semicircle is a special arc defined by two points. The arc hits both points. */
+        semicircle(P1, P2, attributes = {}) {
+            return new Semicircle('Semicircle', [P1, P2,], attributes);
         }
         /** An input widget for choosing values from a given range of numbers.  Parameters are startpoint, endpoint,
                        and an array with [minimum, initialValue, maximum].  Query the value with slider.Value().  Set the slider either by
@@ -1050,6 +1202,10 @@ export var TXG;
        *``` */
         slider(StartPoint, EndPoint, minimum_initial_maximum, attributes = {}) {
             return new Slider('Slider', [StartPoint, EndPoint, minimum_initial_maximum,], attributes);
+        }
+        /** Slope field. Plot a slope field given by a function f(x, y) returning a number. */
+        slopefield(func, xData, yData, attributes = {}) {
+            return new Slopefield('Slopefield', [func, xData, yData,], attributes);
         }
         // implementation of signature,  hidden from user
         slopetriangle(a, b, c, d, e, f, g, h, i) {
@@ -1199,8 +1355,8 @@ export var TXG;
             return this.elValue.addChild();
         }
         /** Adds ids of elements to the array this.parents. */
-        addParents() {
-            return this.elValue.addParents();
+        addParents(parents) {
+            return this.elValue.addParents(TSXGraph.dereference(parents));
         }
         /** Rotate texts or images by a given degree. */
         addRotation() {
@@ -1353,6 +1509,10 @@ export var TXG;
         /** Checks if locale is enabled in the attribute. */
         useLocale() {
             return this.elValue.useLocale();
+        }
+        /**  */
+        on(event, handler) {
+            return this.elValue.on(event, handler);
         }
     }
     TXG.GeometryElement = GeometryElement;
@@ -1769,6 +1929,12 @@ export var TXG;
         }
     }
     TXG.Curve = Curve;
+    class BezierCurve extends Curve {
+        constructor(className, params, attrs) {
+            super(className, params, attrs);
+        }
+    }
+    TXG.BezierCurve = BezierCurve;
     class Curve3D extends Curve {
         constructor(className, params, attrs) {
             super(className, params, attrs);
@@ -1899,7 +2065,7 @@ export var TXG;
         }
         /** Adds ids of elements to the array this.parents. */
         addParents(parents) {
-            return this.elValue.addParents(parents);
+            return this.elValue.addParents(TSXGraph.dereference(parents));
         }
         /** Adds an Point to this group. */
         addPoint(point) {
@@ -2188,8 +2354,8 @@ export var TXG;
         coords() {
             return this.elValue.coords();
         }
-        /**  */
-        distance(toPoint) {
+        /** Calculates Euclidean distance for two Points, eg:  p1.Dist(p2) */
+        Dist(toPoint) {
             return this.elValue.Dist(TSXGraph.dereference(toPoint));
         }
         /** Set the face of a point element. */
@@ -2211,6 +2377,18 @@ export var TXG;
         /**  */
         Z() {
             return this.elValue.Z();
+        }
+        /** Moves an element towards coordinates, optionally tweening over time.  Time is in ms.  WATCH OUT, there
+                               is no AWAIT for the tween to finish, a second moveTo() starts immediately. Thats GOOD if you
+                               want to move two different points at the same time, BAD if you want to move the same point repeatedly.  EG:
+                               
+       ```js
+       
+       P.moveTo([A.X(), A.Y()], 5000)
+       
+       ``` */
+        moveTo(p, time = 0) {
+            return this.elValue.moveTo(TSXGraph.dereference(p), time);
         }
         /** Point location in vector form [n,n] */
         XY() {
@@ -2603,8 +2781,8 @@ export var TXG;
             return this.elValue.free();
         }
         /** Set an angle to a prescribed value given in radians. */
-        setAngle() {
-            return this.elValue.setAngle();
+        setAngle(angle) {
+            return this.elValue.setAngle(angle);
         }
         /** Returns the value of the angle. */
         Value() {
@@ -2685,6 +2863,23 @@ export var TXG;
     class Button extends Text {
         constructor(className, params, attrs) {
             super(className, params, attrs);
+        }
+        /**  */
+        get rendNodeButton() {
+            return this.elValue.rendNodeButton;
+        }
+        /** Add an event to trigger when button is pressed.
+       ```js
+           let isLeftRight = true;
+           let buttonMove = TSX.button([-2, 4], 'initial',
+               // use the button() codeblock to change the text and control a flag
+               () => { isLeftRight = !isLeftRight;
+                    buttonMove.rendNodeButton.innerHTML = isLeftRight ? 'left' : 'right' })
+           // use onClick() to add actions to the button
+           buttonMove.onClick(() => {isLeftRight ? P.moveTo(up, 1000) : P.moveTo(dn, 1000)})
+       ``` */
+        onClick(action) {
+            window.JXG.addEvent(this.elValue.rendNodeButton, `click`, action);
         }
     }
     TXG.Button = Button;
@@ -2806,6 +3001,12 @@ export var TXG;
         }
     }
     TXG.Glider = Glider;
+    class Glider3D extends Point3D {
+        constructor(className, params, attrs) {
+            super(className, params, attrs);
+        }
+    }
+    TXG.Glider3D = Glider3D;
     class Grid extends Curve {
         constructor(className, params, attrs) {
             super(className, params, attrs);
@@ -3237,6 +3438,10 @@ export var TXG;
         /** In 3D space, a circle consists of all points on a given plane with a given distance from a given point. The given point is called the center, and the given distance is called the radius. A circle can be constructed by providing a center, a normal vector, and a radius (given as a number or function). */
         circle3D(point, normal, radius, attributes = {}) {
             return this.elValue.create("circle3d", TSXGraph.dereference([point, normal, radius]), attributes);
+        }
+        /** Glider3D is an alias for JSXGraph's Point3d(). */
+        glider3D(element, initial = [0, 0, 0], attributes = {}) {
+            return this.elValue.create("point3d", [...initial, TSXGraph.dereference(element)], attributes);
         }
         /** Create a 3D plane object defined by a point and two directions, and extending negative and positive distanced in those directions by a range.  Remember to set visible:true.
                                    
