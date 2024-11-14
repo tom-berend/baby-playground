@@ -19,6 +19,8 @@ declare var WebGLObject: {
 
 */
 
+import { LIB_VERSION } from './version';
+
 import * as monaco from "monaco-editor";
 // import * as BABYLON from 'babylonjs';
 // import * as PlanetCute from './planetcute'
@@ -429,13 +431,14 @@ export class Editor {
 
         let html = '<!DOCTYPE html>';
         html += '<head>';
-        html += '<script type="text/javascript" charset="UTF-8" src="dist/jsxgraphcore.js"></script>'
-        html += '<link rel="stylesheet" type="text/css" href="dist/jsxgraph.css" />';
+        html += `<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/jsxgraphcore.js"></script>`
+        html += `<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/jsxgraph.css" />`;
         html += '</head>';
         html += '<body>';
         html += '<div id="jxgbox" class="jxgbox" style="width:850px; height:850px;"></div>';
 
         html += '<script type="module" defer>'
+        html += "\r\n" + `import { TXG } from "./dist.${LIB_VERSION}/tsxgraph.js";`  // this import is always provided because lib version
         html += "\r\n" + this.hiddenCode   // before try/catch
         html += "\r\n try {"
 
@@ -450,7 +453,7 @@ export class Editor {
         html += '</body>';
         html += '</head>';
 
-        // console.log('%cgenerateSourceCode\n', 'color:lightblue;', html)
+        console.log('%cgenerateSourceCode\n', 'color:lightblue;', html)
         return html
     }
 

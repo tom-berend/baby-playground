@@ -30,6 +30,8 @@ declare namespace TXG {
         labelled?: string | Function;
         /** Attributes for the line label. */
         label?: LabelAttributes;
+        /** Set display name  */
+        name?: string | Function;
         /** If enabled:true the (stroke) element will get a customized shadow.Customize color and opacity: If the object's RGB stroke color is [r,g,b] and its opacity is op, and the shadow parameters color is given as [r', g', b'] and opacity as op' the shadow will receive the RGB color[blend*r + r', blend*g + g', blend*b + b']and its opacity will be equal to op * op'. Further, the parameters blur and offset can be adjusted.This attribute is only available with SVG, not with canvas. */
         shadow?: Object;
         /** If true, KaTeX will be used to render the input string. */
@@ -40,30 +42,84 @@ declare namespace TXG {
         nonnegativeOnly?: Boolean;
         /** Draw label for this Element? */
         drawLabels?: Boolean;
-        /** Control the attribute ”checked” of the HTML checkbox. */
-        checked?: Boolean;
         /** Size in pixels */
-        size?: Number;
-        /** Tick face for major ticks of finite length.By default (face: '|') this is a straight line. Possible other values are ''. These faces are used in JXG.Hatch for hatch marking parallel lines. */
-        face?: String;
+        size?: Number | Function;
+        /** There are different point styles which differ in appearance. */
+        face?: 'o' | 'line' | 'point' | 'cross' | 'plus' | 'minus' | 'divide' | 'diamond' | 'triangledown' | 'triangleleft' | 'triangleright' | 'triangleup' | 'square' | 'circle' | string;
         /** Include the the zero line in the grid */
         drawZero?: Boolean;
+        /** If true, the dash pattern is multiplied by strokeWidth / 2. */
+        dashScale?: Boolean;
+        /** If the element is dragged it will be moved on mousedown or touchstart to the top of its layer. Works only for SVG renderer and for simple elements consisting of one SVG node. */
+        dragToTopOfLayer?: Boolean;
+        /** If true the element is fixed and can not be dragged around. The element will even stay at its position on zoom and moveOrigin events. Only free elements like points, texts, curves can be frozen. */
+        frozen?: Boolean;
+        /** Gradient type. Possible values are 'linear'. 'radial' or null. */
+        gradient?: string;
+        /** Angle (in radians) of the gradiant in case the gradient is of type 'linear'. If the angle is 0, the first color is on the left and the second color is on the right. If the angle is π/2 the first color is on top and the second color at the bottom. */
+        gradientAngle?: number;
+        /** From the SVG specification: ‘cx’, ‘cy’ and ‘r’ define the largest (i.e., outermost) circle for the radial gradient. The gradient will be drawn such that the 100% gradient stop is mapped to the perimeter of this largest (i.e., outermost) circle. For radial gradients in canvas this is the value 'x1'. Takes a value between 0 and 1. */
+        gradientCX?: number;
+        /** From the SVG specification: ‘cx’, ‘cy’ and ‘r’ define the largest (i.e., outermost) circle for the radial gradient. The gradient will be drawn such that the 100% gradient stop is mapped to the perimeter of this largest (i.e., outermost) circle. For radial gradients in canvas this is the value 'y1'. Takes a value between 0 and 1. */
+        gradientCY?: number;
+        /** The gradientEndOffset attribute is a number (ranging from 0 to 1) which indicates where the second gradient stop is placed, see the SVG specification for more information. For linear gradients, this attribute represents a location along the gradient vector. For radial gradients, it represents a percentage distance from (fx,fy) to the edge of the outermost/largest circle. */
+        gradientEndOffset?: number;
+        /** This attribute defines the radius of the start circle of the radial gradient. The gradient will be drawn such that the 0% <stop> is mapped to the perimeter of the start circle. For radial gradients in canvas this is the value 'r0'. Takes a value between 0 and 1. */
+        gradientFR?: number;
+        /** `fx` and `fy` define the focal point for the radial gradient. The gradient will be drawn such that the 0% gradient stop is mapped to (fx, fy). For radial gradients in canvas this is the value 'x0'. Takes a value between 0 and 1. */
+        gradientFX?: number;
+        /** y-coordinate of the circle center for the second color in case of gradient 'radial'. (The attribute fy in SVG) For radial gradients in canvas this is the value 'y0'. Takes a value between 0 and 1. */
+        gradientFY?: number;
+        /** From the SVG specification: ‘cx’, ‘cy’ and ‘r’ define the largest (i.e., outermost) circle for the radial gradient. The gradient will be drawn such that the 100% gradient stop is mapped to the perimeter of this largest (i.e., outermost) circle. For radial gradients in canvas this is the value 'r1'. Takes a value between 0 and 1. */
+        gradientR?: number;
+        /** Second color for gradient. */
+        gradientSecondColor?: String;
+        /** Opacity of second gradient color. Takes a value between 0 and 1. */
+        gradientSecondOpacity?: number;
+        /** The gradientStartOffset attribute is a number (ranging from 0 to 1) which indicates where the first gradient stop is placed, see the SVG specification for more information. For linear gradients, this attribute represents a location along the gradient vector. For radial gradients, it represents a percentage distance from (fx,fy) to the edge of the outermost/largest circle. */
+        gradientStartOffset?: number;
+        /** Should the element use highlight attributes on mouseOver? */
+        highlight?: Boolean;
+        /** The fill color of the given geometry element when the mouse is pointed over it. */
+        highlightFillColor?: string | Function;
+        /** Opacity for fill color when the object is highlighted. */
+        highlightFillOpacity?: number | Function;
         /** The stroke color of the given geometry element when the user moves the mouse over it. */
-        highlightStrokeColor?: String;
+        highlightStrokeColor?: string | Function;
         /** Opacity for stroke color when the object is highlighted. */
-        highlightStrokeOpacity?: Number;
+        highlightStrokeOpacity?: number | Function;
         /** Width of the element's stroke when the mouse is pointed over it. */
-        highlightStrokeWidth?: Number;
+        highlightStrokeWidth?: number | Function;
+        /** Display layer which will contain the element. */
+        layer?: number;
+        /** Line endings (linecap) of a stroke element, i.e. line, circle, curve. Possible values are:'butt','round','square'. */
+        lineCap?: string;
         /** Controls if an element can get the focus with the tab key. tabindex corresponds to the HTML attribute of the same name. See descriptiona at MDN. The additional value ”null” completely disables focus of an element. The value will be ignored if keyboard control of the board is not enabled or the element is fixed or not visible. */
         tabindex?: Number;
-        /** Set display name  */
-        name?: String;
     }
     interface GeometryElement3DAttributes {
         /** used by V2 vector math library */
         scaleXY?: Number;
         /** Set whether the element is visibledisplay name  */
         visible?: Boolean;
+    }
+    interface BoardAttributes {
+        /** used by V2 vector math library */
+        scaleXY?: Number;
+    }
+    interface InfoboxAttributes {
+        /** used by V2 vector math library */
+        scaleXY?: Number;
+        /** Horizontal offset in pixel of the infobox text from its anchor point. */
+        distanceX?: Number;
+        /** Vertical offset in pixel of the infobox text from its anchor point. */
+        distanceY?: Number;
+        /** Internationalization support for infobox text. */
+        intl?: object;
+    }
+    interface CAAttributes {
+        /** used by V2 vector math library */
+        scaleXY?: Number;
     }
     interface ChartAttributes extends GeometryElementAttributes {
         /** Select type of chart. */
@@ -87,7 +143,15 @@ declare namespace TXG {
         /** Attributes for center point. */
         point2?: Point;
     }
+    interface ComplexAttributes {
+        /** used by V2 vector math library */
+        scaleXY?: Number;
+    }
     interface CompositionAttributes {
+        /** used by V2 vector math library */
+        scaleXY?: Number;
+    }
+    interface CoordsAttributes {
         /** used by V2 vector math library */
         scaleXY?: Number;
     }
@@ -121,6 +185,14 @@ declare namespace TXG {
     }
     interface BezierCurveAttributes extends CurveAttributes {
     }
+    interface DumpAttributes {
+        /** used by V2 vector math library */
+        scaleXY?: Number;
+    }
+    interface ForeignObjectAttributes extends GeometryElementAttributes {
+        /** List of attractor elements. If the distance of the ForeignObject is less than attractorDistance the ForeignObject is made to glider of this element. */
+        attractors?: Element[];
+    }
     interface GroupAttributes extends CompositionAttributes {
     }
     interface ImageAttributes extends GeometryElementAttributes {
@@ -150,6 +222,10 @@ declare namespace TXG {
         h_max?: Number;
         /** Half of the box size (in user units) to search for existing line segments in the quadtree. */
         qdt_box?: Number;
+    }
+    interface LegendAttributes {
+        /** used by V2 vector math library */
+        scaleXY?: Number;
     }
     interface LineAttributes extends GeometryElementAttributes {
         /** Configure the arrow head at the position of its first point or the corresponding intersection with the canvas borderIn case firstArrow is an object it has the sub-attributes:{type: 1, // possible values are 1, 2, ..., 7. Default value is 1.size: 6, // size of the arrow head. Default value is 6.// This value is multiplied with the strokeWidth of the line// Exception: for type=7 size is ignoredhighlightSize: 6, // size of the arrow head in case the element is highlighted. Default value }type=7 is the default for curves if firstArrow: true */
@@ -182,8 +258,6 @@ declare namespace TXG {
         touchLastPoint?: Boolean;
     }
     interface PointAttributes extends GeometryElementAttributes {
-        /** There are different point styles which differ in appearance. Posssible values are Value InputOutput crossx circleo square, [][] plus+ minus- divide| diamond<> triangleup^, a, A triangledownv triangleleft< triangleright> */
-        face?: String;
         /** If true, the infobox is shown on mouse/pen over, if false not. If the value is 'inherit', the value of JXG.Board#showInfobox is taken. true | false | 'inherit' */
         showInfobox?: Boolean | String;
         /** If set to true, the point will snap to a grid of integer multiples of Point#snapSizeX and Point#snapSizeY (in user coordinates).The coordinates of the grid points are either integer multiples of snapSizeX and snapSizeY (given in user coordinates, not pixels) or are the intersection points of the major ticks of the boards default axes in case that snapSizeX, snapSizeY are negative. */
@@ -193,7 +267,7 @@ declare namespace TXG {
     }
     interface PolygonAttributes extends GeometryElementAttributes {
         /** Attributes for the polygon border lines. */
-        borders?: Line;
+        borders?: LineAttributes;
         /** If true, moving the mouse over inner points triggers hasPoint. */
         hasInnerPoints?: Boolean;
         /** By default, the strokewidths of the borders of a polygon are not changed during highlighting (only strokeColor and strokeOpacity are changed to highlightStrokeColor, and highlightStrokeOpacity). However, strokewidth is changed to highlightStrokewidth if an individual border gets the focus.With this attribute set to true, also the borders change strokeWidth if the polygon itself gets the focus. */
@@ -223,7 +297,7 @@ declare namespace TXG {
         /** Used to round texts given by a number. */
         digits?: Number;
         /** Determines the rendering method of the text. */
-        display?: String;
+        display?: "html" | "internal";
         /** Sensitive area for dragging the text. */
         dragArea?: String;
         /** The font size in pixels. */
@@ -258,6 +332,8 @@ declare namespace TXG {
         useKatex?: Boolean;
         /** If true, MathJax will be used to render the input string. */
         useMathJax?: Boolean;
+        /** Control the attribute ”checked” of the HTML checkbox. */
+        checked?: Boolean;
     }
     interface TicksAttributes extends GeometryElementAttributes {
         /** Determine the position of the tick with value 0. 'left' means point1 of the line, 'right' means point2, and 'middle' is equivalent to the midpoint of the defining points. This attribute is ignored if the parent line is of type axis. */
@@ -270,8 +346,6 @@ declare namespace TXG {
         drawLabels?: Boolean;
         /** Draw the zero tick, that lies at line.point1? */
         drawZero?: Boolean;
-        /** Tick face for major ticks of finite length.By default (face: '|') this is a straight line. Possible other values are ''. These faces are used in JXG.Hatch for hatch marking parallel lines. */
-        face?: String;
         /** A function that expects two JXG.Coords, the first one representing the coordinates of the tick that is to be labeled, the second one the coordinates of the center (the tick with position 0). The third parameter is a null, number or a string. In the latter two cases, this value is taken. Returns a string. */
         generateLabelText?: Function;
         /** A function that expects two JXG.Coords, the first one representing the coordinates of the tick that is to be labeled, the second one the coordinates of the center (the tick with position 0). */
@@ -579,7 +653,7 @@ declare namespace TXG {
     }
     interface RegularPolygonAttributes extends PolygonAttributes {
         /** Attributes for the polygon border lines. */
-        borders?: Line;
+        borders?: LineAttributes;
         /** If true, moving the mouse over inner points triggers hasPoint. */
         hasInnerPoints?: Boolean;
         /** Attributes for the polygon vertices.   eg: {vertices: { opacity: 0 }}, */
@@ -655,6 +729,12 @@ declare namespace TXG {
     }
     interface TangentAttributes extends LineAttributes {
     }
+    interface tangentToAttributes extends LineAttributes {
+        /** Attributes for the intersection point of the conic/circle with the polar line of the tangentTo construction. */
+        point?: PointAttributes;
+        /** Attributes for the polar line of the tangentTo construction. */
+        polar?: PolarLineAttributes;
+    }
     interface TapemeasureAttributes extends SegmentAttributes {
         /** The precision of the tape measure value displayed in the optional text. */
         digits?: Number;
@@ -680,6 +760,8 @@ declare namespace TXG {
         numberPoints?: Number;
     }
     interface TransformAttributes extends GeometryElementAttributes {
+    }
+    interface TransformPointAttributes extends PointAttributes {
     }
     interface View3DAttributes extends GeometryElement3DAttributes {
         /** Choose the projection type to be used: `parallel` or `central`. `parallel` is parallel projection, also called orthographic projection.   `central` is central projection, also called perspective projection */
@@ -735,10 +817,16 @@ declare namespace TXG {
         /** Specify the user handling of the bank angle. */
         bank?: Object;
     }
+    interface TranslateAttributes extends TransformAttributes {
+    }
+    interface RotateAttributes extends TransformAttributes {
+    }
+    interface ScaleAttributes extends TransformAttributes {
+    }
     type NumberFunction = Number | Function;
     /** A 'point' has a position in space.  The only characteristic that distinguishes one point from another is its position. */
-    type point = [NumberFunction, NumberFunction] | NumberFunction[];
-    type line = [Point | point, Point | point];
+    type pointAddr = NumberFunction[] | [number, number] | [number, Function] | [Function, number] | [Function | Function];
+    type line = [Point | pointAddr, Point | pointAddr];
     type arrayNumber = Number[];
     type arrayNumber2 = arrayNumber | Number;
     type matAny = arrayNumber2[];
@@ -753,16 +841,21 @@ declare namespace TXG {
         offset?: [Number, Number];
         /** Possible string values for the position of a label for label anchor points.  First and Last are only for lines. */
         position?: 'first' | 'last' | 'lft' | 'rt' | 'top' | 'bot' | 'ulft' | 'urt' | 'llft' | 'lrt';
+        anchorX?: 'left' | 'middle' | 'right';
+        anchorY?: 'top' | 'middle' | 'bottom';
+        toFraction?: Boolean;
+        useMathjax?: Boolean;
     }
     interface DisplayPoint extends ParallelpointAttributes {
         size?: Number;
-        face?: String;
+        face?: 'cross' | 'plus' | 'minus' | 'divide' | 'diamond' | 'triangledown' | 'triangleleft' | 'triangleright' | 'triangleup' | 'square' | 'circle';
     }
     interface VertexAttributes {
         visible?: Boolean;
     }
     interface PanAttributes {
         enabled?: Boolean;
+        throttle?: number;
         needTwoFingers?: Boolean;
     }
     interface InitBoardAttributes {
@@ -770,7 +863,7 @@ declare namespace TXG {
         animationDelay?: Number;
         /** Show default axis. */
         axis?: boolean;
-        /** Bounding box of the visible area in user coordinates. [left,top,right,bottom] */
+        /** Bounding box of the visible area in user coordinates. [left,top,right,bottom] eg: [-5,5,5,-5] */
         boundingbox?: [Number, Number, Number, Number];
         /** Enable browser scrolling on touch interfaces if the user double taps into an empty region of the board. */
         browserPan?: Boolean;
@@ -785,7 +878,11 @@ declare namespace TXG {
         fullscreen?: Object;
         /** Show grid? */
         grid?: Boolean;
-        /** If set to true, the ratio between horizontal and vertical unit sizes stays constant - independent of size changes of the hosting HTML div element. */
+        /** If set to true, the ratio between horizontal and vertical unit sizes stays constant - independent of size changes of the hosting HTML div element.
+         *
+
+true is useful for keeping circles round, but may keep you from setting the boundingbox you desire"
+        */
         keepAspectRatio?: Boolean;
         /** Maximum frame rate of the board, i.e. */
         maxFrameRate?: Number;
@@ -832,9 +929,27 @@ declare namespace TXG {
     /** JSXGraph library wrapped in TypeScript */
     export class TSXGraph {
         static defaultAttrs: Object;
-        /** Initialize a new board. */
-        static initBoard(html: string, attributes?: InitBoardAttributes): TSXBoard;
+        /** Initialize a new board. The first parameter 'html' should be the ID of a <DIV> in your web page.
+
+
+         * ```js
+<div id="jxgbox" class="jxgbox" style="width:1000px; height:1000px;float:left;"></div>
+<script src="lunar.js" type="module" defer>  </script>
+
+// start your .ts with something like this
+import { TXG } from "../src/tsxgraph.js";
+const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
+```
+        */
+        /** Initializes a new board */
+        static initBoard(html: string, attributeObj?: InitBoardAttributes): TSXBoard;
         static freeBoard(board: TSXBoard): void;
+        /** set Katex as default for board (names, labels, everything).  useKatex() need only be set ONCE, no way to unset. the text element has a 'useKatex' attribute that lets you turn Katex on and off for individual text fields.
+        * ```js
+        *     TXG.TSXGraph.useKatex()
+        * ```
+        */
+        static useKatex(): void;
         static dereference(params: any | any[]): any[];
         static defaultAttributes(attrs: Object): Object;
     }
@@ -844,34 +959,13 @@ declare namespace TXG {
         /** Line defined by solution to a*x + b*y = c */
         line(a: Number | Function, b: Number | Function, c?: Number | Function, attributes?: LineAttributes): Line;
         /** Just as two (distinct) points determine a line, five points (no three collinear) determine a conic. */
-        fivePoints(A: Point | point, B: Point | point, C: Point | point, D: Point | point, E: Point | point, attributes?: ConicAttributes): Conic;
+        fivePoints(A: Point | pointAddr, B: Point | pointAddr, C: Point | pointAddr, D: Point | pointAddr, E: Point | pointAddr, attributes?: ConicAttributes): Conic;
         /** Build a plane algebraic curve from six numbers that satisfies Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0, and A,B,C not all zero.  This might be a circle, ellipse, parabola, or hyperbola. */
         sixNumbers(A: Number, B: Number, C: Number, D: Number, E: Number, F: Number, attributes?: ConicAttributes): Conic;
         /** An Ellipse from 3 points */
-        threePoints(focalPoint1: Point | point, focalPoint2: Point | point, outerPoint: Point | point, attributes?: EllipseAttributes): Ellipse;
+        threePoints(focalPoint1: Point | pointAddr, focalPoint2: Point | pointAddr, outerPoint: Point | pointAddr, attributes?: EllipseAttributes): Ellipse;
         /** Three Points, plus start and end. */
-        ellipseArc(focalPoint1: Point | point, focalPoint2: Point | point, outerPoint: Point | point, startAngle: Number | Function, endAngle: Number | Function, attributes?: EllipseAttributes): Ellipse;
-    }
-    interface TransformIface {
-        z_ignore: Object;
-        /** Move a distance from a point */
-        translate(x: Number | Function, y: Number | Function, attributes?: TransformAttributes): Transform;
-        /** Increase distance from a point by a factor */
-        scale(x: number | Function, y: number | Function, attributes?: TransformAttributes): Transform;
-        /** Rotate by angle around a point */
-        rotate(angle: Number | Function, point?: Point | point, attributes?: TransformAttributes): Transform;
-        /** Reflect around a line */
-        reflect(x: Number | Function, y: Number | Function, attributes?: TransformAttributes): Transform;
-        /** Move proportionally to distance */
-        shear(x: Number | Function, y: Number | Function, attributes?: TransformAttributes): Transform;
-        /** Transform using a MAT3 */
-        generic(a: Number, b: Number, c: Number, d: Number, e: Number, f: Number, g: Number, h: Number, i: Number, attributes?: TransformAttributes): Transform;
-        /** A new Point from a Point and Transform */
-        point(p: Point | point, t: Transform | Transform[], attributes?: PointAttributes): Point;
-        /** A new Circle from a Circle and Transform */
-        circle(c: Circle, t: Transform | Transform[], attributes?: CircleAttributes): Circle;
-        /** A new Curve from a Curve and Transform */
-        curve(c: Curve, t: Transform | Transform[], attributes?: CurveAttributes): Curve;
+        ellipseArc(focalPoint1: Point | pointAddr, focalPoint2: Point | pointAddr, outerPoint: Point | pointAddr, startAngle: Number | Function, endAngle: Number | Function, attributes?: EllipseAttributes): Ellipse;
     }
     interface JSXMathJSXMathIface {
     }
@@ -970,9 +1064,12 @@ declare namespace TXG {
                                            Algorithm: D.E. Knuth, TAOCP 2, p. 128. */
         randomExponential(lambda: number): number;
         /** Generate value of a random variable with gamma distribution of order alpha.  Default scale is 1. Default threshold is 0.
-                                          See {@link https://en.wikipedia.org/wiki/Gamma_distribution}.
-                                          Algorithm: D.E. Knuth, TAOCP 2, p. 129. */
+                               See {@link https://en.wikipedia.org/wiki/Gamma_distribution}.
+                               Algorithm: D.E. Knuth, TAOCP 2, p. 129. */
         randomGamma(shape: number, scale?: number, threshold?: number): number;
+        /** Generate value of a random variable with Pareto distribution with shape gamma and scale k.
+                                          See {@link https://en.wikipedia.org/wiki/Pareto_distribution}. */
+        randomPareto(shape: number, scale?: number, threshold?: number): number;
         /** Generate value of a random variable with beta distribution with shape parameters alpha and beta.
                                            See {@link https://en.wikipedia.org/wiki/Beta_distribution}. */
         randomBeta(alpha: number, beta: number): number;
@@ -1003,8 +1100,11 @@ declare namespace TXG {
         histogram(data: number[], bins?: number, range?: boolean | [number, number], density?: boolean, cumulative?: boolean): [number[], number[]];
         /** Determines the absolute value of every given value.  */
         abs(arr: number[] | number): Number[] | Number;
+        /** The P-th percentile ( 0 < P ≤ 100 ) of a list of N ordered values (sorted from least to greatest) is the smallest value in the list such that no more than P percent of the data is strictly less than the value and at least P percent of the data is less than or equal to that value. */
+        percentile(data: number[], ranges: number[]): number[];
     }
     export class TSXBoard {
+        /** the underlying JSXGraph board object.  Might be null.  To walk the elements in the board, use: for (let el in (TSX.board! as any).objects) {...}       */
         board: TSXBoard | null;
         private printLineNumber;
         /** Version of underlying JSX library */
@@ -1016,6 +1116,12 @@ declare namespace TXG {
         setDefaultAttributes(attrs: Object): void;
         /** get a 2D canvas context (warning: cannot mix SVG and canvas) */
         getCanvasCTX(): CanvasRenderingContext2D;
+        /** given a PointerEvent (eg: TSX.on('down', (e:Event)=> ... ) returns [x,y] absolute coordinates of the boards container top left corner.  use with getPosition() to get board absolute addresses. */
+        getCoordsTopLeftCorner(e: Event): number[];
+        /** given a PointerEvent (eg: TSX.on('down', (e:Event)=> ... ) returns [x,y] coordinates relative to the documents's top left corner.  See also getCoordsTopLeftCorner() */
+        getPosition(e: Event): number[];
+        /** given a PointerEvent (eg: TSX.on('down', (e:Event)=> ... ), returns the mouse coordinates [x,y] in JSXGraph coordinates.  */
+        getMouseCoords(e: Event): number[];
         setBoundingBox(left: Number, top: Number, right: Number, bottom: Number): TSXBoard;
         getBoundingBox(): [number, number];
         addGrid(): TSXBoard;
@@ -1029,16 +1135,14 @@ declare namespace TXG {
         /** run through the board and call update() on each element */
         updateElements(): void;
         on(event: string, handler: (e: Event) => void, context?: unknown): void;
+        /** Set the current frame.  If it doesn't exist, it will be created. Optionally set a location.  Example:  TSX.setFrame('starship',[4,4]) */
+        setFrame(name: string, location?: number[]): void;
         print(...args: any[]): void;
         suspendUpdate(): void;
         unsuspendUpdate(): void;
         private dereference;
-        /** new Points from point, angle, and distance.  Angle is in radians. */
-        V2AngleDistance(origin: TXG.Point, distance: number, angle: number, dest?: TXG.Point): TXG.Point;
         /**  */
         conic: ConicIface;
-        /** This element is used to provide projective transformations. */
-        transform: TransformIface;
         JSXMathMath: JSXMathJSXMathIface;
         MatrixMath: MatrixJSXMathIface;
         GeometryMath: GeometryJSXMathIface;
@@ -1050,156 +1154,169 @@ declare namespace TXG {
         /** A circle can be constructed by providing a center and a point on the circle,
                                 or a center and a radius (given as a number, function, line, or circle).
                                 If the radius is a negative value, its absolute values is taken.
-
+                       
        *```js
                        TSX.circle(P1,1])
                        TSX.circle([0,0],[1,0])
-
+                       
        *```
-
+                       
        Also see: Circumcircle is a circle described by three points.  An Arc is a segment of a circle. */
-        circle(centerPoint: Point | point, remotePoint: Point | point | Line | line | Number | Function | Circle, attributes?: CircleAttributes): Circle;
+        circle(centerPoint: Point | pointAddr, remotePoint: Point | pointAddr | Line | line | Number | Function | Circle, attributes?: CircleAttributes): Circle;
         /** Plot a set of points or a function from arrays X and Y */
         curve(xArray: number[], yArray: number[], attributes?: CurveAttributes): Curve;
         curve(xArray: Function, yArray: Function, attributes?: CurveAttributes): Curve;
         curve(xArray: number[] | Function, yArray: number[] | Function, left: NumberFunction, right: NumberFunction, attributes?: CurveAttributes): Curve;
         /** A cubic bezier curve.  The input is 3k + 1 points; those at positions k mod 3 = 0 (eg: 0, 3, 6 are the data points, the two points between each data points are the control points.
-
+                       
        *```js
            let points: TXG.Point[] = []
            points.push(TSX.point([-2, -1], { size: 4, color: 'blue', name: '0' }))
-
+       
            points.push(TSX.point([-2, -2.5], { name: '1' }))
            points.push(TSX.point([-1, -2.5], { name: '2' }))
-
+       
            points.push(TSX.point([2, -2], { size: 4, color: 'blue', name: '3' }))
-
+       
            let curve = TSX.bezierCurve(points, { strokeColor: 'orange', strokeWidth: 5, fixed: false }); // Draggable curve
-
+       
            // 'BezierCurve()' is just a shorthand for the following two lines:
            // let bz = TSX.NumericsMath.bezier(points)
            // let curve = TSX.curve(bz[0], bz[1])
-
+                       
        *```
-
+       
                         */
         bezierCurve(points: Point[], attributes?: BezierCurveAttributes): Curve;
+        /** This element is used to provide a constructor for arbitrary content in an SVG foreignObject container.
+       ```js
+       TSX.foreignObject(
+           `<video width="300" height="200" src="https://eucbeniki.sio.si/vega2/278/Video_metanje_oge_.mp4" type="html5video" controls>`,
+           [0, -3], [9, 6],
+           {layer: 8, fixed: true})
+       ```
+                     */
+        foreignObject(content: string, position: number[], size?: number[] | null, attributes?: ForeignObjectAttributes): ForeignObject;
         /** Array of Points */
-        group(pointArray: Point[], attributes?: GroupAttributes): Group;
+        group(pointArray: Point[] | Polygon, attributes?: GroupAttributes): Group;
         /** Display an image.  The first element is the location URL of the image.
                        A collection of space icons is provided, press CTRL+I to show the list.
-                       The second parameter sets the lower left point of the image, you may need to shift the image location to center it.
-
+                       The second parameter sets the lower left point of the image.
+                       The optional third parameter sets the size multiplier of the image, default is [1,1].
+                       
+       If you want to move the image, just tie the image to a point, maybe at the center of the image.
+                        For more flexibility, see TSX.Rotate() and TSX.Translate()
+                       
        *```js
-                       TSX.image('../icons/sun.png',[0,0])
-                       let P1 = TSX.point([3,2],{opacity:0})
-                       TSX.image(p1,[3-offest,3-offset])
-
+                   TSX.image('icons/earth.png', [0, 0],[2,2])
+                   let p1 = TSX.point([3, 2], { opacity: .1 })
+                   TSX.image('icons/moon-full-moon.png', [()=>p1.X(),()=>p1.Y()])
+                       
        *``` */
-        image(url: String | spaceIcon, lowerLeft: point, widthHeight?: [Number, Number], attributes?: ImageAttributes): Image;
+        image(url: String | spaceIcon, lowerLeft: pointAddr, widthHeight?: [Number, Number], attributes?: ImageAttributes): Image;
         /** An implicit curve is a plane curve defined by an implicit equation relating two coordinate variables, commonly x and y. For example, the unit circle is defined by the implicit equation x2 + y2 = 1. In general, every implicit curve is defined by an equation of the form f(x, y) = 0 for some function f of two variables.  IMPLICIT means that the equation is not expressed as a solution for either x in terms of y or vice versa. */
         implicitcurve(f: Function | String, attributes?: ImplicitcurveAttributes): Implicitcurve;
         implicitcurve(f: Function | String, dfx: Function | String, dfy: Function | String, attributes?: ImplicitcurveAttributes): Implicitcurve;
         /** This element is used to provide a constructor for a general line given by two points.
                                        By setting additional properties a line can be used as an arrow and/or axis.
-
+                                       
        *```js
                                        TSX.line([3,2],[3,3],{strokeColor:'blue',strokeWidth:5,strokeOpacity:.5})
                                        let P1 = TSX.point([3,2])
                                        TSX.line(p1,[3,3])
-
+                                       
        *```
-
+                                       
         also create lines with Segment, Arrow, Transform.Point, Circumcenter, Glider, and others.
                                         Look at .conic.line() for a line defined by the equation 'az +bx +cy = 0'
                            */
-        line(p1: Point | point, p2: Point | point, attributes?: LineAttributes): Line;
+        line(p1: Point | pointAddr, p2: Point | pointAddr, attributes?: LineAttributes): Line;
         /** Create a point. If any parent elements are functions or the attribute 'fixed' is true then point will be constrained.
-
+                   
        *```js
                     TSX.point([3,2],{strokeColor:'blue',strokeWidth:5,strokeOpacity:.5})
                     TSX.point([3,3]),{fixed:true, showInfobox:true}
                     TSX.point([()=>p1.X()+2,()=>p1.Y()+2]) // 2 up 2 right from p1
                     TSX.point([1,2,2])  // three axis definition - [z,x,y]
-
+                   
        *```
-
+                   
         also create points with Intersection, Midpoint, Transform.Point, Circumcenter, Glider, and others. */
-        point(position: NumberFunction[], attributes?: PointAttributes): Point;
+        point(position: pointAddr, attributes?: PointAttributes): Point;
         /** Array of Points */
-        polygon(pointArray: Point[] | point[], attributes?: PolygonAttributes): Polygon;
+        polygon(pointArray: Point[] | pointAddr[], attributes?: PolygonAttributes): Polygon;
         /** Display a message
-
+                                       
        *```js
                                        TSX.text([3,2],[3,3], {fontSize:20, strokeColor:'blue'})
                                        TSX.text([0, 4], () => 'BD ' + B.distance(D).toFixed(2))
                                        TSX.text([-4, 2], '\pm\sqrt{a^2 + b^2}', { useKatex: true })
-
+                                       
        *``` */
-        text(position: Point | point, label: String | Function, attributes?: TextAttributes): Text;
+        text(position: Point | pointAddr, label: String | Function, attributes?: TextAttributes): Text;
         /** A circular sector is a subarea of the area enclosed by a circle. It is enclosed by two radii and an arc. */
-        sector(P1: Point | point, P2: Point | point, P3: Point | point, attributes?: SectorAttributes): Sector;
+        sector(P1: Point | pointAddr, P2: Point | pointAddr, P3: Point | pointAddr, attributes?: SectorAttributes): Sector;
         /** Vector field. Plot a vector field either given by two functions f1(x, y) and f2(x,y) or by a function f(x, y) returning an array of size 2. */
         vectorfield(fxfy: Function[], horizontalMesh?: Number[], verticalMesh?: Number[], attributes?: VectorfieldAttributes): Vectorfield;
         /** The angle element is used to denote an angle defined by three points (from, around,to), or two lines and two directions (either points or plus-or-minus 1 to indicate direction.
                     As opposed to the sector, an angle has two angle points and no radius point.
-
+                                       
         type=='sector': Sector is displayed.
-
+                                       
         type=='square': a parallelogram is displayed.
-
+                                       
         type=='auto':  a square is displayed if the angle is near orthogonal.
-
+                                       
         If no name is provided the angle label is automatically set to a lower greek letter. */
-        angle(from: Point | point, around: Point | point, to: Point | point, attributes?: AngleAttributes): Angle;
+        angle(from: Point | pointAddr, around: Point | pointAddr, to: Point | pointAddr, attributes?: AngleAttributes): Angle;
         angle(line1: Line | line, line2: Line | line, direction1: [Number, Number], direction2: [Number, Number], attributes?: AngleAttributes): Angle;
         angle(line1: Line | line, line2: Line | line, dirPlusMinus1: Number, dirPlusMinus2: Number, attributes?: AngleAttributes): Angle;
         /** Create a circular Arc defined by three points (because a circle can be defined by three points - see circumcircle).
-
+                                   
        *```js
                                    let arc = TSX.arc([-8,5],[-4,5],[-9,9]])
-
+                                   
        *```
-
+                                   
         To create an arc with origin, startpoint, and angle, look at MajorArc/MinorArc. */
-        arc(origin: Point | point, from: Point | point, to: Point | point, attributes?: ArcAttributes): Arc;
+        arc(origin: Point | pointAddr, from: Point | pointAddr, to: Point | pointAddr, attributes?: ArcAttributes): Arc;
         /** Arrow defined by two points (like a Segment) with arrow at P2
-
+                                   
        *```js
-
+                                   
         let arrow = TSX.arrow([-8,5],[-4,5])
-
+                                   
        *```
-
+                                   
         */
-        arrow(p1: Point | point, p2: Point | point, attributes?: ArrowAttributes): Arrow;
+        arrow(p1: Point | pointAddr, p2: Point | pointAddr, attributes?: ArrowAttributes): Arrow;
         /** A line parallel to a given line (or two points), through a point. */
-        parallel(line: Line | [Point, Point], point: Point | point, attributes?: ParallelAttributes): Parallel;
-        parallel(lineP1: Point | point, lineP2: Point | point, Point: Point | point, attributes?: ParallelAttributes): Parallel;
+        parallel(line: Line | [Point, Point], point: Point | pointAddr, attributes?: ParallelAttributes): Parallel;
+        parallel(lineP1: Point | pointAddr, lineP2: Point | pointAddr, Point: Point | pointAddr, attributes?: ParallelAttributes): Parallel;
         /** Create an Arrow parallel to a segment. The constructed arrow contains p3 and has the same slope as the line through p1 and p2. */
-        arrowparallel(p1: Point | point, p2: Point | point, p3: Point | point, attributes?: ArrowparallelAttributes): Arrowparallel;
+        arrowparallel(p1: Point | pointAddr, p2: Point | pointAddr, p3: Point | pointAddr, attributes?: ArrowparallelAttributes): Arrowparallel;
         /** Create an Axis with two points (like a Line) */
-        axis(p1: Point | point, p2: Point | point, attributes?: AxisAttributes): Axis;
-        /** Bisect an Angle defined with three points */
-        bisector(p1: Point, p2: Point, p3: Point, attributes?: BisectorAttributes): Bisector;
+        axis(p1: Point | pointAddr, p2: Point | pointAddr, attributes?: AxisAttributes): Axis;
+        /** Bisect an Angle defined with three points A,B,C, and divides the angle ABC into two equal sized parts. */
+        bisector(A: Point | pointAddr, B: Point | pointAddr, C: Point | pointAddr, attributes?: BisectorAttributes): Bisector;
         /** Bisect a Line defined with two points */
         bisectorlines(l1: Line, l2: Line, attributes?: BisectorlinesAttributes): Bisectorlines;
         /** create a button */
-        button(position: NumberFunction[], label: String | Function, handler: Function, attributes?: ButtonAttributes): Button;
+        button(position: pointAddr, label: String | Function, handler: Function, attributes?: ButtonAttributes): Button;
         /** This element is used to provide a constructor for cardinal spline curves. Create a dynamic cardinal spline interpolated curve given by sample points p_1 to p_n. */
         cardinalspline(data: Point[] | number[][], funct: Function, splineType: `uniform` | `centripetal`, attributes?: CardinalsplineAttributes): Curve;
         /** This element is used to provide a constructor for special texts containing a form checkbox element. For this element, the attribute ”display” has to have the value 'html' (which is the default). The underlying HTML checkbox element can be accessed through the sub-object 'rendNodeCheck', e.g. to add event listeners. */
-        checkbox(position: NumberFunction[], label: String | Function, attributes?: CheckboxAttributes): Checkbox;
+        checkbox(position: pointAddr, label: String | Function, attributes?: CheckboxAttributes): Checkbox;
         /** Creates a Point at the center of a circle defined by 3 points */
-        circumcenter(p1: Point | point, p2: Point | point, p3: Point | point, attributes?: CircumcenterAttributes): Circumcenter;
+        circumcenter(p1: Point | pointAddr, p2: Point | pointAddr, p3: Point | pointAddr, attributes?: CircumcenterAttributes): Circumcenter;
         /** Draw a circle defined by 3 points */
-        circumcircle(p1: Point | point, p2: Point | point, p3: Point | point, attributes?: CircumcircleAttributes): Circumcircle;
+        circumcircle(p1: Point | pointAddr, p2: Point | pointAddr, p3: Point | pointAddr, attributes?: CircumcircleAttributes): Circumcircle;
         /** Draw an arc from P1 to P3 (missing P3 to P1) defined by 3 points */
-        circumcircleArc(p1: Point | point, p2: Point | point, p3: Point | point, attributes?: CircumcircleArcAttributes): CircumcircleArc;
+        circumcircleArc(p1: Point | pointAddr, p2: Point | pointAddr, p3: Point | pointAddr, attributes?: CircumcircleArcAttributes): CircumcircleArc;
         /** Creates a CircumCenter and draws a sector from P1 to P3 (missing P3 to P1) defined by 3 points */
-        circumcircleSector(p1: Point | point, p2: Point | point, p3: Point | point, attributes?: CircumcircleSectorAttributes): CircumcircleSector;
+        circumcircleSector(p1: Point | pointAddr, p2: Point | pointAddr, p3: Point | pointAddr, attributes?: CircumcircleSectorAttributes): CircumcircleSector;
         /** A comb to display domains of inequalities. */
-        comb(p1: Point | point, p2: Point | point, attributes?: CombAttributes): Comb;
+        comb(p1: Point | pointAddr, p2: Point | pointAddr, attributes?: CombAttributes): Comb;
         /** Difference of two closed path elements. The elements may be of type curve, circle, polygon, inequality. If one element is a curve, it has to be closed. The resulting element is of type curve. */
         curveDifference(curve1: GeometryElement, curve2: GeometryElement, attributes?: CurveDifferenceAttributes): CurveDifference;
         /** Intersection of two closed path elements. The elements may be of type curve, circle, polygon, inequality. If one element is a curve, it has to be closed. The resulting element is of type curve. */
@@ -1208,14 +1325,19 @@ declare namespace TXG {
         curveUnion(curve1: GeometryElement, curve2: GeometryElement, attributes?: CurveUnionAttributes): CurveUnion;
         /** This element is used to provide a constructor for the graph showing the (numerical) derivative of a given curve. */
         derivative(curve: Curve, attributes?: DerivativeAttributes): Derivative;
-        /** Two Points and Radius */
-        ellipse(p1: Point | point, p2: Point | point, radius: Number | Function, attributes?: EllipseAttributes): Ellipse;
+        /**  An ellipse is given by two points (the foci) and a third point on the ellipse or the length of the major axis. */
+        ellipse(p1: Point | pointAddr, p2: Point | pointAddr, radius: Point | pointAddr | Number | Function, attributes?: EllipseAttributes): Ellipse;
         /** A wrapper for element Curve with X() set to x. The graph is drawn for x in the interval [a,b] default -10 to 10.
        ```js
        let f = TSX.functiongraph((x: number) => 3 * Math.pow(x, 2))
        ``` */
-        functiongraph(funct: Function, leftBorder?: Number, rightBorder?: Number, attributes?: FunctiongraphAttributes): Functiongraph;
-        /** A GeometryElement like Line, Circle, or Curve, and optionally a starting point defined by [X,Y] */
+        functiongraph(funct: Function, leftBorder?: number, rightBorder?: number, attributes?: FunctiongraphAttributes): Curve;
+        /** A point bound to a GeometryElement like Line, Circle, or Curve, with  optionally a starting point defined by [X,Y]
+       ```js
+       let c1 = TSX.circle(a, 1)
+       let g1 = TSX.glider(c1)
+       let g2 = TSX.glider(c1,[0,0])  // includes initial point
+       ```  */
         glider(hostElement: GeometryElement, attributes?: GliderAttributes): Glider;
         glider(hostElement: GeometryElement, initialPosition: number[], attributes?: GliderAttributes): Glider;
         glider(attributes?: GliderAttributes): Glider;
@@ -1225,32 +1347,32 @@ declare namespace TXG {
         /** Hatches can be used to mark congruent lines or curves. */
         hatch(line: Line | line, numberHatches: Number, attributes?: HatchAttributes): Hatch;
         /** This element is used to provide a constructor for an hyperbola. An hyperbola is given by two points (the foci) and a third point on the hyperbola or the length of the major axis. */
-        hyperbola(point1: Point | point, point2: Point | point, point3: Point | point | Number, start?: Number, end?: Number, attributes?: HyperbolaAttributes): Hyperbola;
+        hyperbola(point1: Point | pointAddr, point2: Point | pointAddr, point3: Point | pointAddr | Number, start?: Number, end?: Number, attributes?: HyperbolaAttributes): Hyperbola;
         /** Constructs the incenter of the triangle described by the three given points. https://mathworld.wolfram.com/Incenter.html */
-        incenter(p1: Point | point, p2: Point | point, p3: Point | point, attributes?: IncenterAttributes): Incenter;
+        incenter(p1: Point | pointAddr, p2: Point | pointAddr, p3: Point | pointAddr, attributes?: IncenterAttributes): Incenter;
         /** An incircle is given by three points. */
-        incircle(p1: Point | point, p2: Point | point, p3: Point | point, attributes?: IncircleAttributes): Incircle;
+        incircle(p1: Point | pointAddr, p2: Point | pointAddr, p3: Point | pointAddr, attributes?: IncircleAttributes): Incircle;
         /** Creates an area indicating the solution of a linear inequality or an inequality of a function graph, i.e. an inequality of type y */
         inequality(boundaryLine: Line | line | Curve, attributes?: InequalityAttributes): Inequality;
         /** This element is used to provide a constructor for special texts containing a HTML form input element. If the width of element is set with the attribute ”cssStyle”, the width of the label must be added. For this element, the attribute ”display” has to have the value 'html' (which is the default). The underlying HTML input field can be accessed through the sub-object 'rendNodeInput', e.g. to add event listeners. */
-        input(position: Point | point, label: String | Function, initial: String, attributes?: InputAttributes): Input;
+        input(position: Point | pointAddr, label: String | Function, initial?: String, attributes?: InputAttributes): Input;
         /** This element is used to visualize the integral of a given curve over a given interval. */
         integral(range: Number[], curve: Curve, attributes?: IntegralAttributes): Integral;
         /** An intersection point is a point which lives on two JSXGraph elements, i.e. it is one point of the set consisting of the intersection points of the two elements. The following element types can be (mutually) intersected: line, circle, curve, polygon, polygonal chain. */
         intersection(element1: Line | Circle | Curve, element2: Line | Circle, attributes?: IntersectionAttributes): Point;
         /** A major arc is a segment of the circumference of a circle having measure greater than or equal to 180 degrees (pi radians). It is defined by a center, one point that defines the radius, and a third point that defines the angle of the arc. */
-        majorArc(p1: Point | point, p2: Point | point, p3: Point | point, attributes?: MajorArcAttributes): MajorArc;
+        majorArc(p1: Point | pointAddr, p2: Point | pointAddr, p3: Point | pointAddr, attributes?: MajorArcAttributes): MajorArc;
         /** A major sector is a sector of a circle having measure greater than or equal to 180 degrees (pi radians). It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
-        majorSector(p1: Point | point, p2: Point | point, p3: Point | point, attributes?: MajorSectorAttributes): MajorSector;
+        majorSector(p1: Point | pointAddr, p2: Point | pointAddr, p3: Point | pointAddr, attributes?: MajorSectorAttributes): MajorSector;
         /** A point in the middle of two given points or a line segment. */
         midpoint(p1: Point, p2: Point, attributes?: MidpointAttributes): Midpoint;
         midpoint(line: Line, attributes?: MidpointAttributes): Midpoint;
         /** A minor arc is a segment of the circumference of a circle having measure less than or equal to 180 degrees (pi radians). It is defined by a center, one point that defines the radius, and a third point that defines the angle of the arc. */
-        minorArc(p1: Point | point, p2: Point | point, p3: Point | point, attributes?: MinorArcAttributes): MinorArc;
+        minorArc(p1: Point | pointAddr, p2: Point | pointAddr, p3: Point | pointAddr, attributes?: MinorArcAttributes): MinorArc;
         /** A minor sector is a sector of a circle having measure less than or equal to 180 degrees (pi radians). It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
-        minorSector(p1: Point | point, p2: Point | point, p3: Point | point, attributes?: MinorSectorAttributes): MinorSector;
+        minorSector(p1: Point | pointAddr, p2: Point | pointAddr, p3: Point | pointAddr, attributes?: MinorSectorAttributes): MinorSector;
         /** A mirror element of a point, line, circle, curve, polygon will be constructed. */
-        mirrorelement(element: Point | Line | Circle | Curve | Polygon, acrossPoint: Point | point, attributes?: mirrorelementAttributes): mirrorelement;
+        mirrorelement(element: Point | Line | Circle | Curve | Polygon, acrossPoint: Point | pointAddr, attributes?: mirrorelementAttributes): mirrorelement;
         /** A mirror point will be constructed. */
         mirrorpoint(p1: Point, p2: Point, attributes?: MirrorpointAttributes): Mirrorpoint;
         /** A non-reflex angle is the acute or obtuse instance of an angle. It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
@@ -1258,32 +1380,37 @@ declare namespace TXG {
         /** A line through a given point on an element of type line, circle, curve, or turtle and orthogonal (at right angle) to that object. */
         normal(object: Line | Circle | Curve, point: Point, attributes?: NormalAttributes): Normal;
         normal(glider: Glider, attributes?: NormalAttributes): Normal;
-        /** This is used to construct a point that is the orthogonal projection of a point to a line. */
-        orthogonalprojection(point: Point | point, line: Line | line, attributes?: OrthogonalprojectionAttributes): Orthogonalprojection;
+        /** An `orthogonalprojection` is a locked point determined by projecting a point orthogonally onto a line.
+       ```js
+       let s1 = TSX.segment(p1, p2)
+       let p3 = TSX.point([0, -1])
+       TSX.orthogonalprojection(p3, s1)
+       ``` */
+        orthogonalprojection(point: Point | pointAddr, line: Line | line, attributes?: OrthogonalprojectionAttributes): Orthogonalprojection;
         /** This element is used to provide a constructor for the ”other” intersection point. */
         otherIntersection(element1: Line | Circle, element2: Line | Circle, firstIntersection: Point, attributes?: OtherIntersectionAttributes): Point;
         /** This element is used to provide a constructor for a parabola. A parabola is given by one point (the focus) and a line (the directrix). */
-        parabola(focalPoint: Point | point, line: Line | line, attributes?: ParabolaAttributes): Parabola;
+        parabola(focalPoint: Point | pointAddr, line: Line | line, attributes?: ParabolaAttributes): Parabola;
         /** A parallel point is given by three points, or a line and a point. Taking the Euclidean vector from the first to the second point, the parallel point is determined by adding that vector to the third point. The line determined by the first two points is parallel to the line determined by the third point and the constructed point. */
-        parallelpoint(line: Line | [Point, Point], point: Point | point, attributes?: ParallelpointAttributes): Parallelpoint;
+        parallelpoint(line: Line | [Point, Point], point: Point | pointAddr, attributes?: ParallelpointAttributes): Parallelpoint;
         parallelpoint(P1: Point, P2: Point, P3: Point, attributes?: ParallelpointAttributes): Parallelpoint;
         /** Create a line segment between two points. If there is a third variable then the segment has a fixed length (which may be a function) determined by the absolute value of that number. */
-        segment(P1: Point | point, P2: Point | point, attributes?: SegmentAttributes): Segment;
-        segment(P1: Point | point, P2: Point | point, length: number | Function, attributes?: SegmentAttributes): Segment;
+        segment(P1: Point | pointAddr, P2: Point | pointAddr, attributes?: SegmentAttributes): Segment;
+        segment(P1: Point | pointAddr, P2: Point | pointAddr, length: number | Function, attributes?: SegmentAttributes): Segment;
         /**  */
-        parallelogram(p1: Point | point, p2: Point | point, p3: Point | point, attributes?: ParallelogramAttributes): Parallelogram;
+        parallelogram(p1: Point | pointAddr, p2: Point | pointAddr, p3: Point | pointAddr, attributes?: ParallelogramAttributes): Parallelogram;
         /** Create a line orthogonal to a given line and containing a given point. If you want a Perpendicular to a Curve, look at Normal(). */
-        perpendicular(line: Line | line, point: Point | point, attributes?: PerpendicularAttributes): Perpendicular;
+        perpendicular(line: Line | line, point: Point | pointAddr, attributes?: PerpendicularAttributes): Perpendicular;
         /** Create a point on a line where a perpendicular to a given point would intersect that line. */
-        perpendicularPoint(line: Line | line, point: Point | point, attributes?: PerpendicularPointAttributes): PerpendicularPoint;
+        perpendicularPoint(line: Line | line, point: Point | pointAddr, attributes?: PerpendicularPointAttributes): PerpendicularPoint;
         /** Create a segment orthogonal to a given line and containing a given point.  If you want a Perpendicular to a Curve, look at Normal(). */
-        perpendicularSegment(line: Line | line, point: Point | point, attributes?: PerpendicularSegmentAttributes): PerpendicularSegment;
+        perpendicularSegment(line: Line | line, point: Point | pointAddr, attributes?: PerpendicularSegmentAttributes): PerpendicularSegment;
         /** This element is used to provide a constructor for the polar line of a point with respect to a conic or a circle. */
         polarLine(conic: Conic | Circle, point: Point, attributes?: PolarLineAttributes): PolarLine;
         /** This element is used to provide a constructor for the pole point of a line with respect to a conic or a circle. */
         polePoint(conic: Conic | Circle, line: Line, attributes?: PolePointAttributes): PolePoint;
         /** Array of Points */
-        polygonalChain(pointArray: Point[] | point[], attributes?: PolygonalChainAttributes): PolygonalChain;
+        polygonalChain(pointArray: Point[] | pointAddr[], attributes?: PolygonalChainAttributes): PolygonalChain;
         /** This element is used to provide a constructor for the radical axis with respect to two circles with distinct centers. The angular bisector of the polar lines of the circle centers with respect to the other circle is always the radical axis. The radical axis passes through the intersection points when the circles intersect. When a circle about the midpoint of circle centers, passing through the circle centers, intersects the circles, the polar lines pass through those intersection points. */
         radicalAxis(circle1: Circle, circle2: Circle, attributes?: RadicalAxisAttributes): RadicalAxis;
         /** A reflected element (point, polygon, line or curve) from an object of the same type and a line of reflection. */
@@ -1291,13 +1418,13 @@ declare namespace TXG {
         /** A reflex angle is the neither acute nor obtuse instance of an angle. It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
         reflexAngle(point1: Point, point2: Point, point3: Point, attributes?: ReflexAngleAttributes): ReflexAngle;
         /** Constructs a regular polygon. It needs two points which define the base line and the number of vertices. */
-        regularPolygon(P1: Point | point, P2: Point | point, nVertices: Number, attributes?: RegularPolygonAttributes): RegularPolygon;
+        regularPolygon(P1: Point | pointAddr, P2: Point | pointAddr, nVertices: Number, attributes?: RegularPolygonAttributes): RegularPolygon;
         /** A semicircle is a special arc defined by two points. The arc hits both points. */
-        semicircle(P1: Point | point, P2: Point | point, attributes?: SemicircleAttributes): Semicircle;
+        semicircle(P1: Point | pointAddr, P2: Point | pointAddr, attributes?: SemicircleAttributes): Semicircle;
         /** An input widget for choosing values from a given range of numbers.  Parameters are startpoint, endpoint,
                        and an array with [minimum, initialValue, maximum].  Query the value with slider.Value().  Set the slider either by
                        dragging the control or clicking on the line (you can disable clicking with {moveOnUp:false}
-
+               
        *```js
                 let s = TSX.slider([1, 2], [3, 2], [1, 5, 10])           //  query with s.Value()
                 let s = TSX.slider([1, 2], [3, 2], [1, 5, 10],{snapWidth:1})     //  only values 1,2,3...
@@ -1309,9 +1436,9 @@ declare namespace TXG {
                    label: {fontSize: 16, strokeColor: 'orange'},
                    suffixLabel: ' x=',         // really a prefix
                    postLabel: ' meters'        // this is a suffix
-
+               
        *``` */
-        slider(StartPoint: Point | point, EndPoint: Point | point, minimum_initial_maximum: [number, number, number], attributes?: SliderAttributes): Slider;
+        slider(StartPoint: Point | pointAddr, EndPoint: Point | pointAddr, minimum_initial_maximum: [number, number, number], attributes?: SliderAttributes): Slider;
         /** Slope field. Plot a slope field given by a function f(x, y) returning a number. */
         slopefield(func: Function, xData: NumberFunction[], yData: NumberFunction[], attributes?: SlopefieldAttributes): Slopefield;
         /** A slope triangle is an imaginary triangle that helps you find the slope of a line or a line segment (use the method '.Value()' ). The hypotenuse of the triangle (the diagonal) is the line you are interested in finding the slope of. The two 'legs' of the triangle are the 'rise' and 'run' used in the slope formula. */
@@ -1322,18 +1449,46 @@ declare namespace TXG {
         /** A tangent to a point on a line, circle, or curve.  Usually the point is a Glider. */
         tangent(point: Glider, attributes?: TangentAttributes): Tangent;
         tangent(point: Point, curve: Line | Circle | Curve, attributes?: TangentAttributes): Tangent;
+        /** Construct the tangent line through a point to a conic or a circle. There will be either two, one or no such tangent, depending if the point is outside of the conic, on the conic, or inside of the conic. Similar to the intersection of a line with a circle, the specific tangent can be chosen with a third (optional) parameter number. */
+        tangentTo(conic: Conic | Circle, point: Point | pointAddr, N?: Number, attributes?: tangentToAttributes): tangentTo;
         /** A tape measure can be used to measure distances between points. */
-        tapemeasure(P1: Point | point, P2: Point | point, attributes?: TapemeasureAttributes): Tapemeasure;
+        tapemeasure(P1: Point | pointAddr, P2: Point | pointAddr, attributes?: TapemeasureAttributes): Tapemeasure;
         /** This element is used to provide a constructor for trace curve (simple locus curve), which is realized as a special curve. */
         tracecurve(glider: Glider, point: Point, attributes?: TracecurveAttributes): Tracecurve;
+        /** Create a new point from an existing point and a concatenation of transforms. This is a powerful way of creating complex constructions that can be rotated, scaled, and translated.  An alternative to using Groups.
+       ~~~js
+           // define and initialize the translation values
+           let tX = TSX.slider([-9, 9.0], [3, 9.0], [-10, 0, 10], { name: 'tX' })
+           let tY = TSX.slider([-9, 8.5], [3, 8.5], [-10, 0, 10], { name: 'tY' })
+           let tRotate = TSX.slider([-9, 8.0], [3, 8.0], [-Math.PI * 2, 0, Math.PI * 2], { name: 'tRotate' })
+           let tScale = TSX.slider([-9, 7.5], [3, 7.5], [0, 1, 5], { name: 'tScale' })
+           // set up the model for the complex shape (use opacity:0)
+           let a = TSX.point([1, 5])
+           let b = TSX.point([2, 5])
+           // set up tranforms for rotation, scaling, and translation
+           let trans = TSX.translate(()=>tX.Value(), ()=>tY.Value())
+           let rot = TSX.rotate(() => tRotate.Value(), a)  // rotation around c
+           let scale = TSX.scale(()=>tScale.Value(),()=>tScale.Value())  // scaling is relative to [0,0]
+           // implement shape based on model and applying transforms
+           let ma = TSX.transformPoint(a,[rot,scale,trans],{color:'blue'})
+           let mb = TSX.transformPoint(b,[rot,scale,trans],{color:'blue'})
+           TSX.segment(ma,mb)
+       ~~~             */
+        transformPoint(point: Point, transform: Transform | Transform[], attributes?: TransformPointAttributes): Point;
         /** Here, lower is an array of the form [x, y] and dim is an array of the form [w, h]. The arrays [x, y] and [w, h] define the 2D frame into which the 3D cube is (roughly) projected. If the view azimuth=0 and elevation=0, the 3D view will cover a rectangle with lower left corner [x,y] and side lengths [w, h] of the board. The 'cube' is of the form [[x1, x2], [y1, y2], [z1, z2]] which determines the coordinate ranges of the 3D cube.  */
         view3D(x?: Number, y?: Number, w?: Number, h?: Number, xBounds?: Number[], yBounds?: Number[], zBounds?: Number[], attributes?: View3DAttributes): View3D;
+        /** Create a Transform object with Translate properties. */
+        translate(dx: number | Function, dy: number | Function, attributes?: TranslateAttributes): Transform;
+        /** Create a Transform object with Rotate properties. */
+        rotate(angle: number | Function, around: Point | pointAddr, attributes?: RotateAttributes): Transform;
+        /** Create a Transform object with Scale properties.  Scaling is relative to [0,0]. */
+        scale(xMultiplier: number | Function, yMultiplier: number | Function, attributes?: ScaleAttributes): Transform;
     }
     export class GeometryElement {
         elValue: Object;
         tsxBoard: TSXBoard;
         scaleXY: number;
-        constructor(className: string, params: any[], attrs: Object);
+        constructor(className: string, params: any[], attrs: GeometryElementAttributes);
         /**  */
         get x(): GeometryElement;
         /**  */
@@ -1383,8 +1538,6 @@ declare namespace TXG {
         getType(): String;
         /** Move an element to its nearest grid point. */
         handleSnapToGrid(): GeometryElement;
-        /** Checks whether (x,y) is near the element. */
-        hasPoint(x: number, y: number): Boolean;
         /** Hide the element. */
         hide(): GeometryElement;
         /** Hide the element. */
@@ -1406,7 +1559,7 @@ declare namespace TXG {
         /** Sets an arbitrary number of attributes. */
         setAttribute(attrs: GeometryElementAttributes): void;
         /** Sets a label and its text If label doesn't exist, it creates one */
-        setLabel(): Object;
+        setLabel(txt: string): Object;
         /** Updates the element's label text, strips all html. */
         setLabelText(): Object;
         /** Updates the element's label text and the element's attribute ”name”, strips all html. */
@@ -1434,7 +1587,7 @@ declare namespace TXG {
         elValue: Object;
         tsxBoard: TSXBoard;
         scaleXY: number;
-        constructor(className: string, params: any[], attrs: Object);
+        constructor(className: string, params: any[], attrs: GeometryElement3DAttributes);
         /**  */
         get element2D(): Number[];
         /**  */
@@ -1456,19 +1609,19 @@ declare namespace TXG {
         elValue: Object;
         tsxBoard: TSXBoard;
         scaleXY: number;
-        constructor(className: string, params: any[], attrs: Object);
+        constructor(className: string, params: any[], attrs: BoardAttributes);
     }
     export class Infobox {
         elValue: Object;
         tsxBoard: TSXBoard;
         scaleXY: number;
-        constructor(className: string, params: any[], attrs: Object);
+        constructor(className: string, params: any[], attrs: InfoboxAttributes);
     }
     export class CA {
         elValue: Object;
         tsxBoard: TSXBoard;
         scaleXY: number;
-        constructor(className: string, params: any[], attrs: Object);
+        constructor(className: string, params: any[], attrs: CAAttributes);
         /** f = map (x) -> x*sin(x); Usages: h = D(f, x); h = map (x) -> D(f, x); or D(x^2, x); */
         expandDerivatives(): any;
         /** Declare all subnodes as math nodes, i.e recursively set node.isMath = true; */
@@ -1517,7 +1670,7 @@ declare namespace TXG {
         elValue: Object;
         tsxBoard: TSXBoard;
         scaleXY: number;
-        constructor(className: string, params: any[], attrs: Object);
+        constructor(className: string, params: any[], attrs: ComplexAttributes);
         /**  */
         get absval(): Number;
         /**  */
@@ -1545,7 +1698,7 @@ declare namespace TXG {
         elValue: Object;
         tsxBoard: TSXBoard;
         scaleXY: number;
-        constructor(className: string, params: any[], attrs: Object);
+        constructor(className: string, params: any[], attrs: CompositionAttributes);
         /** Adds an element to the composition container. */
         add(): Boolean;
         /** Invokes fullUpdate for every stored element with a fullUpdate method and hands over the given arguments. */
@@ -1567,7 +1720,7 @@ declare namespace TXG {
         elValue: Object;
         tsxBoard: TSXBoard;
         scaleXY: number;
-        constructor(className: string, params: any[], attrs: Object);
+        constructor(className: string, params: any[], attrs: CoordsAttributes);
         /**  */
         get board(): Board;
         /**  */
@@ -1634,7 +1787,7 @@ declare namespace TXG {
         elValue: Object;
         tsxBoard: TSXBoard;
         scaleXY: number;
-        constructor(className: string, params: any[], attrs: Object);
+        constructor(className: string, params: any[], attrs: DumpAttributes);
         /** Adds markers to every element of the board */
         addMarkers(): Dump;
         /** Converts an array of different values into a parameter string that can be used by the code generators. */
@@ -1656,10 +1809,7 @@ declare namespace TXG {
         /** Saves the construction in board to JessieCode. */
         toJessie(): Dump;
     }
-    export class ForeignObject {
-        elValue: Object;
-        tsxBoard: TSXBoard;
-        scaleXY: number;
+    export class ForeignObject extends GeometryElement {
         constructor(className: string, params: any[], attrs: Object);
         /**  */
         get content(): Number[];
@@ -1683,37 +1833,35 @@ declare namespace TXG {
         /** Adds ids of elements to the array this.parents. */
         addParents(parents: GeometryElement[]): Object;
         /** Adds an Point to this group. */
-        addPoint(point: Point | point): Group;
+        addPoint(point: Point | pointAddr | Image): Group;
         /** Adds multiple points to this group. */
         addPoints(points: Point[]): Group;
         /** Adds a point to the set of rotation points of the group. */
-        addRotationPoint(): Group;
+        addRotationPoint(point: Point): Group;
         /** Adds a point to the set of the scale points of the group. */
-        addScalePoint(): Group;
+        addScalePoint(point: Point, direction: number | Function): Group;
+        /** Adds a point to the set of the translation points of the group. */
+        addTranslationPoint(point: Point): Group;
         /** List of the element ids resp. */
         getParents(): Number[];
         /** Removes a point from the group. */
-        removePoint(): Group;
+        removePoint(point: Point): Group;
         /** Removes the rotation property from a point of the group. */
-        removeRotationPoint(): Group;
+        removeRotationPoint(point: Point): Group;
         /** Removes the scaling property from a point of the group. */
-        removeScalePoint(): Group;
+        removeScalePoint(point: Point): Group;
         /** Removes the translation property from a point of the group. */
-        removeTranslationPoint(): Group;
-        /** Sets ids of elements to the array this.parents. */
-        setParents(): Object;
-        /**  */
-        setProperty(): Group;
+        removeTranslationPoint(point: Point): Group;
         /** Sets the center of rotation for the group. */
-        setRotationCenter(): Group;
+        setRotationCenter(pivot: Point | pointAddr | "centroid"): Group;
         /** Sets the rotation points of the group. */
-        setRotationPoints(): Group;
+        setRotationPoints(points: Point | Point[]): Group;
         /** Sets the center of scaling for the group. */
-        setScaleCenter(): Group;
+        setScaleCenter(point: Point | pointAddr): Group;
         /** Sets the scale points of the group. */
-        setScalePoints(): Group;
+        setScalePoints(points: Point | Point[]): Group;
         /** Sets the translation points of the group. */
-        setTranslationPoints(): Group;
+        setTranslationPoints(points: Point | Point[]): Group;
         /** Releases all elements of this group. */
         ungroup(): Group;
     }
@@ -1742,7 +1890,7 @@ declare namespace TXG {
         elValue: Object;
         tsxBoard: TSXBoard;
         scaleXY: number;
-        constructor(className: string, params: any[], attrs: Object);
+        constructor(className: string, params: any[], attrs: LegendAttributes);
         /**  */
         get colors(): Number[];
         /**  */
@@ -1824,7 +1972,7 @@ declare namespace TXG {
         /**  */
         coords(): Number[];
         /** Calculates Euclidean distance for two Points, eg:  p1.Dist(p2) */
-        Dist(toPoint: Point | point): number;
+        Dist(toPoint: Point | pointAddr): number;
         /** Set the face of a point element. */
         face(style: 'cross' | 'circle' | 'square' | 'plus' | 'minus' | 'diamond'): Boolean;
         /** Updates the position of the point. */
@@ -1838,13 +1986,23 @@ declare namespace TXG {
         /** Moves an element towards coordinates, optionally tweening over time.  Time is in ms.  WATCH OUT, there
                                is no AWAIT for the tween to finish, a second moveTo() starts immediately. Thats GOOD if you
                                want to move two different points at the same time, BAD if you want to move the same point repeatedly.  EG:
-
+                               
        ```js
-
+       
        P.moveTo([A.X(), A.Y()], 5000)
-
+       
        ``` */
-        moveTo(p: number[], time?: number): any;
+        moveTo(p: number[] | Function[], time?: number, callback?: Function, effect?: "==" | "<>" | ">" | "<"): any;
+        /** Moves an element towards coordinates, optionally tweening over time.  Time is in ms.  WATCH OUT, there
+                               is no AWAIT for the tween to finish, a second moveTo() starts immediately. Thats GOOD if you
+                               want to move two different points at the same time, BAD if you want to move the same point repeatedly.  EG:
+                               
+       ```js
+       
+       P.moveTo([A.X(), A.Y()], 5000)
+       
+       ``` */
+        visit(p: number[] | Function[], time?: number, callback?: Function, effect?: "==" | "<>" | ">" | "<", repeat?: number): any;
         /** Point location in vector form [n,n] */
         XY(): [number, number];
     }
@@ -1867,6 +2025,8 @@ declare namespace TXG {
         get borders(): Number[];
         /** Attributes for the polygon vertices. */
         get vertices(): VertexAttributes;
+        /** Checks whether (x,y) is near the polygon. */
+        hasPoint(x: number, y: number): Boolean;
         /** Uses the boards renderer to update the polygon. */
         updateRenderer(): any;
     }
@@ -1877,6 +2037,8 @@ declare namespace TXG {
         constructor(className: string, params: any[], attrs: Object);
         /**  */
         get size(): Number[];
+        /**  */
+        setAttribute(attrs: TextAttributes): void;
         /** Returns the bounding box of the text element in user coordinates as an array of length 4: [upper left x, upper left y, lower right x, lower right y]. */
         bounds(): Number[];
         /** A very crude estimation of the dimensions of the textbox in case nothing else is available. */
@@ -1905,6 +2067,9 @@ declare namespace TXG {
         updateSize(): this;
         /** Decode unicode entities into characters. */
         utf8_decode(): String;
+    }
+    export class Text3D extends GeometryElement3D {
+        constructor(className: string, params: any[], attrs: Object);
     }
     export class Ticks extends GeometryElement {
         constructor(className: string, params: any[], attrs: Object);
@@ -2101,6 +2266,8 @@ declare namespace TXG {
     }
     export class Checkbox extends Text {
         constructor(className: string, params: any[], attrs: Object);
+        /**  */
+        setAttribute(attrs: CheckboxAttributes): void;
         /** Returns the value of the checkbox element */
         Value(): Boolean;
         /**  */
@@ -2341,6 +2508,9 @@ declare namespace TXG {
     export class Tangent extends Line {
         constructor(className: string, params: any[], attrs: Object);
     }
+    export class tangentTo extends Line {
+        constructor(className: string, params: any[], attrs: Object);
+    }
     export class Tapemeasure extends Segment {
         constructor(className: string, params: any[], attrs: Object);
         /** Returns the length of the tape measure. */
@@ -2351,12 +2521,32 @@ declare namespace TXG {
     }
     export class Transform extends GeometryElement {
         constructor(className: string, params: any[], attrs: Object);
+        /** Create a new Point from a Point and Transform.  Translation just requires dx and dy.
+                                   Rotation requires a point to rotate around, and a rotation transform around that point, and
+                                   a remote point that sets both the radius and the initial angle of the rotation.
+                                   
+       Example: Given a rotation transform controlled by a slider, create a rotating point using the transform method Point() and the
+                                   radius point.
+       ```js
+           let slid = TSX.slider([-4,0],[-2,0],[-20,0,20])  // controls rotation
+           let c = TSX.point([-1,-1],{name:'c'})     //center
+           let rot = TSX.rotate(()=>slid.Value(),c)  // rotation around c
+           let initial = TSX.point([-1,1],{name:'initial'})
+           let d = rot.point(initial,{name:'rotation around c'})  // new point
+           TSX.segment(c,d)    // to illustrate
+       ``` */
+        point(fromPoint: Point, attributes?: PointAttributes): Point;
         /**  */
         applyOnce(element: GeometryElement): void;
-        /**  */
+        /**  Binds a transformation to a GeometryElement or an array of elements. In every update of the GeometryElement(s), the transformation is executed. That means, in order to immediately apply the transformation, a call of board.update() has to follow. */
         bindTo(element: GeometryElement): void;
         /**  */
+        melt(t: Transform): Transform;
+        /**  */
         setMatrix(): Transform;
+    }
+    export class TransformPoint extends Point {
+        constructor(className: string, params: any[], attrs: Object);
     }
     export class View3D extends GeometryElement3D {
         constructor(className: string, params: any[], attrs: Object);
@@ -2376,17 +2566,19 @@ declare namespace TXG {
         circle3D(point: Point3D, normal: number[], radius: number, attributes?: Object): Circle3D;
         /** Glider3D is an alias for JSXGraph's Point3d(). */
         glider3D(element: Curve3D, initial?: number[], attributes?: Object): Point3D;
+        /** This element is used to provide a constructor for a 3D Text. */
+        text3D(position: NumberFunction[], text: string | Function, attributes?: Object): Text3D;
         /** Create a 3D plane object defined by a point and two directions, and extending negative and positive distanced in those directions by a range.  Remember to set visible:true.
-
+                                   
        *```js
-
+       
         let pnt = [[-1, 1, 1]]
         let axis1 = [0, 1, 0], axis2 = [0, 0, 1]
         let range1 = [0,3], range2 = [0,3]
         view.plane3D'(pnt, axis1, axis2, range1, range2,
                { fillColor: 'red', gradientSecondColor: 'blue', fillOpacity: .5, strokeColor: 'blue',
                 gradient: 'linear', visible:true })
-
+                                   
        ``` */
         plane3D(point: Point3D | number[], axis1: number[], axis2: number[], range1: number[], range2: number[], attributes?: Object): Plane3D;
         /**  */
@@ -2420,5 +2612,15 @@ declare namespace TXG {
         /**  */
         stopAzimuth(): any;
     }
+    export class Translate extends Transform {
+        constructor(className: string, params: any[], attrs: Object);
+    }
+    export class Rotate extends Transform {
+        constructor(className: string, params: any[], attrs: Object);
+    }
+    export class Scale extends Transform {
+        constructor(className: string, params: any[], attrs: Object);
+    }
     export {};
 }
+

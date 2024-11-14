@@ -3,6 +3,9 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const path = require('path');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 
+var PACKAGE = require('./package.json');        // use the version # from package.json
+var version = PACKAGE.version;
+
 module.exports = {
     // devtool: 'inline-source-map',
     devtool: 'eval-source-map',
@@ -64,9 +67,9 @@ module.exports = {
 
     output: {
         filename: 'bundle.[name].js',     // for small bundles
-        publicPath: "dist/",
+        publicPath: "dist."+version+"/",
         globalObject: "self",
-        path: path.resolve(__dirname, "dist"),
+        path: path.resolve(__dirname, "dist."+version),
     },
     plugins: [
         new MonacoWebpackPlugin(),

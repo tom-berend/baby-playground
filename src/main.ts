@@ -4,6 +4,8 @@
 //   - you should also remove   /** @ignore */ and the line that follows
 
 import ts from 'typescript';
+import { LIB_VERSION } from './version';
+
 
 import { Editor } from "./editor";
 import { OnClickSay } from "./onClickSay"
@@ -35,9 +37,9 @@ import { Buffer } from "buffer";
 (self as any).MonacoEnvironment = {
     getWorkerUrl(moduleId: string, label: string) {
         if (label === "typescript" || label === "javascript") {
-            return "./dist/ts.worker.js";
+            return `./dist.${LIB_VERSION}/ts.worker.js`;
         }
-        return "./dist/editor.worker.js";
+        return `./dist.${LIB_VERSION}/editor.worker.js`;
     },
 };
 

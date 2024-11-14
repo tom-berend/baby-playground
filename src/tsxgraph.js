@@ -19,7 +19,7 @@
 //    DEALINGS IN THE SOFTWARE.
 //
 /////////////////////////////////////////////////////////////////////////////
-//   Generated on September 27, 2024, 7:37 pm 
+//   Generated on November 12, 2024, 4:02 am 
 export var TXG;
 (function (TXG) {
     // utility function for determining whether an object is a JSX object (or part of this wrapper)
@@ -53,17 +53,40 @@ export var TXG;
     TXG.Symbolic = Symbolic;
     /** JSXGraph library wrapped in TypeScript */
     class TSXGraph {
-        static defaultAttrs = { name: '', keepAspectRatio: true };
-        /** Initialize a new board. */
-        static initBoard(html, attributes = {}) {
+        static defaultAttrs = { name: '' };
+        /** Initialize a new board. The first parameter 'html' should be the ID of a <DIV> in your web page.
+
+
+         * ```js
+<div id="jxgbox" class="jxgbox" style="width:1000px; height:1000px;float:left;"></div>
+<script src="lunar.js" type="module" defer>  </script>
+
+// start your .ts with something like this
+import { TXG } from "../src/tsxgraph.js";
+const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
+```
+        */
+        /** Initializes a new board */
+        static initBoard(html, attributeObj = {}) {
             const newBoard = new TSXBoard();
-            newBoard.board = window.JXG.JSXGraph.initBoard(html, attributes);
+            // add some defaults that we prefer
+            if (!('resize' in attributeObj))
+                attributeObj['resize'] = { enabled: true, throttle: 200 };
+            newBoard.board = window.JXG.JSXGraph.initBoard(html, attributeObj);
             JSXMath.board = newBoard.board; // make a copy for JSXMath and its decendents
             return newBoard;
         }
         // /** Delete a board and all its contents. */
         static freeBoard(board) {
             window.JXG.JSXGraph.freeBoard(board);
+        }
+        /** set Katex as default for board (names, labels, everything).  useKatex() need only be set ONCE, no way to unset. the text element has a 'useKatex' attribute that lets you turn Katex on and off for individual text fields.
+        * ```js
+        *     TXG.TSXGraph.useKatex()
+        * ```
+        */
+        static useKatex() {
+            window.JXG.Options.text.useKatex = true;
         }
         // utility to dereference parameter- if they use TSXGraph objects then  use the JSXGraph objects instead
         static dereference(params) {
@@ -96,6 +119,7 @@ export var TXG;
     }
     TXG.TSXGraph = TSXGraph;
     class TSXBoard {
+        /** the underlying JSXGraph board object.  Might be null.  To walk the elements in the board, use: for (let el in (TSX.board! as any).objects) {...}       */
         board;
         printLineNumber = 0; // added a print() function, this tracks the line#
         /** Version of underlying JSX library */
@@ -121,6 +145,23 @@ export var TXG;
             const div = document.getElementById(boardID);
             window.JXG.CanvasRenderer(div, [this.canvasWidth, this.canvasHeight]);
             return window.JXG.context;
+        }
+        /** given a PointerEvent (eg: TSX.on('down', (e:Event)=> ... ) returns [x,y] absolute coordinates of the boards container top left corner.  use with getPosition() to get board absolute addresses. */
+        getCoordsTopLeftCorner(e) {
+            return this.board.getCoordsTopLeftCorner(e);
+        }
+        /** given a PointerEvent (eg: TSX.on('down', (e:Event)=> ... ) returns [x,y] coordinates relative to the documents's top left corner.  See also getCoordsTopLeftCorner() */
+        getPosition(e) {
+            return window.JXG.getPosition(e);
+        }
+        /** given a PointerEvent (eg: TSX.on('down', (e:Event)=> ... ), returns the mouse coordinates [x,y] in JSXGraph coordinates.  */
+        getMouseCoords(e) {
+            let cPos = this.board.getCoordsTopLeftCorner(e);
+            let absPos = window.JXG.getPosition(e);
+            let dx = absPos[0] - cPos[0];
+            let dy = absPos[1] - cPos[1];
+            let coords = new window.JXG.Coords(2, [dx, dy], this.board);
+            return [coords.usrCoords[1], coords.usrCoords[2]];
         }
         setBoundingBox(left, top, right, bottom) {
             return this.board.setBoundingBox([left, top, right, bottom]);
@@ -168,6 +209,10 @@ export var TXG;
         // addKeyboardEventHandlers():void{
         //     (this.board as any).addKeyboardEventHandlers()
         // }
+        /** Set the current frame.  If it doesn't exist, it will be created. Optionally set a location.  Example:  TSX.setFrame('starship',[4,4]) */
+        setFrame(name, location) {
+            this.board.setFrame(name, location);
+        }
         print(...args) {
             let bbox = this.board.getBoundingBox(); // get every time, in case setBoundingBox()
             let left = bbox[0]; // align x to left border
@@ -238,22 +283,18 @@ export var TXG;
         /////////////////////////////
         /////////////////////////////
         ///////////  V2 Math Library
-        /** new Points from point, angle, and distance.  Angle is in radians. */
-        V2AngleDistance(origin, distance, angle, dest) {
-            console.log(origin, origin.tsxBoard);
-            if (!dest) {
-                dest = JSXMath.board.point([0, 0], { name: '' });
-            }
-            let x = origin.X() + distance * Math.cos(angle);
-            let y = origin.Y() + distance * Math.sin(angle);
-            console.log(x, y);
-            dest.setPositionDirectly([x, y]);
-            return dest;
-        }
+        // /** new Points from point, angle, and distance.  Angle is in radians. */
+        // public V2AngleDistance(origin: TXG.Point, distance: number, angle: number, dest?: TXG.Point): TXG.Point {
+        //     console.log(origin, origin.tsxBoard)
+        //     if (!dest) { dest = JSXMath.board.point([0, 0], { name: '' }) }
+        //     let x = origin.X() + distance * Math.cos(angle)
+        //     let y = origin.Y() + distance * Math.sin(angle)
+        //     console.log(x,y)
+        //     dest.setPositionDirectly([x, y])
+        //     return dest
+        // }
         /**  */
         conic;
-        /** This element is used to provide projective transformations. */
-        transform;
         JSXMathMath;
         MatrixMath;
         GeometryMath;
@@ -286,47 +327,6 @@ export var TXG;
                 },
             };
             this.conic.z_ignore = this;
-            this.transform = {
-                /** @protected */
-                z_ignore: {},
-                /** Move a distance from a point */
-                translate(x, y, attributes = {}) {
-                    return new Transform('Transform', [x, y,], { type: 'translate' });
-                },
-                /** Increase distance from a point by a factor */
-                scale(x, y, attributes = {}) {
-                    return new Transform('Transform', [x, y,], { type: 'scale' });
-                },
-                /** Rotate by angle around a point */
-                rotate(angle, point = [0, 0], attributes = {}) {
-                    return new Transform('Transform', [angle, point,], { type: 'rotate' });
-                },
-                /** Reflect around a line */
-                reflect(x, y, attributes = {}) {
-                    return new Transform('Transform', [x, y,], { type: 'reflect' });
-                },
-                /** Move proportionally to distance */
-                shear(x, y, attributes = {}) {
-                    return new Transform('Transform', [x, y,], { type: 'shear' });
-                },
-                /** Transform using a MAT3 */
-                generic(a, b, c, d, e, f, g, h, i, attributes = {}) {
-                    return new Transform('Transform', [a, b, c, d, e, f, g, h, i,], { type: 'generic' });
-                },
-                /** A new Point from a Point and Transform */
-                point(p, t, attributes = {}) {
-                    return new Point('Point', [p, t,], attributes);
-                },
-                /** A new Circle from a Circle and Transform */
-                circle(c, t, attributes = {}) {
-                    return new Circle('Circle', [c, t,], attributes);
-                },
-                /** A new Curve from a Curve and Transform */
-                curve(c, t, attributes = {}) {
-                    return new Curve('Curve', [c, t,], attributes);
-                },
-            };
-            this.transform.z_ignore = this;
             this.JSXMathMath = {};
             this.MatrixMath = {
                 /** Calculates the cross product of two vectors both of length three. */
@@ -423,9 +423,12 @@ export var TXG;
                                                    Algorithm: D.E. Knuth, TAOCP 2, p. 128. */
                 randomExponential(lambda) { return window.JXG.Math.Statistics.randomExponential(lambda); },
                 /** Generate value of a random variable with gamma distribution of order alpha.  Default scale is 1. Default threshold is 0.
-                                                  See {@link https://en.wikipedia.org/wiki/Gamma_distribution}.
-                                                  Algorithm: D.E. Knuth, TAOCP 2, p. 129. */
+                                       See {@link https://en.wikipedia.org/wiki/Gamma_distribution}.
+                                       Algorithm: D.E. Knuth, TAOCP 2, p. 129. */
                 randomGamma(shape, scale, threshold) { return window.JXG.Math.Statistics.randomGamma(shape, scale, threshold); },
+                /** Generate value of a random variable with Pareto distribution with shape gamma and scale k.
+                                                  See {@link https://en.wikipedia.org/wiki/Pareto_distribution}. */
+                randomPareto(shape, scale, threshold) { return window.JXG.Math.Statistics.randomPareto(shape, scale, threshold); },
                 /** Generate value of a random variable with beta distribution with shape parameters alpha and beta.
                                                    See {@link https://en.wikipedia.org/wiki/Beta_distribution}. */
                 randomBeta(alpha, beta) { return window.JXG.Math.Statistics.randomBeta(alpha, beta); },
@@ -456,6 +459,8 @@ export var TXG;
                 histogram(data, bins, range, density, cumulative) { return window.JXG.Math.Statistics.histogram(data, { bins: bins ?? 10, range: range ?? false, density: density ?? true, cumulative: cumulative ?? false }); },
                 /** Determines the absolute value of every given value.  */
                 abs(arr) { return window.JXG.Math.Statistics.abs(arr); },
+                /** The P-th percentile ( 0 < P ≤ 100 ) of a list of N ordered values (sorted from least to greatest) is the smallest value in the list such that no more than P percent of the data is strictly less than the value and at least P percent of the data is less than or equal to that value. */
+                percentile(data, ranges) { return window.JXG.Math.Statistics.percentile(TSXGraph.dereference(data), TSXGraph.dereference(ranges)); },
             };
         }
         /** create a chart */
@@ -557,18 +562,33 @@ export var TXG;
         bezierCurve(points, attributes = {}) {
             return new Curve('curve', window.JXG.Math.Numerics.bezier(this.dereference(points)), TSXGraph.defaultAttributes(attributes));
         }
+        /** This element is used to provide a constructor for arbitrary content in an SVG foreignObject container.
+       ```js
+       TSX.foreignObject(
+           `<video width="300" height="200" src="https://eucbeniki.sio.si/vega2/278/Video_metanje_oge_.mp4" type="html5video" controls>`,
+           [0, -3], [9, 6],
+           {layer: 8, fixed: true})
+       ```
+                     */
+        foreignObject(content, position, size = null, attributes = {}) {
+            return new ForeignObject('ForeignObject', [content, position, size,], attributes);
+        }
         /** Array of Points */
         group(pointArray, attributes = {}) {
             return new Group('Group', [pointArray,], attributes);
         }
         /** Display an image.  The first element is the location URL of the image.
                        A collection of space icons is provided, press CTRL+I to show the list.
-                       The second parameter sets the lower left point of the image, you may need to shift the image location to center it.
+                       The second parameter sets the lower left point of the image.
+                       The optional third parameter sets the size multiplier of the image, default is [1,1].
+                       
+       If you want to move the image, just tie the image to a point, maybe at the center of the image.
+                        For more flexibility, see TSX.Rotate() and TSX.Translate()
                        
        *```js
-                       TSX.image('../icons/sun.png',[0,0])
-                       let P1 = TSX.point([3,2],{opacity:0})
-                       TSX.image(p1,[3-offest,3-offset])
+                   TSX.image('icons/earth.png', [0, 0],[2,2])
+                   let p1 = TSX.point([3, 2], { opacity: .1 })
+                   TSX.image('icons/moon-full-moon.png', [()=>p1.X(),()=>p1.Y()])
                        
        *``` */
         image(url, lowerLeft, widthHeight = [1, 1], attributes = {}) {
@@ -779,9 +799,9 @@ export var TXG;
         axis(p1, p2, attributes = {}) {
             return new Axis('Axis', [p1, p2,], attributes);
         }
-        /** Bisect an Angle defined with three points */
-        bisector(p1, p2, p3, attributes = {}) {
-            return new Bisector('Bisector', [p1, p2, p3,], attributes);
+        /** Bisect an Angle defined with three points A,B,C, and divides the angle ABC into two equal sized parts. */
+        bisector(A, B, C, attributes = {}) {
+            return new Bisector('Bisector', [A, B, C,], attributes);
         }
         /** Bisect a Line defined with two points */
         bisectorlines(l1, l2, attributes = {}) {
@@ -837,7 +857,7 @@ export var TXG;
         derivative(curve, attributes = {}) {
             return new Derivative('Derivative', [curve,], attributes);
         }
-        /** Two Points and Radius */
+        /**  An ellipse is given by two points (the foci) and a third point on the ellipse or the length of the major axis. */
         ellipse(p1, p2, radius, attributes = {}) {
             return new Ellipse('Ellipse', [p1, p2, radius,], attributes);
         }
@@ -947,7 +967,7 @@ export var TXG;
             return new Inequality('Inequality', [boundaryLine,], attributes);
         }
         /** This element is used to provide a constructor for special texts containing a HTML form input element. If the width of element is set with the attribute ”cssStyle”, the width of the label must be added. For this element, the attribute ”display” has to have the value 'html' (which is the default). The underlying HTML input field can be accessed through the sub-object 'rendNodeInput', e.g. to add event listeners. */
-        input(position, label, initial, attributes = {}) {
+        input(position, label, initial = "", attributes = {}) {
             position.push(label, initial);
             return new Input('Input', TSXGraph.dereference(position), TSXGraph.defaultAttributes(attributes));
         }
@@ -1055,7 +1075,12 @@ export var TXG;
             }
             return new Normal('normal', params, TSXGraph.defaultAttributes(attrs)); // as Normal
         }
-        /** This is used to construct a point that is the orthogonal projection of a point to a line. */
+        /** An `orthogonalprojection` is a locked point determined by projecting a point orthogonally onto a line.
+       ```js
+       let s1 = TSX.segment(p1, p2)
+       let p3 = TSX.point([0, -1])
+       TSX.orthogonalprojection(p3, s1)
+       ``` */
         orthogonalprojection(point, line, attributes = {}) {
             return new Orthogonalprojection('Orthogonalprojection', [point, line,], attributes);
         }
@@ -1279,6 +1304,10 @@ export var TXG;
             }
             return new Tangent('tangent', params, TSXGraph.defaultAttributes(attrs)); // as Tangent
         }
+        /** Construct the tangent line through a point to a conic or a circle. There will be either two, one or no such tangent, depending if the point is outside of the conic, on the conic, or inside of the conic. Similar to the intersection of a line with a circle, the specific tangent can be chosen with a third (optional) parameter number. */
+        tangentTo(conic, point, N = 0, attributes = {}) {
+            return new tangentTo('tangentTo', [conic, point, N,], attributes);
+        }
         /** A tape measure can be used to measure distances between points. */
         tapemeasure(P1, P2, attributes = {}) {
             return new Tapemeasure('Tapemeasure', [P1, P2,], attributes);
@@ -1286,6 +1315,28 @@ export var TXG;
         /** This element is used to provide a constructor for trace curve (simple locus curve), which is realized as a special curve. */
         tracecurve(glider, point, attributes = {}) {
             return new Tracecurve('Tracecurve', [glider, point,], attributes);
+        }
+        /** Create a new point from an existing point and a concatenation of transforms. This is a powerful way of creating complex constructions that can be rotated, scaled, and translated.  An alternative to using Groups.
+       ~~~js
+           // define and initialize the translation values
+           let tX = TSX.slider([-9, 9.0], [3, 9.0], [-10, 0, 10], { name: 'tX' })
+           let tY = TSX.slider([-9, 8.5], [3, 8.5], [-10, 0, 10], { name: 'tY' })
+           let tRotate = TSX.slider([-9, 8.0], [3, 8.0], [-Math.PI * 2, 0, Math.PI * 2], { name: 'tRotate' })
+           let tScale = TSX.slider([-9, 7.5], [3, 7.5], [0, 1, 5], { name: 'tScale' })
+           // set up the model for the complex shape (use opacity:0)
+           let a = TSX.point([1, 5])
+           let b = TSX.point([2, 5])
+           // set up tranforms for rotation, scaling, and translation
+           let trans = TSX.translate(()=>tX.Value(), ()=>tY.Value())
+           let rot = TSX.rotate(() => tRotate.Value(), a)  // rotation around c
+           let scale = TSX.scale(()=>tScale.Value(),()=>tScale.Value())  // scaling is relative to [0,0]
+           // implement shape based on model and applying transforms
+           let ma = TSX.transformPoint(a,[rot,scale,trans],{color:'blue'})
+           let mb = TSX.transformPoint(b,[rot,scale,trans],{color:'blue'})
+           TSX.segment(ma,mb)
+       ~~~             */
+        transformPoint(point, transform, attributes = {}) {
+            return new Point('point', TSXGraph.dereference([point, TSXGraph.dereference(transform)]), TSXGraph.defaultAttributes(attributes));
         }
         /** Here, lower is an array of the form [x, y] and dim is an array of the form [w, h]. The arrays [x, y] and [w, h] define the 2D frame into which the 3D cube is (roughly) projected. If the view azimuth=0 and elevation=0, the 3D view will cover a rectangle with lower left corner [x,y] and side lengths [w, h] of the board. The 'cube' is of the form [[x1, x2], [y1, y2], [z1, z2]] which determines the coordinate ranges of the 3D cube.  */
         view3D(x = -13, y = -10, w = 20, h = 20, xBounds = [-5, 5], yBounds = [-5, 5], zBounds = [-5, 5], attributes = {
@@ -1306,6 +1357,18 @@ export var TXG;
         }) {
             return new View3D('view3D', [[x, y], [w, h], [xBounds, yBounds, zBounds]], attributes);
         }
+        /** Create a Transform object with Translate properties. */
+        translate(dx, dy, attributes = {}) {
+            return new Transform('Transform', TSXGraph.dereference([dx, dy]), { type: 'translate' });
+        }
+        /** Create a Transform object with Rotate properties. */
+        rotate(angle, around, attributes = {}) {
+            return new Transform('Transform', TSXGraph.dereference([angle, around]), { type: 'rotate' });
+        }
+        /** Create a Transform object with Scale properties.  Scaling is relative to [0,0]. */
+        scale(xMultiplier, yMultiplier, attributes = {}) {
+            return new Transform('Transform', TSXGraph.dereference([xMultiplier, yMultiplier]), { type: 'scale' });
+        }
     }
     TXG.TSXBoard = TSXBoard;
     class GeometryElement {
@@ -1319,7 +1382,7 @@ export var TXG;
             else {
                 this.elValue = JSXMath.board.create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs));
             }
-            if (Object.hasOwn(attrs, 'scaleXY')) {
+            if (attrs.hasOwnProperty('scaleXY')) {
                 this.scaleXY = attrs.scaleXY; // for V2 Math
             }
         }
@@ -1422,10 +1485,6 @@ export var TXG;
         handleSnapToGrid() {
             return this.elValue.handleSnapToGrid();
         }
-        /** Checks whether (x,y) is near the element. */
-        hasPoint(x, y) {
-            return this.elValue.hasPoint(x, y);
-        }
         /** Hide the element. */
         hide() {
             return this.elValue.hide();
@@ -1467,8 +1526,8 @@ export var TXG;
             return this.elValue.setAttribute(attrs);
         }
         /** Sets a label and its text If label doesn't exist, it creates one */
-        setLabel() {
-            return this.elValue.setLabel();
+        setLabel(txt) {
+            return this.elValue.setLabel(txt);
         }
         /** Updates the element's label text, strips all html. */
         setLabelText() {
@@ -1527,7 +1586,7 @@ export var TXG;
             else {
                 this.elValue = JSXMath.board.create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs));
             }
-            if (Object.hasOwn(attrs, 'scaleXY')) {
+            if (attrs.hasOwnProperty('scaleXY')) {
                 this.scaleXY = attrs.scaleXY; // for V2 Math
             }
         }
@@ -1576,7 +1635,7 @@ export var TXG;
             else {
                 this.elValue = JSXMath.board.create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs));
             }
-            if (Object.hasOwn(attrs, 'scaleXY')) {
+            if (attrs.hasOwnProperty('scaleXY')) {
                 this.scaleXY = attrs.scaleXY; // for V2 Math
             }
         }
@@ -1593,7 +1652,7 @@ export var TXG;
             else {
                 this.elValue = JSXMath.board.create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs));
             }
-            if (Object.hasOwn(attrs, 'scaleXY')) {
+            if (attrs.hasOwnProperty('scaleXY')) {
                 this.scaleXY = attrs.scaleXY; // for V2 Math
             }
         }
@@ -1610,7 +1669,7 @@ export var TXG;
             else {
                 this.elValue = JSXMath.board.create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs));
             }
-            if (Object.hasOwn(attrs, 'scaleXY')) {
+            if (attrs.hasOwnProperty('scaleXY')) {
                 this.scaleXY = attrs.scaleXY; // for V2 Math
             }
         }
@@ -1713,7 +1772,7 @@ export var TXG;
             else {
                 this.elValue = JSXMath.board.create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs));
             }
-            if (Object.hasOwn(attrs, 'scaleXY')) {
+            if (attrs.hasOwnProperty('scaleXY')) {
                 this.scaleXY = attrs.scaleXY; // for V2 Math
             }
         }
@@ -1774,7 +1833,7 @@ export var TXG;
             else {
                 this.elValue = JSXMath.board.create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs));
             }
-            if (Object.hasOwn(attrs, 'scaleXY')) {
+            if (attrs.hasOwnProperty('scaleXY')) {
                 this.scaleXY = attrs.scaleXY; // for V2 Math
             }
         }
@@ -1823,7 +1882,7 @@ export var TXG;
             else {
                 this.elValue = JSXMath.board.create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs));
             }
-            if (Object.hasOwn(attrs, 'scaleXY')) {
+            if (attrs.hasOwnProperty('scaleXY')) {
                 this.scaleXY = attrs.scaleXY; // for V2 Math
             }
         }
@@ -1964,7 +2023,7 @@ export var TXG;
             else {
                 this.elValue = JSXMath.board.create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs));
             }
-            if (Object.hasOwn(attrs, 'scaleXY')) {
+            if (attrs.hasOwnProperty('scaleXY')) {
                 this.scaleXY = attrs.scaleXY; // for V2 Math
             }
         }
@@ -2010,20 +2069,9 @@ export var TXG;
         }
     }
     TXG.Dump = Dump;
-    class ForeignObject {
-        elValue = {};
-        tsxBoard = JSXMath.board; // copy, sometimes need access to board
-        scaleXY = 1; // used by V2 math library
+    class ForeignObject extends GeometryElement {
         constructor(className, params, attrs) {
-            if (className == 'Polygon' || className == 'PolygonalChain' || className == 'Group') {
-                this.elValue = JSXMath.board.create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs));
-            }
-            else {
-                this.elValue = JSXMath.board.create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs));
-            }
-            if (Object.hasOwn(attrs, 'scaleXY')) {
-                this.scaleXY = attrs.scaleXY; // for V2 Math
-            }
+            super(className, params, attrs);
         }
         /**  */
         get content() {
@@ -2076,60 +2124,56 @@ export var TXG;
             return this.elValue.addPoints(TSXGraph.dereference(points));
         }
         /** Adds a point to the set of rotation points of the group. */
-        addRotationPoint() {
-            return this.elValue.addRotationPoint();
+        addRotationPoint(point) {
+            return this.elValue.addRotationPoint(TSXGraph.dereference(point));
         }
         /** Adds a point to the set of the scale points of the group. */
-        addScalePoint() {
-            return this.elValue.addScalePoint();
+        addScalePoint(point, direction) {
+            return this.elValue.addScalePoint(TSXGraph.dereference(point), direction);
+        }
+        /** Adds a point to the set of the translation points of the group. */
+        addTranslationPoint(point) {
+            return this.elValue.addTranslationPoint(TSXGraph.dereference(point));
         }
         /** List of the element ids resp. */
         getParents() {
             return this.elValue.getParents();
         }
         /** Removes a point from the group. */
-        removePoint() {
-            return this.elValue.removePoint();
+        removePoint(point) {
+            return this.elValue.removePoint(TSXGraph.dereference(point));
         }
         /** Removes the rotation property from a point of the group. */
-        removeRotationPoint() {
-            return this.elValue.removeRotationPoint();
+        removeRotationPoint(point) {
+            return this.elValue.removeRotationPoint(TSXGraph.dereference(point));
         }
         /** Removes the scaling property from a point of the group. */
-        removeScalePoint() {
-            return this.elValue.removeScalePoint();
+        removeScalePoint(point) {
+            return this.elValue.removeScalePoint(TSXGraph.dereference(point));
         }
         /** Removes the translation property from a point of the group. */
-        removeTranslationPoint() {
-            return this.elValue.removeTranslationPoint();
-        }
-        /** Sets ids of elements to the array this.parents. */
-        setParents() {
-            return this.elValue.setParents();
-        }
-        /**  */
-        setProperty() {
-            return this.elValue.setProperty();
+        removeTranslationPoint(point) {
+            return this.elValue.removeTranslationPoint(TSXGraph.dereference(point));
         }
         /** Sets the center of rotation for the group. */
-        setRotationCenter() {
-            return this.elValue.setRotationCenter();
+        setRotationCenter(pivot) {
+            return this.elValue.setRotationCenter(TSXGraph.dereference(pivot));
         }
         /** Sets the rotation points of the group. */
-        setRotationPoints() {
-            return this.elValue.setRotationPoints();
+        setRotationPoints(points) {
+            return this.elValue.setRotationPoints(TSXGraph.dereference(points));
         }
         /** Sets the center of scaling for the group. */
-        setScaleCenter() {
-            return this.elValue.setScaleCenter();
+        setScaleCenter(point) {
+            return this.elValue.setScaleCenter(TSXGraph.dereference(point));
         }
         /** Sets the scale points of the group. */
-        setScalePoints() {
-            return this.elValue.setScalePoints();
+        setScalePoints(points) {
+            return this.elValue.setScalePoints(TSXGraph.dereference(points));
         }
         /** Sets the translation points of the group. */
-        setTranslationPoints() {
-            return this.elValue.setTranslationPoints();
+        setTranslationPoints(points) {
+            return this.elValue.setTranslationPoints(TSXGraph.dereference(points));
         }
         /** Releases all elements of this group. */
         ungroup() {
@@ -2190,7 +2234,7 @@ export var TXG;
             else {
                 this.elValue = JSXMath.board.create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs));
             }
-            if (Object.hasOwn(attrs, 'scaleXY')) {
+            if (attrs.hasOwnProperty('scaleXY')) {
                 this.scaleXY = attrs.scaleXY; // for V2 Math
             }
         }
@@ -2387,8 +2431,20 @@ export var TXG;
        P.moveTo([A.X(), A.Y()], 5000)
        
        ``` */
-        moveTo(p, time = 0) {
-            return this.elValue.moveTo(TSXGraph.dereference(p), time);
+        moveTo(p, time = 0, callback = () => { }, effect = "==") {
+            return this.elValue.moveTo(TSXGraph.dereference(p), time, { callback: callback, effect: effect });
+        }
+        /** Moves an element towards coordinates, optionally tweening over time.  Time is in ms.  WATCH OUT, there
+                               is no AWAIT for the tween to finish, a second moveTo() starts immediately. Thats GOOD if you
+                               want to move two different points at the same time, BAD if you want to move the same point repeatedly.  EG:
+                               
+       ```js
+       
+       P.moveTo([A.X(), A.Y()], 5000)
+       
+       ``` */
+        visit(p, time = 0, callback = () => { }, effect = "==", repeat = 1) {
+            return this.elValue.visit(TSXGraph.dereference(p), time, { callback: callback, effect: effect, repeat: repeat });
         }
         /** Point location in vector form [n,n] */
         XY() {
@@ -2434,6 +2490,10 @@ export var TXG;
         get vertices() {
             return this.elValue.vertices;
         }
+        /** Checks whether (x,y) is near the polygon. */
+        hasPoint(x, y) {
+            return this.elValue.hasPoint(x, y);
+        }
         /** Uses the boards renderer to update the polygon. */
         updateRenderer() {
             return this.elValue.updateRenderer();
@@ -2453,6 +2513,10 @@ export var TXG;
         /**  */
         get size() {
             return this.elValue.size;
+        }
+        /**  */
+        setAttribute(attrs) {
+            return this.elValue.setAttribute(attrs);
         }
         /** Returns the bounding box of the text element in user coordinates as an array of length 4: [upper left x, upper left y, lower right x, lower right y]. */
         bounds() {
@@ -2512,6 +2576,12 @@ export var TXG;
         }
     }
     TXG.Text = Text;
+    class Text3D extends GeometryElement3D {
+        constructor(className, params, attrs) {
+            super(className, params, attrs);
+        }
+    }
+    TXG.Text3D = Text3D;
     class Ticks extends GeometryElement {
         constructor(className, params, attrs) {
             super(className, params, attrs);
@@ -2892,6 +2962,10 @@ export var TXG;
     class Checkbox extends Text {
         constructor(className, params, attrs) {
             super(className, params, attrs);
+        }
+        /**  */
+        setAttribute(attrs) {
+            return this.elValue.setAttribute(attrs);
         }
         /** Returns the value of the checkbox element */
         Value() {
@@ -3373,6 +3447,12 @@ export var TXG;
         }
     }
     TXG.Tangent = Tangent;
+    class tangentTo extends Line {
+        constructor(className, params, attrs) {
+            super(className, params, attrs);
+        }
+    }
+    TXG.tangentTo = tangentTo;
     class Tapemeasure extends Segment {
         constructor(className, params, attrs) {
             super(className, params, attrs);
@@ -3393,13 +3473,35 @@ export var TXG;
         constructor(className, params, attrs) {
             super(className, params, attrs);
         }
+        /** Create a new Point from a Point and Transform.  Translation just requires dx and dy.
+                                   Rotation requires a point to rotate around, and a rotation transform around that point, and
+                                   a remote point that sets both the radius and the initial angle of the rotation.
+                                   
+       Example: Given a rotation transform controlled by a slider, create a rotating point using the transform method Point() and the
+                                   radius point.
+       ```js
+           let slid = TSX.slider([-4,0],[-2,0],[-20,0,20])  // controls rotation
+           let c = TSX.point([-1,-1],{name:'c'})     //center
+           let rot = TSX.rotate(()=>slid.Value(),c)  // rotation around c
+           let initial = TSX.point([-1,1],{name:'initial'})
+           let d = rot.point(initial,{name:'rotation around c'})  // new point
+           TSX.segment(c,d)    // to illustrate
+       ``` */
+        point(fromPoint, attributes = {}) {
+            return JSXMath.board.create('point', [TSXGraph.dereference(fromPoint), this.elValue], TSXGraph.defaultAttributes(attributes));
+        }
         /**  */
         applyOnce(element) {
             return this.elValue.applyOnce(TSXGraph.dereference(element));
         }
-        /**  */
+        /**  Binds a transformation to a GeometryElement or an array of elements. In every update of the GeometryElement(s), the transformation is executed. That means, in order to immediately apply the transformation, a call of board.update() has to follow. */
         bindTo(element) {
             return this.elValue.bindTo(TSXGraph.dereference(element));
+        }
+        /**  */
+        melt(t) {
+            this.elValue = this.elValue.melt(TSXGraph.dereference(t));
+            return this;
         }
         /**  */
         setMatrix() {
@@ -3407,6 +3509,12 @@ export var TXG;
         }
     }
     TXG.Transform = Transform;
+    class TransformPoint extends Point {
+        constructor(className, params, attrs) {
+            super(className, params, attrs);
+        }
+    }
+    TXG.TransformPoint = TransformPoint;
     class View3D extends GeometryElement3D {
         constructor(className, params, attrs) {
             super(className, params, attrs);
@@ -3442,6 +3550,10 @@ export var TXG;
         /** Glider3D is an alias for JSXGraph's Point3d(). */
         glider3D(element, initial = [0, 0, 0], attributes = {}) {
             return this.elValue.create("point3d", [...initial, TSXGraph.dereference(element)], attributes);
+        }
+        /** This element is used to provide a constructor for a 3D Text. */
+        text3D(position, text, attributes = {}) {
+            return this.elValue.create("text3d", [...TSXGraph.dereference(position), text], attributes);
         }
         /** Create a 3D plane object defined by a point and two directions, and extending negative and positive distanced in those directions by a range.  Remember to set visible:true.
                                    
@@ -3520,4 +3632,22 @@ export var TXG;
         }
     }
     TXG.View3D = View3D;
+    class Translate extends Transform {
+        constructor(className, params, attrs) {
+            super(className, params, attrs);
+        }
+    }
+    TXG.Translate = Translate;
+    class Rotate extends Transform {
+        constructor(className, params, attrs) {
+            super(className, params, attrs);
+        }
+    }
+    TXG.Rotate = Rotate;
+    class Scale extends Transform {
+        constructor(className, params, attrs) {
+            super(className, params, attrs);
+        }
+    }
+    TXG.Scale = Scale;
 })(TXG || (TXG = {}));

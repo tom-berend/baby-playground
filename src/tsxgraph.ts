@@ -21,7 +21,7 @@
         //
         /////////////////////////////////////////////////////////////////////////////
 
-        //   Generated on September 27, 2024, 7:37 pm 
+        //   Generated on November 12, 2024, 4:02 am 
 
 
 
@@ -58,6 +58,8 @@
  labelled?: string|Function
  /** Attributes for the line label. */
  label?: LabelAttributes
+ /** Set display name  */
+ name?:string|Function
  /** If enabled:true the (stroke) element will get a customized shadow.Customize color and opacity: If the object's RGB stroke color is [r,g,b] and its opacity is op, and the shadow parameters color is given as [r', g', b'] and opacity as op' the shadow will receive the RGB color[blend*r + r', blend*g + g', blend*b + b']and its opacity will be equal to op * op'. Further, the parameters blur and offset can be adjusted.This attribute is only available with SVG, not with canvas. */
  shadow?: Object
  /** If true, KaTeX will be used to render the input string. */
@@ -68,24 +70,60 @@
   nonnegativeOnly?: Boolean
  /** Draw label for this Element? */
  drawLabels?: Boolean
- /** Control the attribute ”checked” of the HTML checkbox. */
-  checked?: Boolean
  /** Size in pixels */
- size?: Number
- /** Tick face for major ticks of finite length.By default (face: '|') this is a straight line. Possible other values are ''. These faces are used in JXG.Hatch for hatch marking parallel lines. */
-  face?: String
+ size?: Number|Function
+ /** There are different point styles which differ in appearance. */
+  face?: 'o'|'line'|'point'|'cross'| 'plus' | 'minus' | 'divide'| 'diamond'| 'triangledown' | 'triangleleft' | 'triangleright'| 'triangleup' | 'square' |'circle' | string
  /** Include the the zero line in the grid */
   drawZero?: Boolean
+ /** If true, the dash pattern is multiplied by strokeWidth / 2. */
+  dashScale?: Boolean
+ /** If the element is dragged it will be moved on mousedown or touchstart to the top of its layer. Works only for SVG renderer and for simple elements consisting of one SVG node. */
+  dragToTopOfLayer?: Boolean
+ /** If true the element is fixed and can not be dragged around. The element will even stay at its position on zoom and moveOrigin events. Only free elements like points, texts, curves can be frozen. */
+  frozen?: Boolean
+ /** Gradient type. Possible values are 'linear'. 'radial' or null. */
+  gradient?: string
+ /** Angle (in radians) of the gradiant in case the gradient is of type 'linear'. If the angle is 0, the first color is on the left and the second color is on the right. If the angle is π/2 the first color is on top and the second color at the bottom. */
+  gradientAngle?: number
+ /** From the SVG specification: ‘cx’, ‘cy’ and ‘r’ define the largest (i.e., outermost) circle for the radial gradient. The gradient will be drawn such that the 100% gradient stop is mapped to the perimeter of this largest (i.e., outermost) circle. For radial gradients in canvas this is the value 'x1'. Takes a value between 0 and 1. */
+  gradientCX?: number
+ /** From the SVG specification: ‘cx’, ‘cy’ and ‘r’ define the largest (i.e., outermost) circle for the radial gradient. The gradient will be drawn such that the 100% gradient stop is mapped to the perimeter of this largest (i.e., outermost) circle. For radial gradients in canvas this is the value 'y1'. Takes a value between 0 and 1. */
+  gradientCY?: number
+ /** The gradientEndOffset attribute is a number (ranging from 0 to 1) which indicates where the second gradient stop is placed, see the SVG specification for more information. For linear gradients, this attribute represents a location along the gradient vector. For radial gradients, it represents a percentage distance from (fx,fy) to the edge of the outermost/largest circle. */
+  gradientEndOffset?: number
+ /** This attribute defines the radius of the start circle of the radial gradient. The gradient will be drawn such that the 0% <stop> is mapped to the perimeter of the start circle. For radial gradients in canvas this is the value 'r0'. Takes a value between 0 and 1. */
+  gradientFR?: number
+ /** `fx` and `fy` define the focal point for the radial gradient. The gradient will be drawn such that the 0% gradient stop is mapped to (fx, fy). For radial gradients in canvas this is the value 'x0'. Takes a value between 0 and 1. */
+  gradientFX?: number
+ /** y-coordinate of the circle center for the second color in case of gradient 'radial'. (The attribute fy in SVG) For radial gradients in canvas this is the value 'y0'. Takes a value between 0 and 1. */
+  gradientFY?: number
+ /** From the SVG specification: ‘cx’, ‘cy’ and ‘r’ define the largest (i.e., outermost) circle for the radial gradient. The gradient will be drawn such that the 100% gradient stop is mapped to the perimeter of this largest (i.e., outermost) circle. For radial gradients in canvas this is the value 'r1'. Takes a value between 0 and 1. */
+  gradientR?: number
+ /** Second color for gradient. */
+  gradientSecondColor?: String
+ /** Opacity of second gradient color. Takes a value between 0 and 1. */
+  gradientSecondOpacity?: number
+ /** The gradientStartOffset attribute is a number (ranging from 0 to 1) which indicates where the first gradient stop is placed, see the SVG specification for more information. For linear gradients, this attribute represents a location along the gradient vector. For radial gradients, it represents a percentage distance from (fx,fy) to the edge of the outermost/largest circle. */
+  gradientStartOffset?: number
+ /** Should the element use highlight attributes on mouseOver? */
+  highlight?: Boolean
+ /** The fill color of the given geometry element when the mouse is pointed over it. */
+  highlightFillColor?: string|Function
+ /** Opacity for fill color when the object is highlighted. */
+  highlightFillOpacity?: number|Function
  /** The stroke color of the given geometry element when the user moves the mouse over it. */
-  highlightStrokeColor?: String
+  highlightStrokeColor?: string|Function
  /** Opacity for stroke color when the object is highlighted. */
-  highlightStrokeOpacity?: Number
+  highlightStrokeOpacity?: number|Function
  /** Width of the element's stroke when the mouse is pointed over it. */
-  highlightStrokeWidth?: Number
+  highlightStrokeWidth?: number|Function
+ /** Display layer which will contain the element. */
+  layer?: number
+ /** Line endings (linecap) of a stroke element, i.e. line, circle, curve. Possible values are:'butt','round','square'. */
+  lineCap?: string
  /** Controls if an element can get the focus with the tab key. tabindex corresponds to the HTML attribute of the same name. See descriptiona at MDN. The additional value ”null” completely disables focus of an element. The value will be ignored if keyboard control of the board is not enabled or the element is fixed or not visible. */
   tabindex?: Number
- /** Set display name  */
- name?:String
  }
 
  interface GeometryElement3DAttributes  {
@@ -203,10 +241,8 @@
  scaleXY?: Number 
  }
 
- interface ForeignObjectAttributes  {
- /** used by V2 vector math library */
- scaleXY?: Number 
- /** List of attractor elements. If the distance of the foreignobject is less than attractorDistance the foreignobject is made to glider of this element. */
+ interface ForeignObjectAttributes extends GeometryElementAttributes {
+ /** List of attractor elements. If the distance of the ForeignObject is less than attractorDistance the ForeignObject is made to glider of this element. */
   attractors?: Element[]
  }
 
@@ -293,8 +329,6 @@
  }
 
  interface PointAttributes extends GeometryElementAttributes {
- /** There are different point styles which differ in appearance. Posssible values are Value InputOutput crossx circleo square, [][] plus+ minus- divide| diamond<> triangleup^, a, A triangledownv triangleleft< triangleright> */
-  face?: String
  /** If true, the infobox is shown on mouse/pen over, if false not. If the value is 'inherit', the value of JXG.Board#showInfobox is taken. true | false | 'inherit' */
   showInfobox?: Boolean|String
  /** If set to true, the point will snap to a grid of integer multiples of Point#snapSizeX and Point#snapSizeY (in user coordinates).The coordinates of the grid points are either integer multiples of snapSizeX and snapSizeY (given in user coordinates, not pixels) or are the intersection points of the major ticks of the boards default axes in case that snapSizeX, snapSizeY are negative. */
@@ -308,7 +342,7 @@
 
  interface PolygonAttributes extends GeometryElementAttributes {
  /** Attributes for the polygon border lines. */
-  borders?: Line
+  borders?: LineAttributes
  /** If true, moving the mouse over inner points triggers hasPoint. */
   hasInnerPoints?: Boolean
  /** By default, the strokewidths of the borders of a polygon are not changed during highlighting (only strokeColor and strokeOpacity are changed to highlightStrokeColor, and highlightStrokeOpacity). However, strokewidth is changed to highlightStrokewidth if an individual border gets the focus.With this attribute set to true, also the borders change strokeWidth if the polygon itself gets the focus. */
@@ -342,7 +376,7 @@
  /** Used to round texts given by a number. */
   digits?: Number
  /** Determines the rendering method of the text. */
-  display?: String
+  display?: "html"|"internal"
  /** Sensitive area for dragging the text. */
   dragArea?: String
  /** The font size in pixels. */
@@ -377,6 +411,11 @@
   useKatex?: Boolean
  /** If true, MathJax will be used to render the input string. */
   useMathJax?: Boolean
+ /** Control the attribute ”checked” of the HTML checkbox. */
+  checked?: Boolean
+ }
+
+ interface Text3DAttributes extends GeometryElement3DAttributes {
  }
 
  interface TicksAttributes extends GeometryElementAttributes {
@@ -390,8 +429,6 @@
   drawLabels?: Boolean
  /** Draw the zero tick, that lies at line.point1? */
   drawZero?: Boolean
- /** Tick face for major ticks of finite length.By default (face: '|') this is a straight line. Possible other values are ''. These faces are used in JXG.Hatch for hatch marking parallel lines. */
-  face?: String
  /** A function that expects two JXG.Coords, the first one representing the coordinates of the tick that is to be labeled, the second one the coordinates of the center (the tick with position 0). The third parameter is a null, number or a string. In the latter two cases, this value is taken. Returns a string. */
   generateLabelText?: Function
  /** A function that expects two JXG.Coords, the first one representing the coordinates of the tick that is to be labeled, the second one the coordinates of the center (the tick with position 0). */
@@ -790,7 +827,7 @@
 
  interface RegularPolygonAttributes extends PolygonAttributes {
  /** Attributes for the polygon border lines. */
-  borders?: Line
+  borders?: LineAttributes
  /** If true, moving the mouse over inner points triggers hasPoint. */
   hasInnerPoints?: Boolean
  /** Attributes for the polygon vertices.   eg: {vertices: { opacity: 0 }}, */
@@ -899,6 +936,13 @@
  interface TangentAttributes extends LineAttributes {
  }
 
+ interface tangentToAttributes extends LineAttributes {
+ /** Attributes for the intersection point of the conic/circle with the polar line of the tangentTo construction. */
+  point?: PointAttributes
+ /** Attributes for the polar line of the tangentTo construction. */
+  polar?: PolarLineAttributes
+ }
+
  interface TapemeasureAttributes extends SegmentAttributes {
  /** The precision of the tape measure value displayed in the optional text. */
   digits?: Number
@@ -926,6 +970,9 @@
  }
 
  interface TransformAttributes extends GeometryElementAttributes {
+ }
+
+ interface TransformPointAttributes extends PointAttributes {
  }
 
  interface View3DAttributes extends GeometryElement3DAttributes {
@@ -983,22 +1030,38 @@
  bank?: Object
  }
 
+ interface TranslateAttributes extends TransformAttributes {
+ }
+
+ interface RotateAttributes extends TransformAttributes {
+ }
+
+ interface ScaleAttributes extends TransformAttributes {
+ }
+
         type NumberFunction = Number|Function
 
         /** A 'point' has a position in space.  The only characteristic that distinguishes one point from another is its position. */
-        type point = [NumberFunction,NumberFunction] | NumberFunction[] // allow tuples or arrays
+        type pointAddr =  NumberFunction[] | [number,number] |[number,Function]|[Function,number]|[Function|Function] // allow tuples or arrays
 
 
         /** A Vector has both magnitude and direction, but no fixed position in space. */
         type Vec2 = [number,number]
 
-        type line  = [Point|point,Point|point]
+        type line  = [Point|pointAddr,Point|pointAddr]
 
 
         // to define 'matAny' (eg: 2x3 array) we need three steps
         type arrayNumber = Number[]
         type arrayNumber2 = arrayNumber|Number
         type matAny = arrayNumber2[]
+
+        interface MoveToOptions{
+           callback?:Function,
+           effect?: "==" | "<>" | "--" | "<" | ">",
+           repeat?:number
+        }
+
 
         // there is no constructor for labels, but we need the attributes anyhow for Tick, etc.
         interface LabelAttributes extends TextAttributes{
@@ -1012,11 +1075,17 @@
             offset?: [Number,Number]
             /** Possible string values for the position of a label for label anchor points.  First and Last are only for lines. */
             position?: 'first'|'last'|'lft'|'rt'|'top'|'bot'|'ulft'|'urt'|'llft'|'lrt'
+            anchorX?: 'left'|'middle'|'right',
+            anchorY?: 'top'|'middle'|'bottom',
+            toFraction?: Boolean,
+            useMathjax?: Boolean,
+
         }
 
         interface DisplayPoint extends ParallelpointAttributes{
             size?:Number
-            face?:String
+            face?: 'cross'| 'plus' | 'minus' | 'divide'| 'diamond'| 'triangledown' | 'triangleleft' | 'triangleright'| 'triangleup' | 'square' |'circle'
+
         }
 
         interface VertexAttributes{
@@ -1025,10 +1094,11 @@
 
         interface PanAttributes{
             enabled?: Boolean
+            throttle?: number
             needTwoFingers?:Boolean
         }
 
-        
+
         // utility function for determining whether an object is a JSX object (or part of this wrapper)
         function isJSXAttribute(maybe:any):Boolean{
             return (typeof (maybe) == 'object' && !Array.isArray(maybe) && !('elValue' in maybe) && !('elType' in maybe))
@@ -1053,7 +1123,7 @@
            animationDelay?: Number
            /** Show default axis. */
            axis?: boolean
-           /** Bounding box of the visible area in user coordinates. [left,top,right,bottom] */
+           /** Bounding box of the visible area in user coordinates. [left,top,right,bottom] eg: [-5,5,5,-5] */
            boundingbox?:[Number,Number,Number,Number]
            /** Enable browser scrolling on touch interfaces if the user double taps into an empty region of the board. */
            browserPan?: Boolean
@@ -1076,7 +1146,11 @@
         //    ignoreLabels?: Boolean
         //    /** Support for internationalization of number formatting. */
         //    intl?: Object
-           /** If set to true, the ratio between horizontal and vertical unit sizes stays constant - independent of size changes of the hosting HTML div element. */
+           /** If set to true, the ratio between horizontal and vertical unit sizes stays constant - independent of size changes of the hosting HTML div element.
+            * 
+
+ true is useful for keeping circles round, but may keep you from setting the boundingbox you desire"
+           */
            keepAspectRatio?: Boolean
         //    /** Control using the keyboard to change the construction. */
         //    keyboard?: Object
@@ -1158,16 +1232,35 @@
         }
 
 
-        /** JSXGraph library wrapped in TypeScript */
-        export class TSXGraph{
+            /** JSXGraph library wrapped in TypeScript */
+            export class TSXGraph{
 
-            static defaultAttrs:Object = {name:'',keepAspectRatio:true}
 
-            /** Initialize a new board. */
-            static initBoard(html: string, attributes:InitBoardAttributes={}): TSXBoard {
+            static defaultAttrs:Object = {name:''}
+
+            /** Initialize a new board. The first parameter 'html' should be the ID of a <DIV> in your web page.
+
+
+             * ```js
+<div id="jxgbox" class="jxgbox" style="width:1000px; height:1000px;float:left;"></div>
+<script src="lunar.js" type="module" defer>  </script>
+
+// start your .ts with something like this
+import { TXG } from "../src/tsxgraph.js";
+const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
+```
+            */
+
+            /** Initializes a new board */
+            static initBoard(html: string, attributeObj:InitBoardAttributes={}): TSXBoard {
 
                    const newBoard = new TSXBoard()
-                   newBoard.board = (window as any).JXG.JSXGraph.initBoard(html, attributes) as unknown as TSXBoard
+
+                   // add some defaults that we prefer
+                   if (!('resize' in attributeObj))
+                       attributeObj['resize'] = {enabled: true, throttle: 200}
+
+                   newBoard.board = (window as any).JXG.JSXGraph.initBoard(html, attributeObj) as unknown as TSXBoard
                    JSXMath.board = newBoard.board  // make a copy for JSXMath and its decendents
                    return newBoard
             }
@@ -1178,7 +1271,14 @@
                 (window as any).JXG.JSXGraph.freeBoard(board)
             }
 
-
+            /** set Katex as default for board (names, labels, everything).  useKatex() need only be set ONCE, no way to unset. the text element has a 'useKatex' attribute that lets you turn Katex on and off for individual text fields.
+            * ```js
+            *     TXG.TSXGraph.useKatex()
+            * ```
+            */
+            static useKatex(){
+                (window as any).JXG.Options.text.useKatex = true;
+            }
 
             // utility to dereference parameter- if they use TSXGraph objects then  use the JSXGraph objects instead
             static dereference(params: any|any[]): any[] {
@@ -1305,35 +1405,13 @@
  /** Line defined by solution to a*x + b*y = c */
    line( a:Number|Function, b:Number|Function, c?:Number|Function ,attributes?:LineAttributes):Line
  /** Just as two (distinct) points determine a line, five points (no three collinear) determine a conic. */
-   fivePoints( A:Point|point, B:Point|point, C:Point|point, D:Point|point, E:Point|point,attributes?:ConicAttributes):Conic
+   fivePoints( A:Point|pointAddr, B:Point|pointAddr, C:Point|pointAddr, D:Point|pointAddr, E:Point|pointAddr,attributes?:ConicAttributes):Conic
  /** Build a plane algebraic curve from six numbers that satisfies Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0, and A,B,C not all zero.  This might be a circle, ellipse, parabola, or hyperbola. */
    sixNumbers( A:Number, B:Number, C:Number, D:Number, E:Number, F:Number,attributes?:ConicAttributes):Conic
  /** An Ellipse from 3 points */
-   threePoints( focalPoint1:Point|point, focalPoint2:Point|point, outerPoint:Point|point,attributes?:EllipseAttributes):Ellipse
+   threePoints( focalPoint1:Point|pointAddr, focalPoint2:Point|pointAddr, outerPoint:Point|pointAddr,attributes?:EllipseAttributes):Ellipse
  /** Three Points, plus start and end. */
-   ellipseArc( focalPoint1:Point|point, focalPoint2:Point|point, outerPoint:Point|point, startAngle:Number|Function, endAngle:Number|Function,attributes?:EllipseAttributes):Ellipse
-}
-
- interface TransformIface {
- z_ignore: Object,
- /** Move a distance from a point */
-   translate( x:Number|Function, y:Number|Function,attributes?:TransformAttributes):Transform
- /** Increase distance from a point by a factor */
-   scale( x:number|Function, y:number|Function,attributes?:TransformAttributes):Transform
- /** Rotate by angle around a point */
-   rotate( angle:Number|Function, point?:Point|point,attributes?:TransformAttributes):Transform
- /** Reflect around a line */
-   reflect( x:Number|Function, y:Number|Function,attributes?:TransformAttributes):Transform
- /** Move proportionally to distance */
-   shear( x:Number|Function, y:Number|Function,attributes?:TransformAttributes):Transform
- /** Transform using a MAT3 */
-   generic( a:Number, b:Number, c:Number, d:Number, e:Number, f:Number, g:Number, h:Number, i:Number,attributes?:TransformAttributes):Transform
- /** A new Point from a Point and Transform */
-   point( p:Point|point, t:Transform|Transform[],attributes?:PointAttributes):Point
- /** A new Circle from a Circle and Transform */
-   circle( c:Circle, t:Transform|Transform[],attributes?:CircleAttributes):Circle
- /** A new Curve from a Curve and Transform */
-   curve( c:Curve, t:Transform|Transform[],attributes?:CurveAttributes):Curve
+   ellipseArc( focalPoint1:Point|pointAddr, focalPoint2:Point|pointAddr, outerPoint:Point|pointAddr, startAngle:Number|Function, endAngle:Number|Function,attributes?:EllipseAttributes):Ellipse
 }
 
  interface JSXMathJSXMathIface {
@@ -1437,9 +1515,12 @@
                                     Algorithm: D.E. Knuth, TAOCP 2, p. 128. */
  randomExponential(lambda:number):number,
  /** Generate value of a random variable with gamma distribution of order alpha.  Default scale is 1. Default threshold is 0.
-                                   See {@link https://en.wikipedia.org/wiki/Gamma_distribution}.
-                                   Algorithm: D.E. Knuth, TAOCP 2, p. 129. */
+                        See {@link https://en.wikipedia.org/wiki/Gamma_distribution}.
+                        Algorithm: D.E. Knuth, TAOCP 2, p. 129. */
  randomGamma(shape:number,scale?:number,threshold?:number):number,
+ /** Generate value of a random variable with Pareto distribution with shape gamma and scale k.
+                                   See {@link https://en.wikipedia.org/wiki/Pareto_distribution}. */
+ randomPareto(shape:number,scale?:number,threshold?:number):number,
  /** Generate value of a random variable with beta distribution with shape parameters alpha and beta.
                                     See {@link https://en.wikipedia.org/wiki/Beta_distribution}. */
  randomBeta(alpha:number,beta:number):number,
@@ -1470,12 +1551,16 @@
  histogram(data:number[], bins?:number, range?:boolean|[number,number], density?:boolean, cumulative?:boolean):[number[],number[]],
  /** Determines the absolute value of every given value.  */
  abs(arr:number[]|number):Number[]|Number,
+ /** The P-th percentile ( 0 < P ≤ 100 ) of a list of N ordered values (sorted from least to greatest) is the smallest value in the list such that no more than P percent of the data is strictly less than the value and at least P percent of the data is less than or equal to that value. */
+ percentile(data:number[],ranges:number[]):number[],
  } 
 
 
 
                 export class TSXBoard {
+                    /** the underlying JSXGraph board object.  Might be null.  To walk the elements in the board, use: for (let el in (TSX.board! as any).objects) {...}       */
                     board: TSXBoard | null
+
                     private printLineNumber:number = 0   // added a print() function, this tracks the line#
 
                     /** Version of underlying JSX library */
@@ -1507,6 +1592,26 @@
                         return (window as any).JXG.context as CanvasRenderingContext2D
                     }
 
+                    /** given a PointerEvent (eg: TSX.on('down', (e:Event)=> ... ) returns [x,y] absolute coordinates of the boards container top left corner.  use with getPosition() to get board absolute addresses. */
+                    getCoordsTopLeftCorner(e:Event):number[]{
+                        return (this.board as any).getCoordsTopLeftCorner(e)
+                    }
+
+                    /** given a PointerEvent (eg: TSX.on('down', (e:Event)=> ... ) returns [x,y] coordinates relative to the documents's top left corner.  See also getCoordsTopLeftCorner() */
+                    getPosition(e:Event):number[]{
+                        return (window as any).JXG.getPosition(e)
+                    }
+
+                    /** given a PointerEvent (eg: TSX.on('down', (e:Event)=> ... ), returns the mouse coordinates [x,y] in JSXGraph coordinates.  */
+                    getMouseCoords(e:Event):number[]{
+                        let cPos = (this.board as any).getCoordsTopLeftCorner(e)
+                        let absPos = (window as any).JXG.getPosition(e)
+                        let dx = absPos[0] - cPos[0]
+                        let dy = absPos[1] - cPos[1]
+
+                        let coords =  new (window as any).JXG.Coords(2, [dx, dy],this.board);
+                        return [coords.usrCoords[1],coords.usrCoords[2]]
+                    }
 
 
                     setBoundingBox(left:Number,top:Number,right:Number,bottom:Number):TSXBoard{
@@ -1560,10 +1665,17 @@
                         }
                     }
 
+
                     // I cannot figure out how to get the keybard to respond.  mouse works fine
                     // addKeyboardEventHandlers():void{
                     //     (this.board as any).addKeyboardEventHandlers()
                     // }
+
+
+                    /** Set the current frame.  If it doesn't exist, it will be created. Optionally set a location.  Example:  TSX.setFrame('starship',[4,4]) */
+                    public setFrame(name:string,location?:number[]){
+                        (this.board as any).setFrame(name,location)
+                    }
 
                     public print(...args: any[]) {
                         let bbox = (this.board as any).getBoundingBox()   // get every time, in case setBoundingBox()
@@ -1645,17 +1757,17 @@
                     ///////////  V2 Math Library
 
 
-                    /** new Points from point, angle, and distance.  Angle is in radians. */
-                    public V2AngleDistance(origin: TXG.Point, distance: number, angle: number, dest?: TXG.Point): TXG.Point {
-                        console.log(origin, origin.tsxBoard)
-                        if (!dest) { dest = JSXMath.board.point([0, 0], { name: '' }) }
+                    // /** new Points from point, angle, and distance.  Angle is in radians. */
+                    // public V2AngleDistance(origin: TXG.Point, distance: number, angle: number, dest?: TXG.Point): TXG.Point {
+                    //     console.log(origin, origin.tsxBoard)
+                    //     if (!dest) { dest = JSXMath.board.point([0, 0], { name: '' }) }
 
-                        let x = origin.X() + distance * Math.cos(angle)
-                        let y = origin.Y() + distance * Math.sin(angle)
-                        console.log(x,y)
-                        dest.setPositionDirectly([x, y])
-                        return dest
-                    }
+                    //     let x = origin.X() + distance * Math.cos(angle)
+                    //     let y = origin.Y() + distance * Math.sin(angle)
+                    //     console.log(x,y)
+                    //     dest.setPositionDirectly([x, y])
+                    //     return dest
+                    // }
 
 
 
@@ -1665,8 +1777,6 @@
         
  /**  */
  conic:ConicIface
- /** This element is used to provide projective transformations. */
- transform:TransformIface
  JSXMathMath:JSXMathJSXMathIface
  MatrixMath:MatrixJSXMathIface
  GeometryMath:GeometryJSXMathIface
@@ -1685,7 +1795,7 @@
  return new Line('Line',[a, b, c, ],attributes) as Line
  },
    /** Just as two (distinct) points determine a line, five points (no three collinear) determine a conic. */
-   fivePoints( A:Point|point, B:Point|point, C:Point|point, D:Point|point, E:Point|point,attributes: ConicAttributes ={}) : Conic {
+   fivePoints( A:Point|pointAddr, B:Point|pointAddr, C:Point|pointAddr, D:Point|pointAddr, E:Point|pointAddr,attributes: ConicAttributes ={}) : Conic {
  return new Conic('Conic',[A, B, C, D, E, ],attributes)
  },
    /** Build a plane algebraic curve from six numbers that satisfies Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0, and A,B,C not all zero.  This might be a circle, ellipse, parabola, or hyperbola. */
@@ -1693,56 +1803,15 @@
  return new Conic('Conic',[A, B, C, D, E, F, ],attributes)
  },
    /** An Ellipse from 3 points */
-   threePoints( focalPoint1:Point|point, focalPoint2:Point|point, outerPoint:Point|point,attributes: EllipseAttributes ={}) : Ellipse {
+   threePoints( focalPoint1:Point|pointAddr, focalPoint2:Point|pointAddr, outerPoint:Point|pointAddr,attributes: EllipseAttributes ={}) : Ellipse {
  return new Ellipse('Ellipse',[focalPoint1, focalPoint2, outerPoint, ],attributes) as Ellipse
  },
    /** Three Points, plus start and end. */
-   ellipseArc( focalPoint1:Point|point, focalPoint2:Point|point, outerPoint:Point|point, startAngle:Number|Function, endAngle:Number|Function,attributes: EllipseAttributes ={}) : Ellipse {
+   ellipseArc( focalPoint1:Point|pointAddr, focalPoint2:Point|pointAddr, outerPoint:Point|pointAddr, startAngle:Number|Function, endAngle:Number|Function,attributes: EllipseAttributes ={}) : Ellipse {
  return new Ellipse('Ellipse',[focalPoint1, focalPoint2, outerPoint, startAngle, endAngle, ],attributes) as Ellipse
  },
  }
  this.conic.z_ignore = this
- this.transform = {
- /** @protected */ 
- z_ignore: {}, 
-   /** Move a distance from a point */
-   translate( x:Number|Function, y:Number|Function,attributes: TransformAttributes ={}) : Transform {
- return new Transform('Transform',[x, y, ],{type:'translate' })
- },
-   /** Increase distance from a point by a factor */
-   scale( x:number|Function, y:number|Function,attributes: TransformAttributes ={}) : Transform {
- return new Transform('Transform',[x, y, ],{type:'scale' })
- },
-   /** Rotate by angle around a point */
-   rotate( angle:Number|Function, point:Point|point=[0,0],attributes: TransformAttributes ={}) : Transform {
- return new Transform('Transform',[angle, point, ],{type:'rotate' })
- },
-   /** Reflect around a line */
-   reflect( x:Number|Function, y:Number|Function,attributes: TransformAttributes ={}) : Transform {
- return new Transform('Transform',[x, y, ],{type:'reflect' })
- },
-   /** Move proportionally to distance */
-   shear( x:Number|Function, y:Number|Function,attributes: TransformAttributes ={}) : Transform {
- return new Transform('Transform',[x, y, ],{type:'shear' })
- },
-   /** Transform using a MAT3 */
-   generic( a:Number, b:Number, c:Number, d:Number, e:Number, f:Number, g:Number, h:Number, i:Number,attributes: TransformAttributes ={}) : Transform {
- return new Transform('Transform',[a, b, c, d, e, f, g, h, i, ],{type:'generic' })
- },
-   /** A new Point from a Point and Transform */
-   point( p:Point|point, t:Transform|Transform[],attributes: PointAttributes ={}) : Point {
- return new Point('Point',[p, t, ],attributes) as Point
- },
-   /** A new Circle from a Circle and Transform */
-   circle( c:Circle, t:Transform|Transform[],attributes: CircleAttributes ={}) : Circle {
- return new Circle('Circle',[c, t, ],attributes) as Circle
- },
-   /** A new Curve from a Curve and Transform */
-   curve( c:Curve, t:Transform|Transform[],attributes: CurveAttributes ={}) : Curve {
- return new Curve('Curve',[c, t, ],attributes) as Curve
- },
- }
- this.transform.z_ignore = this
  this.JSXMathMath = { 
  } 
 
@@ -1844,9 +1913,12 @@
                                     Algorithm: D.E. Knuth, TAOCP 2, p. 128. */
  randomExponential(lambda:number):number { return (window as any).JXG.Math.Statistics.randomExponential(lambda)  as number} ,
  /** Generate value of a random variable with gamma distribution of order alpha.  Default scale is 1. Default threshold is 0.
-                                   See {@link https://en.wikipedia.org/wiki/Gamma_distribution}.
-                                   Algorithm: D.E. Knuth, TAOCP 2, p. 129. */
+                        See {@link https://en.wikipedia.org/wiki/Gamma_distribution}.
+                        Algorithm: D.E. Knuth, TAOCP 2, p. 129. */
  randomGamma(shape:number,scale?:number,threshold?:number):number { return (window as any).JXG.Math.Statistics.randomGamma(shape,scale,threshold)  as number} ,
+ /** Generate value of a random variable with Pareto distribution with shape gamma and scale k.
+                                   See {@link https://en.wikipedia.org/wiki/Pareto_distribution}. */
+ randomPareto(shape:number,scale?:number,threshold?:number):number { return (window as any).JXG.Math.Statistics.randomPareto(shape,scale,threshold)  as number} ,
  /** Generate value of a random variable with beta distribution with shape parameters alpha and beta.
                                     See {@link https://en.wikipedia.org/wiki/Beta_distribution}. */
  randomBeta(alpha:number,beta:number):number { return (window as any).JXG.Math.Statistics.randomBeta(alpha,beta)  as number} ,
@@ -1877,6 +1949,8 @@
  histogram(data:number[], bins?:number, range?:boolean|[number,number], density?:boolean, cumulative?:boolean):[number[],number[]] { return (window as any).JXG.Math.Statistics.histogram(data,{bins:bins??10, range:range??false, density:density??true, cumulative:cumulative??false})  as [number[],number[]]} ,
  /** Determines the absolute value of every given value.  */
  abs(arr:number[]|number):Number[]|Number { return (window as any).JXG.Math.Statistics.abs(arr)  as Number[]|Number} ,
+ /** The P-th percentile ( 0 < P ≤ 100 ) of a list of N ordered values (sorted from least to greatest) is the smallest value in the list such that no more than P percent of the data is strictly less than the value and at least P percent of the data is less than or equal to that value. */
+ percentile(data:number[],ranges:number[]):number[] { return (window as any).JXG.Math.Statistics.percentile(TSXGraph.dereference(data),TSXGraph.dereference(ranges))  as number[]} ,
  } 
 
 }
@@ -1897,7 +1971,7 @@ chart(f:Number[], attributes: ChartAttributes ={} ):Chart{return new Chart('Char
 *```
                 
 Also see: Circumcircle is a circle described by three points.  An Arc is a segment of a circle. */
-circle(centerPoint:Point|point, remotePoint:Point|point|Line|line|Number|Function|Circle, attributes: CircleAttributes ={} ):Circle{
+circle(centerPoint:Point|pointAddr, remotePoint:Point|pointAddr|Line|line|Number|Function|Circle, attributes: CircleAttributes ={} ):Circle{
   let newObject:any  // special case for circle with immediate segment eg:  circle(point,[[1,2],[3,4]]  )
                             if (Array.isArray(remotePoint) && Array.isArray(remotePoint[0] ) && Array.isArray(remotePoint[1] )) {
                                 return new Circle(`circle`, TSXGraph.dereference([centerPoint, remotePoint[0] ,remotePoint[1]]), TSXGraph.defaultAttributes(attributes))
@@ -1984,22 +2058,38 @@ bezierCurve(points:Point[], attributes: BezierCurveAttributes ={} ):Curve{
 }
 
 
+ /** This element is used to provide a constructor for arbitrary content in an SVG foreignObject container.
+```js
+TSX.foreignObject(
+    `<video width="300" height="200" src="https://eucbeniki.sio.si/vega2/278/Video_metanje_oge_.mp4" type="html5video" controls>`,
+    [0, -3], [9, 6],
+    {layer: 8, fixed: true})
+```
+              */
+foreignObject(content:string, position:number[], size:number[]|null=null, attributes: ForeignObjectAttributes ={} ):ForeignObject{return new ForeignObject('ForeignObject', [content,position,size,], attributes)
+}
+
+
  /** Array of Points */
-group(pointArray:Point[], attributes: GroupAttributes ={} ):Group{return new Group('Group', [pointArray,], attributes)
+group(pointArray:Point[]|Polygon, attributes: GroupAttributes ={} ):Group{return new Group('Group', [pointArray,], attributes)
 }
 
 
  /** Display an image.  The first element is the location URL of the image.
                 A collection of space icons is provided, press CTRL+I to show the list.
-                The second parameter sets the lower left point of the image, you may need to shift the image location to center it.
+                The second parameter sets the lower left point of the image.
+                The optional third parameter sets the size multiplier of the image, default is [1,1].
+                
+If you want to move the image, just tie the image to a point, maybe at the center of the image.
+                 For more flexibility, see TSX.Rotate() and TSX.Translate()
                 
 *```js
-                TSX.image('../icons/sun.png',[0,0])
-                let P1 = TSX.point([3,2],{opacity:0})
-                TSX.image(p1,[3-offest,3-offset])
+            TSX.image('icons/earth.png', [0, 0],[2,2])
+            let p1 = TSX.point([3, 2], { opacity: .1 })
+            TSX.image('icons/moon-full-moon.png', [()=>p1.X(),()=>p1.Y()])
                 
 *``` */
-image(url:String|spaceIcon, lowerLeft:point, widthHeight:[Number,Number]=[1,1], attributes: ImageAttributes ={} ):Image{return new Image('Image', [url,lowerLeft,widthHeight,], attributes)
+image(url:String|spaceIcon, lowerLeft:pointAddr, widthHeight:[Number,Number]=[1,1], attributes: ImageAttributes ={} ):Image{return new Image('Image', [url,lowerLeft,widthHeight,], attributes)
 }
 
  /** An implicit curve is a plane curve defined by an implicit equation relating two coordinate variables, commonly x and y. For example, the unit circle is defined by the implicit equation x2 + y2 = 1. In general, every implicit curve is defined by an equation of the form f(x, y) = 0 for some function f of two variables.  IMPLICIT means that the equation is not expressed as a solution for either x in terms of y or vice versa. */
@@ -2051,7 +2141,7 @@ image(url:String|spaceIcon, lowerLeft:point, widthHeight:[Number,Number]=[1,1], 
  also create lines with Segment, Arrow, Transform.Point, Circumcenter, Glider, and others.
                                  Look at .conic.line() for a line defined by the equation 'az +bx +cy = 0'
                     */
-line(p1:Point|point, p2:Point|point, attributes: LineAttributes ={} ):Line{return new Line('Line', [p1,p2,], attributes)
+line(p1:Point|pointAddr, p2:Point|pointAddr, attributes: LineAttributes ={} ):Line{return new Line('Line', [p1,p2,], attributes)
 }
 
 
@@ -2066,13 +2156,13 @@ line(p1:Point|point, p2:Point|point, attributes: LineAttributes ={} ):Line{retur
 *```
             
  also create points with Intersection, Midpoint, Transform.Point, Circumcenter, Glider, and others. */
-point(position:NumberFunction[], attributes: PointAttributes ={} ):Point{
+point(position:pointAddr, attributes: PointAttributes ={} ):Point{
  return new Point('Point', position, TSXGraph.defaultAttributes(attributes))
 }
 
 
  /** Array of Points */
-polygon(pointArray:Point[]|point[], attributes: PolygonAttributes ={} ):Polygon{return new Polygon('Polygon', [pointArray,], attributes)
+polygon(pointArray:Point[]|pointAddr[], attributes: PolygonAttributes ={} ):Polygon{return new Polygon('Polygon', [pointArray,], attributes)
 }
 
 
@@ -2084,14 +2174,14 @@ polygon(pointArray:Point[]|point[], attributes: PolygonAttributes ={} ):Polygon{
                                 TSX.text([-4, 2], '\pm\sqrt{a^2 + b^2}', { useKatex: true })
                                 
 *``` */
-text(position:Point|point, label:String|Function, attributes: TextAttributes ={} ):Text{
+text(position:Point|pointAddr, label:String|Function, attributes: TextAttributes ={} ):Text{
  (position as any).push(label);
                         return new Text('Text', TSXGraph.dereference(position),TSXGraph.defaultAttributes(attributes));
 }
 
 
  /** A circular sector is a subarea of the area enclosed by a circle. It is enclosed by two radii and an arc. */
-sector(P1:Point|point, P2:Point|point, P3:Point|point, attributes: SectorAttributes ={} ):Sector{return new Sector('Sector', [P1,P2,P3,], attributes)
+sector(P1:Point|pointAddr, P2:Point|pointAddr, P3:Point|pointAddr, attributes: SectorAttributes ={} ):Sector{return new Sector('Sector', [P1,P2,P3,], attributes)
 }
 
 
@@ -2109,7 +2199,7 @@ vectorfield(fxfy:Function[], horizontalMesh:Number[]=[-6,25,6], verticalMesh:Num
  type=='auto':  a square is displayed if the angle is near orthogonal.
                                 
  If no name is provided the angle label is automatically set to a lower greek letter. */
- angle(from:Point|point, around:Point|point, to:Point|point,  attributes?:AngleAttributes):Angle 
+ angle(from:Point|pointAddr, around:Point|pointAddr, to:Point|pointAddr,  attributes?:AngleAttributes):Angle 
  angle(line1:Line|line, line2:Line|line, direction1:[Number,Number], direction2:[Number,Number],  attributes?:AngleAttributes):Angle 
  angle(line1:Line|line, line2:Line|line, dirPlusMinus1:Number, dirPlusMinus2:Number,  attributes?:AngleAttributes):Angle 
 
@@ -2161,7 +2251,7 @@ vectorfield(fxfy:Function[], horizontalMesh:Number[]=[-6,25,6], verticalMesh:Num
 *```
                             
  To create an arc with origin, startpoint, and angle, look at MajorArc/MinorArc. */
-arc(origin:Point|point, from:Point|point, to:Point|point, attributes: ArcAttributes ={} ):Arc{return new Arc('Arc', [origin,from,to,], attributes)
+arc(origin:Point|pointAddr, from:Point|pointAddr, to:Point|pointAddr, attributes: ArcAttributes ={} ):Arc{return new Arc('Arc', [origin,from,to,], attributes)
 }
 
 
@@ -2174,12 +2264,12 @@ arc(origin:Point|point, from:Point|point, to:Point|point, attributes: ArcAttribu
 *```
                             
  */
-arrow(p1:Point|point, p2:Point|point, attributes: ArrowAttributes ={} ):Arrow{return new Arrow('Arrow', [p1,p2,], attributes)
+arrow(p1:Point|pointAddr, p2:Point|pointAddr, attributes: ArrowAttributes ={} ):Arrow{return new Arrow('Arrow', [p1,p2,], attributes)
 }
 
  /** A line parallel to a given line (or two points), through a point. */
- parallel(line:Line|[Point,Point], point:Point|point,  attributes?:ParallelAttributes):Parallel 
- parallel(lineP1:Point|point, lineP2:Point|point, Point:Point|point,  attributes?:ParallelAttributes):Parallel 
+ parallel(line:Line|[Point,Point], point:Point|pointAddr,  attributes?:ParallelAttributes):Parallel 
+ parallel(lineP1:Point|pointAddr, lineP2:Point|pointAddr, Point:Point|pointAddr,  attributes?:ParallelAttributes):Parallel 
 
             // implementation of signature,  hidden from user
             parallel(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Parallel {
@@ -2222,17 +2312,17 @@ arrow(p1:Point|point, p2:Point|point, attributes: ArrowAttributes ={} ):Arrow{re
  }
 
  /** Create an Arrow parallel to a segment. The constructed arrow contains p3 and has the same slope as the line through p1 and p2. */
-arrowparallel(p1:Point|point, p2:Point|point, p3:Point|point, attributes: ArrowparallelAttributes ={} ):Arrowparallel{return new Arrowparallel('Arrowparallel', [p1,p2,p3,], attributes)
+arrowparallel(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: ArrowparallelAttributes ={} ):Arrowparallel{return new Arrowparallel('Arrowparallel', [p1,p2,p3,], attributes)
 }
 
 
  /** Create an Axis with two points (like a Line) */
-axis(p1:Point|point, p2:Point|point, attributes: AxisAttributes ={} ):Axis{return new Axis('Axis', [p1,p2,], attributes)
+axis(p1:Point|pointAddr, p2:Point|pointAddr, attributes: AxisAttributes ={} ):Axis{return new Axis('Axis', [p1,p2,], attributes)
 }
 
 
- /** Bisect an Angle defined with three points */
-bisector(p1:Point, p2:Point, p3:Point, attributes: BisectorAttributes ={} ):Bisector{return new Bisector('Bisector', [p1,p2,p3,], attributes)
+ /** Bisect an Angle defined with three points A,B,C, and divides the angle ABC into two equal sized parts. */
+bisector(A:Point|pointAddr, B:Point|pointAddr, C:Point|pointAddr, attributes: BisectorAttributes ={} ):Bisector{return new Bisector('Bisector', [A,B,C,], attributes)
 }
 
 
@@ -2242,7 +2332,7 @@ bisectorlines(l1:Line, l2:Line, attributes: BisectorlinesAttributes ={} ):Bisect
 
 
  /** create a button */
-button(position:NumberFunction[], label:String|Function, handler:Function, attributes: ButtonAttributes ={} ):Button{
+button(position:pointAddr, label:String|Function, handler:Function, attributes: ButtonAttributes ={} ):Button{
  (position as any).push(label,handler);
                         return new Button('Button', position,TSXGraph.defaultAttributes(attributes));
 }
@@ -2254,34 +2344,34 @@ cardinalspline(data:Point[]|number[][], funct:Function, splineType:`uniform`|`ce
 
 
  /** This element is used to provide a constructor for special texts containing a form checkbox element. For this element, the attribute ”display” has to have the value 'html' (which is the default). The underlying HTML checkbox element can be accessed through the sub-object 'rendNodeCheck', e.g. to add event listeners. */
-checkbox(position:NumberFunction[], label:String|Function, attributes: CheckboxAttributes ={} ):Checkbox{
+checkbox(position:pointAddr, label:String|Function, attributes: CheckboxAttributes ={} ):Checkbox{
  (position as any).push(label);
                         return new Checkbox('Checkbox', position,TSXGraph.defaultAttributes(attributes));
 }
 
 
  /** Creates a Point at the center of a circle defined by 3 points */
-circumcenter(p1:Point|point, p2:Point|point, p3:Point|point, attributes: CircumcenterAttributes ={} ):Circumcenter{return new Circumcenter('Circumcenter', [p1,p2,p3,], attributes)
+circumcenter(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: CircumcenterAttributes ={} ):Circumcenter{return new Circumcenter('Circumcenter', [p1,p2,p3,], attributes)
 }
 
 
  /** Draw a circle defined by 3 points */
-circumcircle(p1:Point|point, p2:Point|point, p3:Point|point, attributes: CircumcircleAttributes ={} ):Circumcircle{return new Circumcircle('Circumcircle', [p1,p2,p3,], attributes)
+circumcircle(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: CircumcircleAttributes ={} ):Circumcircle{return new Circumcircle('Circumcircle', [p1,p2,p3,], attributes)
 }
 
 
  /** Draw an arc from P1 to P3 (missing P3 to P1) defined by 3 points */
-circumcircleArc(p1:Point|point, p2:Point|point, p3:Point|point, attributes: CircumcircleArcAttributes ={} ):CircumcircleArc{return new CircumcircleArc('CircumcircleArc', [p1,p2,p3,], attributes)
+circumcircleArc(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: CircumcircleArcAttributes ={} ):CircumcircleArc{return new CircumcircleArc('CircumcircleArc', [p1,p2,p3,], attributes)
 }
 
 
  /** Creates a CircumCenter and draws a sector from P1 to P3 (missing P3 to P1) defined by 3 points */
-circumcircleSector(p1:Point|point, p2:Point|point, p3:Point|point, attributes: CircumcircleSectorAttributes ={} ):CircumcircleSector{return new CircumcircleSector('CircumcircleSector', [p1,p2,p3,], attributes)
+circumcircleSector(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: CircumcircleSectorAttributes ={} ):CircumcircleSector{return new CircumcircleSector('CircumcircleSector', [p1,p2,p3,], attributes)
 }
 
 
  /** A comb to display domains of inequalities. */
-comb(p1:Point|point, p2:Point|point, attributes: CombAttributes ={} ):Comb{return new Comb('Comb', [p1,p2,], attributes)
+comb(p1:Point|pointAddr, p2:Point|pointAddr, attributes: CombAttributes ={} ):Comb{return new Comb('Comb', [p1,p2,], attributes)
 }
 
 
@@ -2305,8 +2395,8 @@ derivative(curve:Curve, attributes: DerivativeAttributes ={} ):Derivative{return
 }
 
 
- /** Two Points and Radius */
-ellipse(p1:Point|point, p2:Point|point, radius:Number|Function, attributes: EllipseAttributes ={} ):Ellipse{return new Ellipse('Ellipse', [p1,p2,radius,], attributes)
+ /**  An ellipse is given by two points (the foci) and a third point on the ellipse or the length of the major axis. */
+ellipse(p1:Point|pointAddr, p2:Point|pointAddr, radius:Point|pointAddr|Number|Function, attributes: EllipseAttributes ={} ):Ellipse{return new Ellipse('Ellipse', [p1,p2,radius,], attributes)
 }
 
 
@@ -2314,10 +2404,15 @@ ellipse(p1:Point|point, p2:Point|point, radius:Number|Function, attributes: Elli
 ```js
 let f = TSX.functiongraph((x: number) => 3 * Math.pow(x, 2))
 ``` */
-functiongraph(funct:Function, leftBorder?:Number, rightBorder?:Number, attributes: FunctiongraphAttributes ={} ):Functiongraph{return new Functiongraph('Functiongraph', [funct,leftBorder,rightBorder,], attributes)
+functiongraph(funct:Function, leftBorder?:number, rightBorder?:number, attributes: FunctiongraphAttributes ={} ):Curve{return new Functiongraph('Functiongraph', [funct,leftBorder,rightBorder,], attributes)
 }
 
- /** A GeometryElement like Line, Circle, or Curve, and optionally a starting point defined by [X,Y] */
+ /** A point bound to a GeometryElement like Line, Circle, or Curve, with  optionally a starting point defined by [X,Y]
+```js
+let c1 = TSX.circle(a, 1)
+let g1 = TSX.glider(c1)
+let g2 = TSX.glider(c1,[0,0])  // includes initial point
+```  */
  glider(hostElement:GeometryElement,  attributes?:GliderAttributes):Glider 
  glider(hostElement:GeometryElement, initialPosition:number[],  attributes?:GliderAttributes):Glider 
  glider( attributes?:GliderAttributes):Glider 
@@ -2404,17 +2499,17 @@ hatch(line:Line|line, numberHatches:Number, attributes: HatchAttributes ={} ):Ha
 
 
  /** This element is used to provide a constructor for an hyperbola. An hyperbola is given by two points (the foci) and a third point on the hyperbola or the length of the major axis. */
-hyperbola(point1:Point|point, point2:Point|point, point3:Point|point|Number, start:Number=-3.14, end:Number=3.14, attributes: HyperbolaAttributes ={} ):Hyperbola{return new Hyperbola('Hyperbola', [point1,point2,point3,start,end,], attributes)
+hyperbola(point1:Point|pointAddr, point2:Point|pointAddr, point3:Point|pointAddr|Number, start:Number=-3.14, end:Number=3.14, attributes: HyperbolaAttributes ={} ):Hyperbola{return new Hyperbola('Hyperbola', [point1,point2,point3,start,end,], attributes)
 }
 
 
  /** Constructs the incenter of the triangle described by the three given points. https://mathworld.wolfram.com/Incenter.html */
-incenter(p1:Point|point, p2:Point|point, p3:Point|point, attributes: IncenterAttributes ={} ):Incenter{return new Incenter('Incenter', [p1,p2,p3,], attributes)
+incenter(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: IncenterAttributes ={} ):Incenter{return new Incenter('Incenter', [p1,p2,p3,], attributes)
 }
 
 
  /** An incircle is given by three points. */
-incircle(p1:Point|point, p2:Point|point, p3:Point|point, attributes: IncircleAttributes ={} ):Incircle{return new Incircle('Incircle', [p1,p2,p3,], attributes)
+incircle(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: IncircleAttributes ={} ):Incircle{return new Incircle('Incircle', [p1,p2,p3,], attributes)
 }
 
 
@@ -2424,7 +2519,7 @@ inequality(boundaryLine:Line|line|Curve, attributes: InequalityAttributes ={} ):
 
 
  /** This element is used to provide a constructor for special texts containing a HTML form input element. If the width of element is set with the attribute ”cssStyle”, the width of the label must be added. For this element, the attribute ”display” has to have the value 'html' (which is the default). The underlying HTML input field can be accessed through the sub-object 'rendNodeInput', e.g. to add event listeners. */
-input(position:Point|point, label:String|Function, initial:String, attributes: InputAttributes ={} ):Input{
+input(position:Point|pointAddr, label:String|Function, initial:String="", attributes: InputAttributes ={} ):Input{
  (position as any).push(label,initial);
                         return new Input('Input', TSXGraph.dereference(position),TSXGraph.defaultAttributes(attributes));
 }
@@ -2442,12 +2537,12 @@ intersection(element1:Line|Circle|Curve, element2:Line|Circle, attributes: Inter
 
 
  /** A major arc is a segment of the circumference of a circle having measure greater than or equal to 180 degrees (pi radians). It is defined by a center, one point that defines the radius, and a third point that defines the angle of the arc. */
-majorArc(p1:Point|point, p2:Point|point, p3:Point|point, attributes: MajorArcAttributes ={} ):MajorArc{return new MajorArc('MajorArc', [p1,p2,p3,], attributes)
+majorArc(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: MajorArcAttributes ={} ):MajorArc{return new MajorArc('MajorArc', [p1,p2,p3,], attributes)
 }
 
 
  /** A major sector is a sector of a circle having measure greater than or equal to 180 degrees (pi radians). It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
-majorSector(p1:Point|point, p2:Point|point, p3:Point|point, attributes: MajorSectorAttributes ={} ):MajorSector{return new MajorSector('MajorSector', [p1,p2,p3,], attributes)
+majorSector(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: MajorSectorAttributes ={} ):MajorSector{return new MajorSector('MajorSector', [p1,p2,p3,], attributes)
 }
 
  /** A point in the middle of two given points or a line segment. */
@@ -2487,17 +2582,17 @@ majorSector(p1:Point|point, p2:Point|point, p3:Point|point, attributes: MajorSec
  }
 
  /** A minor arc is a segment of the circumference of a circle having measure less than or equal to 180 degrees (pi radians). It is defined by a center, one point that defines the radius, and a third point that defines the angle of the arc. */
-minorArc(p1:Point|point, p2:Point|point, p3:Point|point, attributes: MinorArcAttributes ={} ):MinorArc{return new MinorArc('MinorArc', [p1,p2,p3,], attributes)
+minorArc(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: MinorArcAttributes ={} ):MinorArc{return new MinorArc('MinorArc', [p1,p2,p3,], attributes)
 }
 
 
  /** A minor sector is a sector of a circle having measure less than or equal to 180 degrees (pi radians). It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
-minorSector(p1:Point|point, p2:Point|point, p3:Point|point, attributes: MinorSectorAttributes ={} ):MinorSector{return new MinorSector('MinorSector', [p1,p2,p3,], attributes)
+minorSector(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: MinorSectorAttributes ={} ):MinorSector{return new MinorSector('MinorSector', [p1,p2,p3,], attributes)
 }
 
 
  /** A mirror element of a point, line, circle, curve, polygon will be constructed. */
-mirrorelement(element:Point|Line|Circle|Curve|Polygon, acrossPoint:Point|point, attributes: mirrorelementAttributes ={} ):mirrorelement{return new mirrorelement('mirrorelement', [element,acrossPoint,], attributes)
+mirrorelement(element:Point|Line|Circle|Curve|Polygon, acrossPoint:Point|pointAddr, attributes: mirrorelementAttributes ={} ):mirrorelement{return new mirrorelement('mirrorelement', [element,acrossPoint,], attributes)
 }
 
 
@@ -2546,8 +2641,13 @@ nonReflexAngle(point1:Point, point2:Point, point3:Point, attributes: NonReflexAn
    return new Normal('normal', params, TSXGraph.defaultAttributes(attrs)) // as Normal
  }
 
- /** This is used to construct a point that is the orthogonal projection of a point to a line. */
-orthogonalprojection(point:Point|point, line:Line|line, attributes: OrthogonalprojectionAttributes ={} ):Orthogonalprojection{return new Orthogonalprojection('Orthogonalprojection', [point,line,], attributes)
+ /** An `orthogonalprojection` is a locked point determined by projecting a point orthogonally onto a line.
+```js
+let s1 = TSX.segment(p1, p2)
+let p3 = TSX.point([0, -1])
+TSX.orthogonalprojection(p3, s1)
+``` */
+orthogonalprojection(point:Point|pointAddr, line:Line|line, attributes: OrthogonalprojectionAttributes ={} ):Orthogonalprojection{return new Orthogonalprojection('Orthogonalprojection', [point,line,], attributes)
 }
 
 
@@ -2558,11 +2658,11 @@ otherIntersection(element1:Line|Circle, element2:Line|Circle, firstIntersection:
 
 
  /** This element is used to provide a constructor for a parabola. A parabola is given by one point (the focus) and a line (the directrix). */
-parabola(focalPoint:Point|point, line:Line|line, attributes: ParabolaAttributes ={} ):Parabola{return new Parabola('Parabola', [focalPoint,line,], attributes)
+parabola(focalPoint:Point|pointAddr, line:Line|line, attributes: ParabolaAttributes ={} ):Parabola{return new Parabola('Parabola', [focalPoint,line,], attributes)
 }
 
  /** A parallel point is given by three points, or a line and a point. Taking the Euclidean vector from the first to the second point, the parallel point is determined by adding that vector to the third point. The line determined by the first two points is parallel to the line determined by the third point and the constructed point. */
- parallelpoint(line:Line|[Point,Point], point:Point|point,  attributes?:ParallelpointAttributes):Parallelpoint 
+ parallelpoint(line:Line|[Point,Point], point:Point|pointAddr,  attributes?:ParallelpointAttributes):Parallelpoint 
  parallelpoint(P1:Point, P2:Point, P3:Point,  attributes?:ParallelpointAttributes):Parallelpoint 
 
             // implementation of signature,  hidden from user
@@ -2597,8 +2697,8 @@ parabola(focalPoint:Point|point, line:Line|line, attributes: ParabolaAttributes 
    return new Parallelpoint('parallelpoint', params, TSXGraph.defaultAttributes(attrs)) // as Parallelpoint
  }
  /** Create a line segment between two points. If there is a third variable then the segment has a fixed length (which may be a function) determined by the absolute value of that number. */
- segment(P1:Point|point, P2:Point|point,  attributes?:SegmentAttributes):Segment 
- segment(P1:Point|point, P2:Point|point, length:number|Function,  attributes?:SegmentAttributes):Segment 
+ segment(P1:Point|pointAddr, P2:Point|pointAddr,  attributes?:SegmentAttributes):Segment 
+ segment(P1:Point|pointAddr, P2:Point|pointAddr, length:number|Function,  attributes?:SegmentAttributes):Segment 
 
             // implementation of signature,  hidden from user
             segment(a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any):Segment {
@@ -2633,22 +2733,22 @@ parabola(focalPoint:Point|point, line:Line|line, attributes: ParabolaAttributes 
  }
 
  /**  */
-parallelogram(p1:Point|point, p2:Point|point, p3:Point|point, attributes: ParallelogramAttributes ={} ):Parallelogram{return new Parallelogram('Parallelogram', [p1,p2,p3,], attributes)
+parallelogram(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: ParallelogramAttributes ={} ):Parallelogram{return new Parallelogram('Parallelogram', [p1,p2,p3,], attributes)
 }
 
 
  /** Create a line orthogonal to a given line and containing a given point. If you want a Perpendicular to a Curve, look at Normal(). */
-perpendicular(line:Line|line, point:Point|point, attributes: PerpendicularAttributes ={} ):Perpendicular{return new Perpendicular('Perpendicular', [line,point,], attributes)
+perpendicular(line:Line|line, point:Point|pointAddr, attributes: PerpendicularAttributes ={} ):Perpendicular{return new Perpendicular('Perpendicular', [line,point,], attributes)
 }
 
 
  /** Create a point on a line where a perpendicular to a given point would intersect that line. */
-perpendicularPoint(line:Line|line, point:Point|point, attributes: PerpendicularPointAttributes ={} ):PerpendicularPoint{return new PerpendicularPoint('PerpendicularPoint', [line,point,], attributes)
+perpendicularPoint(line:Line|line, point:Point|pointAddr, attributes: PerpendicularPointAttributes ={} ):PerpendicularPoint{return new PerpendicularPoint('PerpendicularPoint', [line,point,], attributes)
 }
 
 
  /** Create a segment orthogonal to a given line and containing a given point.  If you want a Perpendicular to a Curve, look at Normal(). */
-perpendicularSegment(line:Line|line, point:Point|point, attributes: PerpendicularSegmentAttributes ={} ):PerpendicularSegment{return new PerpendicularSegment('PerpendicularSegment', [line,point,], attributes)
+perpendicularSegment(line:Line|line, point:Point|pointAddr, attributes: PerpendicularSegmentAttributes ={} ):PerpendicularSegment{return new PerpendicularSegment('PerpendicularSegment', [line,point,], attributes)
 }
 
 
@@ -2663,7 +2763,7 @@ polePoint(conic:Conic|Circle, line:Line, attributes: PolePointAttributes ={} ):P
 
 
  /** Array of Points */
-polygonalChain(pointArray:Point[]|point[], attributes: PolygonalChainAttributes ={} ):PolygonalChain{return new PolygonalChain('PolygonalChain', [pointArray,], attributes)
+polygonalChain(pointArray:Point[]|pointAddr[], attributes: PolygonalChainAttributes ={} ):PolygonalChain{return new PolygonalChain('PolygonalChain', [pointArray,], attributes)
 }
 
 
@@ -2683,12 +2783,12 @@ reflexAngle(point1:Point, point2:Point, point3:Point, attributes: ReflexAngleAtt
 
 
  /** Constructs a regular polygon. It needs two points which define the base line and the number of vertices. */
-regularPolygon(P1:Point|point, P2:Point|point, nVertices:Number, attributes: RegularPolygonAttributes ={} ):RegularPolygon{return new RegularPolygon('RegularPolygon', [P1,P2,nVertices,], attributes)
+regularPolygon(P1:Point|pointAddr, P2:Point|pointAddr, nVertices:Number, attributes: RegularPolygonAttributes ={} ):RegularPolygon{return new RegularPolygon('RegularPolygon', [P1,P2,nVertices,], attributes)
 }
 
 
  /** A semicircle is a special arc defined by two points. The arc hits both points. */
-semicircle(P1:Point|point, P2:Point|point, attributes: SemicircleAttributes ={} ):Semicircle{return new Semicircle('Semicircle', [P1,P2,], attributes)
+semicircle(P1:Point|pointAddr, P2:Point|pointAddr, attributes: SemicircleAttributes ={} ):Semicircle{return new Semicircle('Semicircle', [P1,P2,], attributes)
 }
 
 
@@ -2709,7 +2809,7 @@ semicircle(P1:Point|point, P2:Point|point, attributes: SemicircleAttributes ={} 
             postLabel: ' meters'        // this is a suffix
         
 *``` */
-slider(StartPoint:Point|point, EndPoint:Point|point, minimum_initial_maximum:[number,number,number], attributes: SliderAttributes ={} ):Slider{return new Slider('Slider', [StartPoint,EndPoint,minimum_initial_maximum,], attributes)
+slider(StartPoint:Point|pointAddr, EndPoint:Point|pointAddr, minimum_initial_maximum:[number,number,number], attributes: SliderAttributes ={} ):Slider{return new Slider('Slider', [StartPoint,EndPoint,minimum_initial_maximum,], attributes)
 }
 
 
@@ -2794,13 +2894,42 @@ spline(points:Point[]|number[][], attributes: SplineAttributes ={} ):Curve{
    return new Tangent('tangent', params, TSXGraph.defaultAttributes(attrs)) // as Tangent
  }
 
+ /** Construct the tangent line through a point to a conic or a circle. There will be either two, one or no such tangent, depending if the point is outside of the conic, on the conic, or inside of the conic. Similar to the intersection of a line with a circle, the specific tangent can be chosen with a third (optional) parameter number. */
+tangentTo(conic:Conic|Circle, point:Point|pointAddr, N:Number=0, attributes: tangentToAttributes ={} ):tangentTo{return new tangentTo('tangentTo', [conic,point,N,], attributes)
+}
+
+
  /** A tape measure can be used to measure distances between points. */
-tapemeasure(P1:Point|point, P2:Point|point, attributes: TapemeasureAttributes ={} ):Tapemeasure{return new Tapemeasure('Tapemeasure', [P1,P2,], attributes)
+tapemeasure(P1:Point|pointAddr, P2:Point|pointAddr, attributes: TapemeasureAttributes ={} ):Tapemeasure{return new Tapemeasure('Tapemeasure', [P1,P2,], attributes)
 }
 
 
  /** This element is used to provide a constructor for trace curve (simple locus curve), which is realized as a special curve. */
 tracecurve(glider:Glider, point:Point, attributes: TracecurveAttributes ={} ):Tracecurve{return new Tracecurve('Tracecurve', [glider,point,], attributes)
+}
+
+
+ /** Create a new point from an existing point and a concatenation of transforms. This is a powerful way of creating complex constructions that can be rotated, scaled, and translated.  An alternative to using Groups.
+~~~js
+    // define and initialize the translation values
+    let tX = TSX.slider([-9, 9.0], [3, 9.0], [-10, 0, 10], { name: 'tX' })
+    let tY = TSX.slider([-9, 8.5], [3, 8.5], [-10, 0, 10], { name: 'tY' })
+    let tRotate = TSX.slider([-9, 8.0], [3, 8.0], [-Math.PI * 2, 0, Math.PI * 2], { name: 'tRotate' })
+    let tScale = TSX.slider([-9, 7.5], [3, 7.5], [0, 1, 5], { name: 'tScale' })
+    // set up the model for the complex shape (use opacity:0)
+    let a = TSX.point([1, 5])
+    let b = TSX.point([2, 5])
+    // set up tranforms for rotation, scaling, and translation
+    let trans = TSX.translate(()=>tX.Value(), ()=>tY.Value())
+    let rot = TSX.rotate(() => tRotate.Value(), a)  // rotation around c
+    let scale = TSX.scale(()=>tScale.Value(),()=>tScale.Value())  // scaling is relative to [0,0]
+    // implement shape based on model and applying transforms
+    let ma = TSX.transformPoint(a,[rot,scale,trans],{color:'blue'})
+    let mb = TSX.transformPoint(b,[rot,scale,trans],{color:'blue'})
+    TSX.segment(ma,mb)
+~~~             */
+transformPoint(point:Point, transform:Transform|Transform[], attributes: TransformPointAttributes ={} ):Point{
+  return new Point('point', TSXGraph.dereference([point,TSXGraph.dereference(transform)]),TSXGraph.defaultAttributes(attributes))
 }
 
 
@@ -2824,19 +2953,37 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
  return new View3D('view3D',[ [x,y],[w,h],[xBounds,yBounds,zBounds]], attributes)
 }
 
+
+ /** Create a Transform object with Translate properties. */
+translate(dx:number|Function, dy:number|Function, attributes: TranslateAttributes ={} ):Transform{
+ return new Transform('Transform', TSXGraph.dereference([dx,dy]), {type:'translate'})
+}
+
+
+ /** Create a Transform object with Rotate properties. */
+rotate(angle:number|Function, around:Point|pointAddr, attributes: RotateAttributes ={} ):Transform{
+ return new Transform('Transform', TSXGraph.dereference([angle,around]), {type:'rotate'})
+}
+
+
+ /** Create a Transform object with Scale properties.  Scaling is relative to [0,0]. */
+scale(xMultiplier:number|Function, yMultiplier:number|Function, attributes: ScaleAttributes ={} ):Transform{
+ return new Transform('Transform', TSXGraph.dereference([xMultiplier,yMultiplier]), {type:'scale'})
+}
+
 }
 
  export class GeometryElement {
  elValue: Object = {}
  tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
  scaleXY:number = 1   // used by V2 math library
- constructor(className:string, params:any[], attrs: Object){
+ constructor(className:string, params:any[], attrs: GeometryElementAttributes){
  if (className == 'Polygon' || className == 'PolygonalChain' || className == 'Group') {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
  } else {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
  }
- if (Object.hasOwn(attrs, 'scaleXY')) {
+ if (attrs.hasOwnProperty('scaleXY')) {
     this.scaleXY = (attrs as any).scaleXY    // for V2 Math
 }
  }
@@ -2964,11 +3111,6 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
   return (this.elValue as any).handleSnapToGrid() as GeometryElement
 }
 
- /** Checks whether (x,y) is near the element. */
- hasPoint(x:number,y:number): Boolean {
-  return (this.elValue as any).hasPoint(x,y) as Boolean
-}
-
  /** Hide the element. */
  hide(): GeometryElement {
   return (this.elValue as any).hide() as GeometryElement
@@ -3020,8 +3162,8 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  /** Sets a label and its text If label doesn't exist, it creates one */
- setLabel(): Object {
-  return (this.elValue as any).setLabel() as Object
+ setLabel(txt:string): Object {
+  return (this.elValue as any).setLabel(txt) as Object
 }
 
  /** Updates the element's label text, strips all html. */
@@ -3084,13 +3226,13 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
  elValue: Object = {}
  tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
  scaleXY:number = 1   // used by V2 math library
- constructor(className:string, params:any[], attrs: Object){
+ constructor(className:string, params:any[], attrs: GeometryElement3DAttributes){
  if (className == 'Polygon' || className == 'PolygonalChain' || className == 'Group') {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
  } else {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
  }
- if (Object.hasOwn(attrs, 'scaleXY')) {
+ if (attrs.hasOwnProperty('scaleXY')) {
     this.scaleXY = (attrs as any).scaleXY    // for V2 Math
 }
  }
@@ -3140,13 +3282,13 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
  elValue: Object = {}
  tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
  scaleXY:number = 1   // used by V2 math library
- constructor(className:string, params:any[], attrs: Object){
+ constructor(className:string, params:any[], attrs: BoardAttributes){
  if (className == 'Polygon' || className == 'PolygonalChain' || className == 'Group') {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
  } else {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
  }
- if (Object.hasOwn(attrs, 'scaleXY')) {
+ if (attrs.hasOwnProperty('scaleXY')) {
     this.scaleXY = (attrs as any).scaleXY    // for V2 Math
 }
  }
@@ -3156,13 +3298,13 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
  elValue: Object = {}
  tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
  scaleXY:number = 1   // used by V2 math library
- constructor(className:string, params:any[], attrs: Object){
+ constructor(className:string, params:any[], attrs: InfoboxAttributes){
  if (className == 'Polygon' || className == 'PolygonalChain' || className == 'Group') {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
  } else {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
  }
- if (Object.hasOwn(attrs, 'scaleXY')) {
+ if (attrs.hasOwnProperty('scaleXY')) {
     this.scaleXY = (attrs as any).scaleXY    // for V2 Math
 }
  }
@@ -3172,13 +3314,13 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
  elValue: Object = {}
  tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
  scaleXY:number = 1   // used by V2 math library
- constructor(className:string, params:any[], attrs: Object){
+ constructor(className:string, params:any[], attrs: CAAttributes){
  if (className == 'Polygon' || className == 'PolygonalChain' || className == 'Group') {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
  } else {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
  }
- if (Object.hasOwn(attrs, 'scaleXY')) {
+ if (attrs.hasOwnProperty('scaleXY')) {
     this.scaleXY = (attrs as any).scaleXY    // for V2 Math
 }
  }
@@ -3291,13 +3433,13 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
  elValue: Object = {}
  tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
  scaleXY:number = 1   // used by V2 math library
- constructor(className:string, params:any[], attrs: Object){
+ constructor(className:string, params:any[], attrs: ComplexAttributes){
  if (className == 'Polygon' || className == 'PolygonalChain' || className == 'Group') {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
  } else {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
  }
- if (Object.hasOwn(attrs, 'scaleXY')) {
+ if (attrs.hasOwnProperty('scaleXY')) {
     this.scaleXY = (attrs as any).scaleXY    // for V2 Math
 }
  }
@@ -3362,13 +3504,13 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
  elValue: Object = {}
  tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
  scaleXY:number = 1   // used by V2 math library
- constructor(className:string, params:any[], attrs: Object){
+ constructor(className:string, params:any[], attrs: CompositionAttributes){
  if (className == 'Polygon' || className == 'PolygonalChain' || className == 'Group') {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
  } else {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
  }
- if (Object.hasOwn(attrs, 'scaleXY')) {
+ if (attrs.hasOwnProperty('scaleXY')) {
     this.scaleXY = (attrs as any).scaleXY    // for V2 Math
 }
  }
@@ -3418,13 +3560,13 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
  elValue: Object = {}
  tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
  scaleXY:number = 1   // used by V2 math library
- constructor(className:string, params:any[], attrs: Object){
+ constructor(className:string, params:any[], attrs: CoordsAttributes){
  if (className == 'Polygon' || className == 'PolygonalChain' || className == 'Group') {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
  } else {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
  }
- if (Object.hasOwn(attrs, 'scaleXY')) {
+ if (attrs.hasOwnProperty('scaleXY')) {
     this.scaleXY = (attrs as any).scaleXY    // for V2 Math
 }
  }
@@ -3583,13 +3725,13 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
  elValue: Object = {}
  tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
  scaleXY:number = 1   // used by V2 math library
- constructor(className:string, params:any[], attrs: Object){
+ constructor(className:string, params:any[], attrs: DumpAttributes){
  if (className == 'Polygon' || className == 'PolygonalChain' || className == 'Group') {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
  } else {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
  }
- if (Object.hasOwn(attrs, 'scaleXY')) {
+ if (attrs.hasOwnProperty('scaleXY')) {
     this.scaleXY = (attrs as any).scaleXY    // for V2 Math
 }
  }
@@ -3645,20 +3787,10 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 }
 
- export class ForeignObject {
- elValue: Object = {}
- tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
- scaleXY:number = 1   // used by V2 math library
+ export class ForeignObject extends GeometryElement {
  constructor(className:string, params:any[], attrs: Object){
- if (className == 'Polygon' || className == 'PolygonalChain' || className == 'Group') {
-    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
- } else {
-    this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
- }
- if (Object.hasOwn(attrs, 'scaleXY')) {
-    this.scaleXY = (attrs as any).scaleXY    // for V2 Math
+   super(className, params, attrs)
 }
- }
 
  /**  */
  public get content():Number[] {
@@ -3712,7 +3844,7 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  /** Adds an Point to this group. */
- addPoint(point:Point|point): Group {
+ addPoint(point:Point|pointAddr|Image): Group {
   return (this.elValue as any).addPoint(TSXGraph.dereference(point)) as Group
 }
 
@@ -3722,13 +3854,18 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  /** Adds a point to the set of rotation points of the group. */
- addRotationPoint(): Group {
-  return (this.elValue as any).addRotationPoint() as Group
+ addRotationPoint(point:Point): Group {
+  return (this.elValue as any).addRotationPoint(TSXGraph.dereference(point)) as Group
 }
 
  /** Adds a point to the set of the scale points of the group. */
- addScalePoint(): Group {
-  return (this.elValue as any).addScalePoint() as Group
+ addScalePoint(point:Point,direction:number|Function): Group {
+  return (this.elValue as any).addScalePoint(TSXGraph.dereference(point),direction) as Group
+}
+
+ /** Adds a point to the set of the translation points of the group. */
+ addTranslationPoint(point:Point): Group {
+  return (this.elValue as any).addTranslationPoint(TSXGraph.dereference(point)) as Group
 }
 
  /** List of the element ids resp. */
@@ -3737,58 +3874,48 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  /** Removes a point from the group. */
- removePoint(): Group {
-  return (this.elValue as any).removePoint() as Group
+ removePoint(point:Point): Group {
+  return (this.elValue as any).removePoint(TSXGraph.dereference(point)) as Group
 }
 
  /** Removes the rotation property from a point of the group. */
- removeRotationPoint(): Group {
-  return (this.elValue as any).removeRotationPoint() as Group
+ removeRotationPoint(point:Point): Group {
+  return (this.elValue as any).removeRotationPoint(TSXGraph.dereference(point)) as Group
 }
 
  /** Removes the scaling property from a point of the group. */
- removeScalePoint(): Group {
-  return (this.elValue as any).removeScalePoint() as Group
+ removeScalePoint(point:Point): Group {
+  return (this.elValue as any).removeScalePoint(TSXGraph.dereference(point)) as Group
 }
 
  /** Removes the translation property from a point of the group. */
- removeTranslationPoint(): Group {
-  return (this.elValue as any).removeTranslationPoint() as Group
-}
-
- /** Sets ids of elements to the array this.parents. */
- setParents(): Object {
-  return (this.elValue as any).setParents() as Object
-}
-
- /**  */
- setProperty(): Group {
-  return (this.elValue as any).setProperty() as Group
+ removeTranslationPoint(point:Point): Group {
+  return (this.elValue as any).removeTranslationPoint(TSXGraph.dereference(point)) as Group
 }
 
  /** Sets the center of rotation for the group. */
- setRotationCenter(): Group {
-  return (this.elValue as any).setRotationCenter() as Group
+ setRotationCenter(pivot:Point|pointAddr|"centroid"): Group {
+  return (this.elValue as any).setRotationCenter(TSXGraph.dereference(pivot)) as Group
 }
 
  /** Sets the rotation points of the group. */
- setRotationPoints(): Group {
-  return (this.elValue as any).setRotationPoints() as Group
+ setRotationPoints(points:Point|Point[]): Group {
+  return (this.elValue as any).setRotationPoints(TSXGraph.dereference(points)) as Group
 }
 
  /** Sets the center of scaling for the group. */
- setScaleCenter(): Group {
-  return (this.elValue as any).setScaleCenter() as Group
+ setScaleCenter(point:Point|pointAddr): Group {
+  return (this.elValue as any).setScaleCenter(TSXGraph.dereference(point)) as Group
 }
 
  /** Sets the scale points of the group. */
- setScalePoints(): Group {
-  return (this.elValue as any).setScalePoints() as Group
+ setScalePoints(points:Point|Point[]): Group {
+  return (this.elValue as any).setScalePoints(TSXGraph.dereference(points)) as Group
 }
 
  /** Sets the translation points of the group. */
- setTranslationPoints(): Group {
-  return (this.elValue as any).setTranslationPoints() as Group
+ setTranslationPoints(points:Point|Point[]): Group {
+  return (this.elValue as any).setTranslationPoints(TSXGraph.dereference(points)) as Group
 }
 
  /** Releases all elements of this group. */
@@ -3849,13 +3976,13 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
  elValue: Object = {}
  tsxBoard: TSXBoard = JSXMath.board  // copy, sometimes need access to board
  scaleXY:number = 1   // used by V2 math library
- constructor(className:string, params:any[], attrs: Object){
+ constructor(className:string, params:any[], attrs: LegendAttributes){
  if (className == 'Polygon' || className == 'PolygonalChain' || className == 'Group') {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params.flat()), TSXGraph.defaultAttributes(attrs))
  } else {
     this.elValue = (JSXMath.board  as any).create(className, TSXGraph.dereference(params), TSXGraph.defaultAttributes(attrs))
  }
- if (Object.hasOwn(attrs, 'scaleXY')) {
+ if (attrs.hasOwnProperty('scaleXY')) {
     this.scaleXY = (attrs as any).scaleXY    // for V2 Math
 }
  }
@@ -4055,7 +4182,7 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 }
 
  /** Calculates Euclidean distance for two Points, eg:  p1.Dist(p2) */
- Dist(toPoint:Point|point): number {
+ Dist(toPoint:Point|pointAddr): number {
   return (this.elValue as any).Dist(TSXGraph.dereference(toPoint)) as number
 }
 
@@ -4093,8 +4220,21 @@ view3D(x:Number=-13, y:Number=-10, w:Number=20, h:Number=20, xBounds:Number[]=[-
 P.moveTo([A.X(), A.Y()], 5000)
 
 ``` */
- moveTo(p:number[],time:number=0): any {
-  return (this.elValue as any).moveTo(TSXGraph.dereference(p),time) as any
+ moveTo(p:number[]|Function[],time:number=0,callback:Function=()=>{},effect:"=="|"<>"|">"|"<"="=="): any {
+  return (this.elValue as any).moveTo(TSXGraph.dereference(p),time,{callback:callback,effect:effect}) as any
+}
+
+ /** Moves an element towards coordinates, optionally tweening over time.  Time is in ms.  WATCH OUT, there
+                        is no AWAIT for the tween to finish, a second moveTo() starts immediately. Thats GOOD if you
+                        want to move two different points at the same time, BAD if you want to move the same point repeatedly.  EG:
+                        
+```js 
+
+P.moveTo([A.X(), A.Y()], 5000)
+
+``` */
+ visit(p:number[]|Function[],time:number=0,callback:Function=()=>{},effect:"=="|"<>"|">"|"<"="==", repeat:number=1): any {
+  return (this.elValue as any).visit(TSXGraph.dereference(p),time,{callback:callback,effect:effect,repeat:repeat}) as any
 }
                     /** Point location in vector form [n,n] */
                     XY(): [number,number] {
@@ -4149,6 +4289,11 @@ P.moveTo([A.X(), A.Y()], 5000)
   return (this.elValue as any).vertices as VertexAttributes
 }
 
+ /** Checks whether (x,y) is near the polygon. */
+ hasPoint(x:number,y:number): Boolean {
+  return (this.elValue as any).hasPoint(x,y) as Boolean
+}
+
  /** Uses the boards renderer to update the polygon. */
  updateRenderer(): any {
   return (this.elValue as any).updateRenderer() as any
@@ -4169,6 +4314,11 @@ P.moveTo([A.X(), A.Y()], 5000)
  /**  */
  public get size():Number[] {
   return (this.elValue as any).size as Number[]
+}
+
+ /**  */
+ setAttribute(attrs:TextAttributes): void {
+  return (this.elValue as any).setAttribute(attrs) as void
 }
 
  /** Returns the bounding box of the text element in user coordinates as an array of length 4: [upper left x, upper left y, lower right x, lower right y]. */
@@ -4239,6 +4389,12 @@ P.moveTo([A.X(), A.Y()], 5000)
  /** Decode unicode entities into characters. */
  utf8_decode(): String {
   return (this.elValue as any).utf8_decode() as String
+}
+}
+
+ export class Text3D extends GeometryElement3D {
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
@@ -4693,6 +4849,11 @@ P.moveTo([A.X(), A.Y()], 5000)
  export class Checkbox extends Text {
  constructor(className:string, params:any[], attrs: Object){
    super(className, params, attrs)
+}
+
+ /**  */
+ setAttribute(attrs:CheckboxAttributes): void {
+  return (this.elValue as any).setAttribute(attrs) as void
 }
 
  /** Returns the value of the checkbox element */
@@ -5199,6 +5360,12 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ export class tangentTo extends Line {
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
+}
+}
+
  export class Tapemeasure extends Segment {
  constructor(className:string, params:any[], attrs: Object){
    super(className, params, attrs)
@@ -5221,19 +5388,49 @@ P.moveTo([A.X(), A.Y()], 5000)
    super(className, params, attrs)
 }
 
+ /** Create a new Point from a Point and Transform.  Translation just requires dx and dy.
+                            Rotation requires a point to rotate around, and a rotation transform around that point, and
+                            a remote point that sets both the radius and the initial angle of the rotation.
+                            
+Example: Given a rotation transform controlled by a slider, create a rotating point using the transform method Point() and the
+                            radius point.
+```js
+    let slid = TSX.slider([-4,0],[-2,0],[-20,0,20])  // controls rotation
+    let c = TSX.point([-1,-1],{name:'c'})     //center
+    let rot = TSX.rotate(()=>slid.Value(),c)  // rotation around c
+    let initial = TSX.point([-1,1],{name:'initial'})
+    let d = rot.point(initial,{name:'rotation around c'})  // new point
+    TSX.segment(c,d)    // to illustrate
+``` */
+ point(fromPoint:Point,attributes:PointAttributes={}): Point {
+  return JSXMath.board.create('point',[TSXGraph.dereference(fromPoint), this.elValue],TSXGraph.defaultAttributes(attributes)) as Point as Point
+}
+
  /**  */
  applyOnce(element:GeometryElement): void {
   return (this.elValue as any).applyOnce(TSXGraph.dereference(element)) as void
 }
 
- /**  */
+ /**  Binds a transformation to a GeometryElement or an array of elements. In every update of the GeometryElement(s), the transformation is executed. That means, in order to immediately apply the transformation, a call of board.update() has to follow. */
  bindTo(element:GeometryElement): void {
   return (this.elValue as any).bindTo(TSXGraph.dereference(element)) as void
 }
 
  /**  */
+ melt(t:Transform): Transform {
+  this.elValue = (this.elValue as any).melt(TSXGraph.dereference(t));
+ return this  as Transform
+}
+
+ /**  */
  setMatrix(): Transform {
   return (this.elValue as any).setMatrix() as Transform
+}
+}
+
+ export class TransformPoint extends Point {
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }
 
@@ -5280,6 +5477,11 @@ P.moveTo([A.X(), A.Y()], 5000)
  /** Glider3D is an alias for JSXGraph's Point3d(). */
  glider3D(element:Curve3D, initial:number[]=[0,0,0],attributes:Object={}): Point3D {
   return (this.elValue as any).create("point3d",[...initial,TSXGraph.dereference(element)],attributes) as Point3D
+}
+
+ /** This element is used to provide a constructor for a 3D Text. */
+ text3D(position: NumberFunction[], text:string|Function,attributes:Object={}): Text3D {
+  return (this.elValue as any).create("text3d",[...TSXGraph.dereference(position),text],attributes) as Text3D
 }
 
  /** Create a 3D plane object defined by a point and two directions, and extending negative and positive distanced in those directions by a range.  Remember to set visible:true.
@@ -5371,5 +5573,23 @@ P.moveTo([A.X(), A.Y()], 5000)
  /**  */
  stopAzimuth(): any {
   return (this.elValue as any).stopAzimuth() as any
+}
+}
+
+ export class Translate extends Transform {
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
+}
+}
+
+ export class Rotate extends Transform {
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
+}
+}
+
+ export class Scale extends Transform {
+ constructor(className:string, params:any[], attrs: Object){
+   super(className, params, attrs)
 }
 }}
