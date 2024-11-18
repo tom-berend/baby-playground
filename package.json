@@ -11,7 +11,6 @@
         "copylib2d": "cp -R lib/*.* dist.1.11 && cp -R lib/fonts dist.1.11 && cp -R lib/bootstrap dist.1.11",
         "copy2playground": "mkdir -p ../../TSXGraph/playground/dist.1.11 && cp -R dist.1.11/* ../../TSXGraph/playground/dist.1.11 && cp -R lib/* ../../TSXGraph/playground/dist.1.11",
         "copy2moodle": "mkdir -p ../../moodle/mod/mathcode/dist.1.11 && cp -R dist.1.11/* ../../moodle/mod/mathcode/dist.1.11 && cp -R lib/* ../../moodle/mod/mathcode/dist.1.11",
-
         "watch": "webpack --watch --config webpack.player.config.js",
         "comment03": "==== run the editor",
         "buildeditor": "rm -rf dist.1.11_editor && webpack --config webpack.editor.config.js && npm run copyeditor",
@@ -26,12 +25,12 @@
         "file-loader": "^6.2.0",
         "lzstring.ts": "^2.0.2",
         "mini-css-extract-plugin": "^2.6.1",
-        "monaco-editor": "^0.51.0",
+        "monaco-editor": "^0.52.0",
         "monaco-editor-webpack-plugin": "^7.1.0",
         "raw-loader": "^4.0.2",
         "style-loader": "^1.2.1",
         "ts-loader": "^8.0.14",
-        "typescript": "^5.4.5",
+        "typescript": "^5.6.3",
         "url-loader": "^3.0.0",
         "webpack": "^5.74.0",
         "webpack-cli": "^4.10.0"

@@ -29,7 +29,7 @@ import * as monaco from "monaco-editor";
 import lib_es5 from "./extraLibs/lib.es5.d.ts.txt";
 import lib_es6 from "./extraLibs/lib.es6.d.ts.txt";  // not sure why i need both but parseInt() fails without es5
 // import lib_baby from "./extraLibs/baby.d.ts.txt";
-// import lib_dom_mini from "./extraLibs/lib.dom_mini.d.ts.txt";
+import lib_dom_mini from "./extraLibs/lib.dom_mini.d.ts.txt";
 // import lib_dom from "./extraLibs/lib.dom.d.ts.txt";
 // import lib_dom_iterable from "./extraLibs/dom.iterable.d.ts.txt";
 
@@ -118,7 +118,7 @@ import mathcode from "./extraLibs/mathcode.d.ts.txt"
 export class Editor {
 
     editor: monaco.editor.IStandaloneCodeEditor
-    initFile: string = ''
+    initFile: string = "";
     el: HTMLElement
     storageKey: string
     safeDelay: number
@@ -143,57 +143,51 @@ export class Editor {
         this.visibleCode = visibleCode
 
 
+        monaco.languages.typescript.typescriptDefaults.addExtraLib("let TSX = TXGraph.initBoard('jxgbox');")
+
         monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
             allowNonTsExtensions: true,
             inlineSourceMap: true,
             inlineSources: true,
 
-            // noLib: true,
+            noLib: true,
             lib: ["dom.iterable"],    // for some reason, dom.iterable is required for destructuring    [x,y] = [1,2]
 
             sourceMap: false,
-            strict: false,
-            alwaysStrict: false,
+            strict: true,
+            alwaysStrict: true,
 
-            noImplicitAny: false,
+            // noImplicitAny: false,
 
-            noUnusedParameters: false,       // easier for beginners
-            noUnusedLocals: true,            // i filter those errors out from the alert
+            // noUnusedParameters: false,       // easier for beginners
+            // noUnusedLocals: true,            // i filter those errors out from the alert
 
-            strictFunctionTypes: true,       // show the error, it will run anyhow
-            strictNullChecks: true,
+            // strictFunctionTypes: true,       // show the error, it will run anyhow
+            // strictNullChecks: true,
 
-            allowUnreachableCode: true,
-            allowUnusedLabels: true,
-            noImplicitThis: true,
-            noImplicitReturns: true,
-            target: monaco.languages.typescript.ScriptTarget.ES2020,
+            // allowUnreachableCode: false,
+            // allowUnusedLabels: true,
+            // noImplicitThis: true,
+            // noImplicitReturns: true,
+            // target: monaco.languages.typescript.ScriptTarget.ES2020,
 
-        });
-
-        monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-            noSemanticValidation: true,
-            noSyntaxValidation: true
         });
 
         monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+            noSemanticValidation: true,
+            noSyntaxValidation: true,
             target: monaco.languages.typescript.ScriptTarget.ES2020,
             noLib: true,                        // don't bring DOM into intellisense
             strictNullChecks: true,
         });
-
-        // monaco.languages.typescript.javascriptDefaults.setExtraLibs({
-        //     filePath: "lib.es5.d.ts"
-        //     content: libSource,
-        //   });
 
         monaco.editor.defineTheme('myTheme', {
             base: 'vs',
             inherit: true,
             rules: [],
             colors: {
-                'editorInlayHint.foreground': '#00FF00',
-                'editorInlayHint.background': '#FF00FF',
+                'editorInlayHint.background': '#00FF00',
+                'editorInlayHint.foreground': '#FF00FF',
             }
         });
 
@@ -201,7 +195,7 @@ export class Editor {
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_baby_plus, "lib.baby.d.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es5, "lib.es5.d.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es6, "lib.es6.d.ts");
-        // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom_mini, "lib.dom_mini.d.ts");
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom_mini, "lib.dom_mini.d.ts");
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom, "lib.dom.d.ts");
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom_iterable, "lib.dom.iterable.d.ts");
 
@@ -233,12 +227,12 @@ export class Editor {
 
         // this stuff has to go into the EVAL, since it doesn't see otherwise
 
-        // let TSX = TXG.TSXGraph.freeBoard(undefined)  // just to make sure webpack keeps it
+        // let TSX = XGraph.freeBoard(undefined)  // just to make sure webpack keeps it
 
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(this.hiddenDecl)
 
-        console.log('value of this.visibleCode:', this.visibleCode)
+        // console.log('value of this.visibleCode:', this.visibleCode)
 
         this.editor = monaco.editor.create(this.el, {
             automaticLayout: true,
@@ -389,6 +383,7 @@ export class Editor {
         // html += '<title>JSXGraph </title>';
 
         html += this.generateSourceCode(editorCode)
+        // console.log('generateSourceCode', editorCode, html)
 
         // html += '<body>';
         // html += '</html>';
@@ -425,6 +420,7 @@ export class Editor {
 
     /** create <script></script>  */
     generateSourceCode(editorCode: string): string {
+        // console.log('%chiddencode','color:pink;', this.hiddenCode, this.hiddenDecl)
         // let code = ''
         // code += "\r\n" + this.hiddenCode + "\r\n"
         // code += "\r\n" + editorCode + "\r\n"
@@ -439,6 +435,7 @@ export class Editor {
 
         html += '<script type="module" defer>'
         html += "\r\n" + `import { TXG } from "./dist.${LIB_VERSION}/tsxgraph.js";`  // this import is always provided because lib version
+
         html += "\r\n" + this.hiddenCode   // before try/catch
         html += "\r\n try {"
 
@@ -453,7 +450,7 @@ export class Editor {
         html += '</body>';
         html += '</head>';
 
-        console.log('%cgenerateSourceCode\n', 'color:lightblue;', html)
+        // console.log('%cgenerateSourceCode\n', 'color:lightblue;', html)
         return html
     }
 

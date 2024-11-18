@@ -25,11 +25,10 @@ export class OnClickSay {
             this.voices.forEach(voice => {
                 // console.log(voice.voiceURI)
                 if (voice.voiceURI.toLowerCase().indexOf('english') > 0) {
-                    // console.log(voice)
+                    // console.log(voice.voiceURI)
                     this.englishVoices.push(voice)
                 }
             })
-            console.log('english voices', this.englishVoices)
 
         } else {
             // console.log('loading voices')

@@ -21,7 +21,7 @@
         //
         /////////////////////////////////////////////////////////////////////////////
 
-        //   Generated on November 12, 2024, 4:02 am 
+        //   Generated on November 16, 2024, 3:11 pm 
 
 
 
@@ -1235,6 +1235,39 @@
             /** JSXGraph library wrapped in TypeScript */
             export class TSXGraph{
 
+            // this is the 'alternative mixins' pattern for TypeScript
+
+        /** use this to create mixins in Typescript.  Each mixin is a traditional ES class,
+         *  For example, to add classes Jumpable and Duckable to class Sprite, you add
+         * an interface which merges the expected mixins using the same name as your base, and
+         * then apply the mixins at runtime.
+        ```js
+        class Jumpable {  jump() {}  }
+        class Duckable {  duck() {}  }
+        class Sprite { x = 0; y = 0; }   // base class
+        interface Sprite extends Jumpable, Duckable {}
+        TXG.TSXGraph.applyMixins(Sprite, [Jumpable, Duckable]);
+
+        let s = new Sprite()  // now includes methods from mixins
+        s.jump();
+        ~~~
+                 */
+                static applyMixins(derivedCtor: any, constructors: any[]):void {
+                    constructors.forEach((baseCtor) => {
+                      Object.getOwnPropertyNames(baseCtor.prototype).forEach((name) => {
+                        Object.defineProperty(
+                          derivedCtor.prototype,
+                          name,
+                          Object.getOwnPropertyDescriptor(baseCtor.prototype, name) ||
+                            Object.create(null)
+                        );
+                      });
+                    });
+                  }
+
+
+
+
 
             static defaultAttrs:Object = {name:''}
 
@@ -1250,8 +1283,6 @@ import { TXG } from "../src/tsxgraph.js";
 const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
 ```
             */
-
-            /** Initializes a new board */
             static initBoard(html: string, attributeObj:InitBoardAttributes={}): TSXBoard {
 
                    const newBoard = new TSXBoard()

@@ -928,6 +928,22 @@ true is useful for keeping circles round, but may keep you from setting the boun
     }
     /** JSXGraph library wrapped in TypeScript */
     export class TSXGraph {
+        /** use this to create mixins in Typescript.  Each mixin is a traditional ES class,
+         *  For example, to add classes Jumpable and Duckable to class Sprite, you add
+         * an interface which merges the expected mixins using the same name as your base, and
+         * then apply the mixins at runtime.
+        ```js
+        class Jumpable {  jump() {}  }
+        class Duckable {  duck() {}  }
+        class Sprite { x = 0; y = 0; }   // base class
+        interface Sprite extends Jumpable, Duckable {}
+        TXG.TSXGraph.applyMixins(Sprite, [Jumpable, Duckable]);
+
+        let s = new Sprite()  // now includes methods from mixins
+        s.jump();
+        ~~~
+                 */
+        static applyMixins(derivedCtor: any, constructors: any[]): void;
         static defaultAttrs: Object;
         /** Initialize a new board. The first parameter 'html' should be the ID of a <DIV> in your web page.
 
@@ -941,7 +957,6 @@ import { TXG } from "../src/tsxgraph.js";
 const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
 ```
         */
-        /** Initializes a new board */
         static initBoard(html: string, attributeObj?: InitBoardAttributes): TSXBoard;
         static freeBoard(board: TSXBoard): void;
         /** set Katex as default for board (names, labels, everything).  useKatex() need only be set ONCE, no way to unset. the text element has a 'useKatex' attribute that lets you turn Katex on and off for individual text fields.

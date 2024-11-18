@@ -74,7 +74,7 @@ export class Main {
     command: HTMLButtonElement
     // fullscreen: HTMLButtonElement
 
-    template = "// a playground for TSXGraph, the TypeScript wrapper for JSXGraph.   https://jsxgraph.uni-bayreuth.de/wp/index.html"  // the code that appears first time
+    template = "TSX.point([0,4],{name:'A'})         // try running this... "
 
     static onClickSay: OnClickSay      // we'll put an instance here
 
@@ -206,7 +206,7 @@ export class Main {
 
                 submitChallenge: (stepUniq: string, textbook: string) => {
 
-                    console.log(`submitEditor: (${stepUniq}: string, ${textbook}: string)`)
+                    // console.log(`submitEditor: (${stepUniq}: string, ${textbook}: string)`)
 
                     // need a callback, this is an async function
                     let blob = new Blob([Main.editor.editor.getValue()], { type: "text/plain" })
@@ -246,7 +246,7 @@ export class Main {
                     let txt = document.getElementById(inputID) as HTMLFormElement
                     txt.select()  // won't work on tablet
                     navigator.clipboard.writeText(txt.value)
-                    console.log(`%ccopied '${txt.value}' to clipboard`, 'background-color:#ffE0E0;')
+                    // console.log(`%ccopied '${txt.value}' to clipboard`, 'background-color:#ffE0E0;')
                 },
 
 
@@ -256,9 +256,9 @@ export class Main {
                     let id = 'a' + inputID + 1
                     let txt = document.getElementById(id) as HTMLFormElement
                     if (txt !== null) {
-                        console.log(`%cpopquiz '${txt.value}'`, 'background-color:#ffE0E0;')
+                        // console.log(`%cpopquiz '${txt.value}'`, 'background-color:#ffE0E0;')
                     } else {
-                        console.log(`%cpopquiz - could not find ${id} '`, 'background-color:#ffE0E0;')
+                        // console.log(`%cpopquiz - could not find ${id} '`, 'background-color:#ffE0E0;')
 
                     }
                 },
@@ -370,8 +370,8 @@ export class Main {
 
 
                     main.setupMonacoEditor(main.hiddenCode, main.hiddenDecl)
-                    console.log('hidden code', main.hiddenCode)
-                    console.log('hidden decl', main.hiddenDecl)
+                    // console.log('hidden code', main.hiddenCode)
+                    // console.log('hidden decl', main.hiddenDecl)
                 },
 
 
@@ -395,14 +395,14 @@ export class Main {
                     // }, '');
 
 
-                    console.log('hidden code', main.hiddenCode)
-                    console.log('hidden decl', main.hiddenDecl)
-                    console.log('visible code', main.initVisibleCode)
+                    // console.log('hidden code', main.hiddenCode)
+                    // console.log('hidden decl', main.hiddenDecl)
+                    // console.log('visible code', main.initVisibleCode)
                 },
 
                 copyToEditor(paragraph: string, textbook: string, code: string) {
 
-                    console.log('copytoEditor code:', code);
+                    // console.log('copytoEditor code:', code);
 
                     let codeString = window.atob(code)
                     writeMoodleLog({ 'datacode': 'Log_CopyToEditor', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: code })
@@ -410,13 +410,13 @@ export class Main {
                     // // refresh the editor before we copy, clearing any old hidden stuff
 
                     Main.editor.editor.setValue(codeString)
-                    console.log('copyToEditor', codeString)
+                    // console.log('copyToEditor', codeString)
                 },
 
                 runInCanvas(paragraph: string, textbook: string, code: string) {   // convert from TS to JS first !!
                     // console.log('runInCanvas',code)
                     let tsCode = window.atob(code)
-                    console.log('runInCanvas', tsCode)
+                    // console.log('runInCanvas', tsCode)
 
                     writeMoodleLog({ 'datacode': 'Log_RunIcon', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: tsCode })
                     let jsCode = ts.transpile(tsCode);
@@ -485,7 +485,7 @@ export class Main {
                 //// these are the buttons on the Editor
                 stopEditor() {
                     try {
-                        console.log('clicked STOP')
+                        // console.log('clicked STOP')
                         this.eraseFileExplorer()    // in case it is open (also resets '2D')
                         // Observable.resetUserObservers()
                         throw 'stop'
@@ -525,13 +525,13 @@ export class Main {
                     // clear ALL tabs
                     for (var i = 1; i <= nTabs; i++) {
                         tabName = tabPrefix + i.toString();
-                        console.log('clearing ID', tabName)
+                        // console.log('clearing ID', tabName)
                         document.getElementById(tabName).style.display = 'none';
                     }
 
                     // now set the one we want
                     tabName = tabPrefix + thisTab.toString();
-                    console.log('setting ID ', tabName)
+                    // console.log('setting ID ', tabName)
                     document.getElementById(tabName).style.display = 'block';
                 },
 
@@ -545,7 +545,7 @@ export class Main {
 
     constructor() {
 
-        console.log('in Main.constructor()')
+        // console.log('in Main.constructor()')
         console.log("Your screen resolution is: " + screen.width + "x" + screen.height);
 
 
