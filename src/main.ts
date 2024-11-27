@@ -438,7 +438,7 @@ export class Main {
 
 
                     // console.log('runEditorCode', jsCode)
-                    Main.editor.runEditorCode(jsCode)//, jsHidden, tsDecls)
+                    Main.editor.runEditorCode(code,jsCode)//, jsHidden, tsDecls)
                 },
 
                 //// these are the buttons on the Editor
@@ -767,7 +767,7 @@ function writeMoodleLog(payload: HostMsg) {
 
     let base64 = Buffer.from(JsonData, 'utf8').toString('base64');
     // console.log('base64', base64)
-    navigator.sendBeacon("ajax.php?payload=" + base64);
+    navigator.sendBeacon("ajax.php",base64);
 }
 
 

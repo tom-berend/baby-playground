@@ -21,7 +21,7 @@
         //
         /////////////////////////////////////////////////////////////////////////////
 
-        //   Generated on November 16, 2024, 3:11 pm 
+        //   Generated on November 19, 2024, 12:16 am 
 
 
 
@@ -2179,14 +2179,14 @@ line(p1:Point|pointAddr, p2:Point|pointAddr, attributes: LineAttributes ={} ):Li
  /** Create a point. If any parent elements are functions or the attribute 'fixed' is true then point will be constrained.
             
 *```js
-             TSX.point([3,2],{strokeColor:'blue',strokeWidth:5,strokeOpacity:.5})
-             TSX.point([3,3]),{fixed:true, showInfobox:true}
-             TSX.point([()=>p1.X()+2,()=>p1.Y()+2]) // 2 up 2 right from p1
-             TSX.point([1,2,2])  // three axis definition - [z,x,y]
+TSX.point([3,2],{strokeColor:'blue',strokeWidth:5,strokeOpacity:.5})
+TSX.point([3,3]),{fixed:true, showInfobox:true}
+TSX.point([()=>p1.X()+2,()=>p1.Y()+2]) // 2 up 2 right from p1
+TSX.point([1,2,2])  // three axis definition - [z,x,y]
             
 *```
             
- also create points with Intersection, Midpoint, Transform.Point, Circumcenter, Glider, and others. */
+ also create points with Intersection, Midpoint, TransformPoint, Circumcenter, Glider, and others. */
 point(position:pointAddr, attributes: PointAttributes ={} ):Point{
  return new Point('Point', position, TSXGraph.defaultAttributes(attributes))
 }
@@ -2200,9 +2200,9 @@ polygon(pointArray:Point[]|pointAddr[], attributes: PolygonAttributes ={} ):Poly
  /** Display a message
                                 
 *```js
-                                TSX.text([3,2],[3,3], {fontSize:20, strokeColor:'blue'})
-                                TSX.text([0, 4], () => 'BD ' + B.distance(D).toFixed(2))
-                                TSX.text([-4, 2], '\pm\sqrt{a^2 + b^2}', { useKatex: true })
+TSX.text([3,2],[3,3], {fontSize:20, strokeColor:'blue'})
+TSX.text([0, 4], () => 'BD ' + B.distance(D).toFixed(2))
+TSX.text([-4, 2], '\pm\sqrt{a^2 + b^2}', { useKatex: true })
                                 
 *``` */
 text(position:Point|pointAddr, label:String|Function, attributes: TextAttributes ={} ):Text{

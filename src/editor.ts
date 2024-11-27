@@ -20,6 +20,7 @@ declare var WebGLObject: {
 */
 
 import { LIB_VERSION } from './version';
+import { Buffer } from "buffer";
 
 import * as monaco from "monaco-editor";
 // import * as BABYLON from 'babylonjs';
@@ -143,42 +144,46 @@ export class Editor {
         this.visibleCode = visibleCode
 
 
-        monaco.languages.typescript.typescriptDefaults.addExtraLib("let TSX = TXGraph.initBoard('jxgbox');")
+        // monaco.languages.typescript.typescriptDefaults.addExtraLib(`import { TXG } from './dist.${LIB_VERSION}/tsxgraph.js'; let TSX = TXG.TXGraph.initBoard('jxgbox');`)
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(`let TSX = TXG.TXGraph.initBoard('jxgbox') as TXG.TSXBoard;`)
+
 
         monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
             allowNonTsExtensions: true,
             inlineSourceMap: true,
             inlineSources: true,
+            experimentalDecorators:true,
 
             noLib: true,
             lib: ["dom.iterable"],    // for some reason, dom.iterable is required for destructuring    [x,y] = [1,2]
 
-            sourceMap: false,
-            strict: true,
-            alwaysStrict: true,
+            sourceMap: true,
+            strict: false,
+            alwaysStrict: false,
 
-            // noImplicitAny: false,
+            noImplicitAny: false,
 
-            // noUnusedParameters: false,       // easier for beginners
-            // noUnusedLocals: true,            // i filter those errors out from the alert
+            noUnusedParameters: false,       // easier for beginners
+            noUnusedLocals: true,            // i filter those errors out from the alert
+            allowUnreachableCode: true,
+            allowUnusedLabels: true,
+            noImplicitThis: false,
 
-            // strictFunctionTypes: true,       // show the error, it will run anyhow
-            // strictNullChecks: true,
+            strictFunctionTypes: true,       // show the error, it will run anyhow
+            strictNullChecks: true,
+            target: monaco.languages.typescript.ScriptTarget.ES2020
 
-            // allowUnreachableCode: false,
-            // allowUnusedLabels: true,
-            // noImplicitThis: true,
             // noImplicitReturns: true,
-            // target: monaco.languages.typescript.ScriptTarget.ES2020,
 
         });
+
 
         monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
             noSemanticValidation: true,
             noSyntaxValidation: true,
             target: monaco.languages.typescript.ScriptTarget.ES2020,
             noLib: true,                        // don't bring DOM into intellisense
-            strictNullChecks: true,
+            strictNullChecks: false,
         });
 
         monaco.editor.defineTheme('myTheme', {
@@ -222,7 +227,7 @@ export class Editor {
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_jsx_tiny)    // my simply remix of the upper level call
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_tsxgraph)    // wrapper version
-        monaco.languages.typescript.typescriptDefaults.addExtraLib(mathcode)    // my simply remix of the upper level call
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(mathcode)    // my simple remix of the upper level call
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(matter)    // my simply remix of the upper level call
 
         // this stuff has to go into the EVAL, since it doesn't see otherwise
@@ -293,6 +298,7 @@ export class Editor {
         // console.log('%ccopyToEditor', 'color:red;', 'hiddencode:', hidden, 'hiddendecl', decls)
         this.hiddenCode = hidden
         this.hiddenDecl = decls
+        console.log('copyToEditor:', hidden, decls)
         this.editor.setValue(code)
     }
 
@@ -353,18 +359,20 @@ export class Editor {
 
 
             this.editorCode = output.outputFiles[0].text as string;
+            let source64 = Buffer.from(sourceCode, 'utf8').toString('base64');
+
 
             // TODO, get correct ID and textbook
             // writeMoodleLog({'datacode': 'LOG_EditorRun', id:0, textbook:'', data05: sourceCode})
 
-            this.runEditorCode(this.editorCode)      // and run the whole mess
+            this.runEditorCode(source64, this.editorCode)      // and run the whole mess
         }
 
         // if model is null, do nothing
     }
 
 
-    runEditorCode(editorCode: string) {
+    runEditorCode(tsCode64: string, editorCode: string) {
         // console.log('runeditorcode', editorCode, hiddenCode)
 
 
@@ -372,21 +380,10 @@ export class Editor {
 
 
 
-        //////////////////////////
-        // try popup
-        //////////////////////////
-
         let plotWindow = window.open("", "jxg", "popup=true,left=100,top=100,width=320,height=320");
         let html = '';
-        // html += '<html>';
-        // html += '<head>';
-        // html += '<title>JSXGraph </title>';
 
-        html += this.generateSourceCode(editorCode)
-        // console.log('generateSourceCode', editorCode, html)
-
-        // html += '<body>';
-        // html += '</html>';
+        html += this.generateSourceCode(tsCode64, editorCode)
 
         // console.log('code to write:', html)
         plotWindow.document.open();
@@ -419,7 +416,7 @@ export class Editor {
     }
 
     /** create <script></script>  */
-    generateSourceCode(editorCode: string): string {
+    generateSourceCode(tsCode64: string, editorCode: string): string {
         // console.log('%chiddencode','color:pink;', this.hiddenCode, this.hiddenDecl)
         // let code = ''
         // code += "\r\n" + this.hiddenCode + "\r\n"
@@ -427,14 +424,22 @@ export class Editor {
 
         let html = '<!DOCTYPE html>';
         html += '<head>';
-        html += `<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/jsxgraphcore.js"></script>`
-        html += `<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/jsxgraph.css" />`;
+
+        html += `\n<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.js"></script>`
+        html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.css" />`;
+
+        html += `\n<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/jsxgraphcore.js"></script>`
+        html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/jsxgraph.css" />`;
         html += '</head>';
         html += '<body>';
+
+        html += `<div id='source64' style='display:none;'>${tsCode64}</div>`
         html += '<div id="jxgbox" class="jxgbox" style="width:850px; height:850px;"></div>';
 
         html += '<script type="module" defer>'
         html += "\r\n" + `import { TXG } from "./dist.${LIB_VERSION}/tsxgraph.js";`  // this import is always provided because lib version
+        html += "\r\n" + `let TSX = TXG.TSXGraph.initBoard('jxgbox');`
+
 
         html += "\r\n" + this.hiddenCode   // before try/catch
         html += "\r\n try {"
@@ -443,14 +448,15 @@ export class Editor {
 
         html += "\r\n }"
         html += "\r\n catch(error) {"
-        html += "\r\n alert(error);"
         html += "\r\n console.log(error);"
+        html += "\r\n alert(error);"
         html += "\r\n }"
         html += '</script>';
+        html += `<div id='source64' style='display:none;'>${tsCode64}</div>`
         html += '</body>';
         html += '</head>';
 
-        // console.log('%cgenerateSourceCode\n', 'color:lightblue;', html)
+        console.log('%cgenerateSourceCode\n', 'background-color:blue;', html)
         return html
     }
 

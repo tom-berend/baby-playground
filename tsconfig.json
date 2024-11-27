@@ -2,14 +2,21 @@
     "compilerOptions": {
         "allowSyntheticDefaultImports": true,
         "noImplicitAny": true,
-        "module": "amd",
-        "target": "ESNext",
-        "lib":["es2022"],
+        "module": "commonjs",
+        "target": "ES2015",
+        "lib": [
+            "esnext",
+            "dom",
+            "DOM.Iterable"
+        ],
         "moduleResolution": "node",
         "allowJs": true,
         "skipLibCheck": true,
         "sourceMap": true,
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "declaration": true,
+        "checkJs": false,
+        "experimentalDecorators": true,
     },
     "files": [
         "src/main.ts"
@@ -19,10 +26,13 @@
     ],
     "include": [
         "src/**/*.ts",
-        "planetcute/planetcute.d.ts", "src/views/studentLesson.ts.unused",
+        "planetcute/planetcute.d.ts",
+        "src/views/studentLesson.ts.unused",
     ],
     "exclude": [
         "node_modules",
         "**/*.spec.ts"
     ],
 }
+
+

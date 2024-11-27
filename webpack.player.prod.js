@@ -7,8 +7,8 @@ var PACKAGE = require('./package.json');        // use the version # from packag
 var version = PACKAGE.version;
 
 module.exports = {
-    devtool: 'hidden-source-map',
-
+    // devtool: 'hidden-source-map',
+    devtool: 'source-map',
     entry: {
         "app": "./src/main.ts",
         "editor.worker": "monaco-editor/esm/vs/editor/editor.worker.js",
