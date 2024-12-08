@@ -438,8 +438,35 @@ export class Main {
 
 
                     // console.log('runEditorCode', jsCode)
-                    Main.editor.runEditorCode(code,jsCode)//, jsHidden, tsDecls)
+                    Main.editor.runEditorCode(code, jsCode)//, jsHidden, tsDecls)
                 },
+
+
+                share(paragraph: string, textbook: string, shareKey: string) {   // convert from TS to JS first !!
+                    console.log('in new share')
+
+                    // write log with a callback, this is an async function
+                    let blob = new Blob([Main.editor.editor.getValue()], { type: "text/plain" })
+                    let reader = new FileReader();
+                    reader.readAsText(blob);
+                    let codebase64: string
+                    reader.onloadend = function() {
+                        let result = reader.result
+                        if (typeof result == 'string') {    // because might be ArrayBuffer
+                            codebase64 = Buffer.from(result, 'utf8').toString('base64');
+                        } else {  // Monaco entarrayBuffer
+                            let enc = new TextDecoder("utf-8");  // use a text decoder
+                            let code = enc.decode(result);
+                            codebase64 = Buffer.from(code, 'utf8').toString('base64');
+                        }
+                        let hiddendeclbase64 = Buffer.from(Main.editor.hiddenDecl, 'utf8').toString('base64');
+                        let hiddencodebase64 = Buffer.from(Main.editor.hiddenCode, 'utf8').toString('base64');
+                        writeMoodleLog({ 'datacode': 'LOG_ShareCode', 'id': main.moodleID, 'textbook': textbook, 'data01': '', 'data02': shareKey, 'data05': codebase64, 'data06': hiddencodebase64, 'data07': hiddendeclbase64 })
+                    }
+                },
+
+
+
 
                 //// these are the buttons on the Editor
                 runEditor(stepUniq: string, textbook: string, shareKey: string = '') {
@@ -734,11 +761,9 @@ function writeMoodleLog(payload: HostMsg) {
     // so we simply use the PREVIOUS UNIQ (usually that got us here)
 
     if (payload.paragraph == undefined)
-        payload.paragraph = prevUniq
+        payload.paragraph = prevUniq ?? ''
     else
         prevUniq = payload.paragraph
-
-
 
     let JsonData = JSON.stringify(payload)
     // console.log('JsonData:', JsonData)
@@ -767,7 +792,10 @@ function writeMoodleLog(payload: HostMsg) {
 
     let base64 = Buffer.from(JsonData, 'utf8').toString('base64');
     // console.log('base64', base64)
-    navigator.sendBeacon("ajax.php",base64);
+    let formData = new FormData()
+    formData.set('payload',base64)
+
+    navigator.sendBeacon("ajax.php", formData);
 }
 
 

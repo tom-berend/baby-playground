@@ -986,7 +986,7 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
     }
     interface MatrixJSXMathIface {
         /** Calculates the cross product of two vectors both of length three. */
-        crossProduct(c1: matAny, c2: matAny): matAny;
+        crossProduct(v1: number[], v2: number[]): number[];
         /** Generates a 4x4 matrix for 3D to 2D projections. */
         frustum(left: Number, right: Number, top: Number, bottom: Number, near: Number, far: Number): matAny;
         /** Generates an identity matrix of size m x n.  (Yes it is possible to have a non-square identity matrix) */
@@ -1169,13 +1169,13 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         /** A circle can be constructed by providing a center and a point on the circle,
                                 or a center and a radius (given as a number, function, line, or circle).
                                 If the radius is a negative value, its absolute values is taken.
-                       
+
        *```js
                        TSX.circle(P1,1])
                        TSX.circle([0,0],[1,0])
-                       
+
        *```
-                       
+
        Also see: Circumcircle is a circle described by three points.  An Arc is a segment of a circle. */
         circle(centerPoint: Point | pointAddr, remotePoint: Point | pointAddr | Line | line | Number | Function | Circle, attributes?: CircleAttributes): Circle;
         /** Plot a set of points or a function from arrays X and Y */
@@ -1183,24 +1183,24 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         curve(xArray: Function, yArray: Function, attributes?: CurveAttributes): Curve;
         curve(xArray: number[] | Function, yArray: number[] | Function, left: NumberFunction, right: NumberFunction, attributes?: CurveAttributes): Curve;
         /** A cubic bezier curve.  The input is 3k + 1 points; those at positions k mod 3 = 0 (eg: 0, 3, 6 are the data points, the two points between each data points are the control points.
-                       
+
        *```js
            let points: TXG.Point[] = []
            points.push(TSX.point([-2, -1], { size: 4, color: 'blue', name: '0' }))
-       
+
            points.push(TSX.point([-2, -2.5], { name: '1' }))
            points.push(TSX.point([-1, -2.5], { name: '2' }))
-       
+
            points.push(TSX.point([2, -2], { size: 4, color: 'blue', name: '3' }))
-       
+
            let curve = TSX.bezierCurve(points, { strokeColor: 'orange', strokeWidth: 5, fixed: false }); // Draggable curve
-       
+
            // 'BezierCurve()' is just a shorthand for the following two lines:
            // let bz = TSX.NumericsMath.bezier(points)
            // let curve = TSX.curve(bz[0], bz[1])
-                       
+
        *```
-       
+
                         */
         bezierCurve(points: Point[], attributes?: BezierCurveAttributes): Curve;
         /** This element is used to provide a constructor for arbitrary content in an SVG foreignObject container.
@@ -1218,15 +1218,15 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
                        A collection of space icons is provided, press CTRL+I to show the list.
                        The second parameter sets the lower left point of the image.
                        The optional third parameter sets the size multiplier of the image, default is [1,1].
-                       
+
        If you want to move the image, just tie the image to a point, maybe at the center of the image.
                         For more flexibility, see TSX.Rotate() and TSX.Translate()
-                       
+
        *```js
                    TSX.image('icons/earth.png', [0, 0],[2,2])
                    let p1 = TSX.point([3, 2], { opacity: .1 })
                    TSX.image('icons/moon-full-moon.png', [()=>p1.X(),()=>p1.Y()])
-                       
+
        *``` */
         image(url: String | spaceIcon, lowerLeft: pointAddr, widthHeight?: [Number, Number], attributes?: ImageAttributes): Image;
         /** An implicit curve is a plane curve defined by an implicit equation relating two coordinate variables, commonly x and y. For example, the unit circle is defined by the implicit equation x2 + y2 = 1. In general, every implicit curve is defined by an equation of the form f(x, y) = 0 for some function f of two variables.  IMPLICIT means that the equation is not expressed as a solution for either x in terms of y or vice versa. */
@@ -1234,39 +1234,39 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         implicitcurve(f: Function | String, dfx: Function | String, dfy: Function | String, attributes?: ImplicitcurveAttributes): Implicitcurve;
         /** This element is used to provide a constructor for a general line given by two points.
                                        By setting additional properties a line can be used as an arrow and/or axis.
-                                       
+
        *```js
                                        TSX.line([3,2],[3,3],{strokeColor:'blue',strokeWidth:5,strokeOpacity:.5})
                                        let P1 = TSX.point([3,2])
                                        TSX.line(p1,[3,3])
-                                       
+
        *```
-                                       
+
         also create lines with Segment, Arrow, Transform.Point, Circumcenter, Glider, and others.
                                         Look at .conic.line() for a line defined by the equation 'az +bx +cy = 0'
                            */
         line(p1: Point | pointAddr, p2: Point | pointAddr, attributes?: LineAttributes): Line;
         /** Create a point. If any parent elements are functions or the attribute 'fixed' is true then point will be constrained.
-                   
+
        *```js
        TSX.point([3,2],{strokeColor:'blue',strokeWidth:5,strokeOpacity:.5})
        TSX.point([3,3]),{fixed:true, showInfobox:true}
        TSX.point([()=>p1.X()+2,()=>p1.Y()+2]) // 2 up 2 right from p1
        TSX.point([1,2,2])  // three axis definition - [z,x,y]
-                   
+
        *```
-                   
+
         also create points with Intersection, Midpoint, TransformPoint, Circumcenter, Glider, and others. */
         point(position: pointAddr, attributes?: PointAttributes): Point;
         /** Array of Points */
         polygon(pointArray: Point[] | pointAddr[], attributes?: PolygonAttributes): Polygon;
         /** Display a message
-                                       
+
        *```js
        TSX.text([3,2],[3,3], {fontSize:20, strokeColor:'blue'})
        TSX.text([0, 4], () => 'BD ' + B.distance(D).toFixed(2))
        TSX.text([-4, 2], '\pm\sqrt{a^2 + b^2}', { useKatex: true })
-                                       
+
        *``` */
         text(position: Point | pointAddr, label: String | Function, attributes?: TextAttributes): Text;
         /** A circular sector is a subarea of the area enclosed by a circle. It is enclosed by two radii and an arc. */
@@ -1274,35 +1274,39 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         /** Vector field. Plot a vector field either given by two functions f1(x, y) and f2(x,y) or by a function f(x, y) returning an array of size 2. */
         vectorfield(fxfy: Function[], horizontalMesh?: Number[], verticalMesh?: Number[], attributes?: VectorfieldAttributes): Vectorfield;
         /** The angle element is used to denote an angle defined by three points (from, around,to), or two lines and two directions (either points or plus-or-minus 1 to indicate direction.
+       ~~~js
+
+       TSX.angle(p1,p2,p3)                                  // angle from 3 points
+       TSX.angle(l1, l2, [5.5, 0], [4, 3], { radius: 1 })   // 2 lines, two directions
+       TSX.angle(l1, l2, 1, -1, { radius: 2 })              // 2 lines two +/- values
+       ~~~
                     As opposed to the sector, an angle has two angle points and no radius point.
-                                       
+
         type=='sector': Sector is displayed.
-                                       
+
         type=='square': a parallelogram is displayed.
-                                       
-        type=='auto':  a square is displayed if the angle is near orthogonal.
-                                       
-        If no name is provided the angle label is automatically set to a lower greek letter. */
+
+        type=='auto':  a square is displayed if the angle is near orthogonal. */
         angle(from: Point | pointAddr, around: Point | pointAddr, to: Point | pointAddr, attributes?: AngleAttributes): Angle;
         angle(line1: Line | line, line2: Line | line, direction1: [Number, Number], direction2: [Number, Number], attributes?: AngleAttributes): Angle;
         angle(line1: Line | line, line2: Line | line, dirPlusMinus1: Number, dirPlusMinus2: Number, attributes?: AngleAttributes): Angle;
         /** Create a circular Arc defined by three points (because a circle can be defined by three points - see circumcircle).
-                                   
+
        *```js
                                    let arc = TSX.arc([-8,5],[-4,5],[-9,9]])
-                                   
+
        *```
-                                   
+
         To create an arc with origin, startpoint, and angle, look at MajorArc/MinorArc. */
         arc(origin: Point | pointAddr, from: Point | pointAddr, to: Point | pointAddr, attributes?: ArcAttributes): Arc;
         /** Arrow defined by two points (like a Segment) with arrow at P2
-                                   
+
        *```js
-                                   
+
         let arrow = TSX.arrow([-8,5],[-4,5])
-                                   
+
        *```
-                                   
+
         */
         arrow(p1: Point | pointAddr, p2: Point | pointAddr, attributes?: ArrowAttributes): Arrow;
         /** A line parallel to a given line (or two points), through a point. */
@@ -1439,7 +1443,7 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         /** An input widget for choosing values from a given range of numbers.  Parameters are startpoint, endpoint,
                        and an array with [minimum, initialValue, maximum].  Query the value with slider.Value().  Set the slider either by
                        dragging the control or clicking on the line (you can disable clicking with {moveOnUp:false}
-               
+
        *```js
                 let s = TSX.slider([1, 2], [3, 2], [1, 5, 10])           //  query with s.Value()
                 let s = TSX.slider([1, 2], [3, 2], [1, 5, 10],{snapWidth:1})     //  only values 1,2,3...
@@ -1451,7 +1455,7 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
                    label: {fontSize: 16, strokeColor: 'orange'},
                    suffixLabel: ' x=',         // really a prefix
                    postLabel: ' meters'        // this is a suffix
-               
+
        *``` */
         slider(StartPoint: Point | pointAddr, EndPoint: Point | pointAddr, minimum_initial_maximum: [number, number, number], attributes?: SliderAttributes): Slider;
         /** Slope field. Plot a slope field given by a function f(x, y) returning a number. */
@@ -1504,6 +1508,7 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         tsxBoard: TSXBoard;
         scaleXY: number;
         constructor(className: string, params: any[], attrs: GeometryElementAttributes);
+        protected initProps(props: any): void;
         /**  */
         get x(): GeometryElement;
         /**  */
@@ -2001,21 +2006,21 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         /** Moves an element towards coordinates, optionally tweening over time.  Time is in ms.  WATCH OUT, there
                                is no AWAIT for the tween to finish, a second moveTo() starts immediately. Thats GOOD if you
                                want to move two different points at the same time, BAD if you want to move the same point repeatedly.  EG:
-                               
+
        ```js
-       
+
        P.moveTo([A.X(), A.Y()], 5000)
-       
+
        ``` */
         moveTo(p: number[] | Function[], time?: number, callback?: Function, effect?: "==" | "<>" | ">" | "<"): any;
         /** Moves an element towards coordinates, optionally tweening over time.  Time is in ms.  WATCH OUT, there
                                is no AWAIT for the tween to finish, a second moveTo() starts immediately. Thats GOOD if you
                                want to move two different points at the same time, BAD if you want to move the same point repeatedly.  EG:
-                               
+
        ```js
-       
+
        P.moveTo([A.X(), A.Y()], 5000)
-       
+
        ``` */
         visit(p: number[] | Function[], time?: number, callback?: Function, effect?: "==" | "<>" | ">" | "<", repeat?: number): any;
         /** Point location in vector form [n,n] */
@@ -2539,7 +2544,7 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         /** Create a new Point from a Point and Transform.  Translation just requires dx and dy.
                                    Rotation requires a point to rotate around, and a rotation transform around that point, and
                                    a remote point that sets both the radius and the initial angle of the rotation.
-                                   
+
        Example: Given a rotation transform controlled by a slider, create a rotating point using the transform method Point() and the
                                    radius point.
        ```js
@@ -2570,7 +2575,7 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         /** This element is used to provide a constructor for a 3D Point. */
         point3D(xyz: NumberFunction[] | Function, attributes?: Object): Point3D;
         /** This element is used to provide a constructor for a 3D line. */
-        line3D(point1: NumberFunction[] | Point3D, point2: NumberFunction[] | Point3D, attributes?: Object): Line3D;
+        line3D(point1: Point3D | NumberFunction[], point2: Point3D | NumberFunction[], attributes?: Object): Line3D;
         /** This element creates a 3D parametric curve. */
         curve3D(xFunction: Function, yFunction: Function, zFunction: Function, range: NumberFunction[], attributes?: Object): Curve3D;
         /**  */
@@ -2584,18 +2589,18 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         /** This element is used to provide a constructor for a 3D Text. */
         text3D(position: NumberFunction[], text: string | Function, attributes?: Object): Text3D;
         /** Create a 3D plane object defined by a point and two directions, and extending negative and positive distanced in those directions by a range.  Remember to set visible:true.
-                                   
+
        *```js
-       
+
         let pnt = [[-1, 1, 1]]
         let axis1 = [0, 1, 0], axis2 = [0, 0, 1]
         let range1 = [0,3], range2 = [0,3]
         view.plane3D'(pnt, axis1, axis2, range1, range2,
                { fillColor: 'red', gradientSecondColor: 'blue', fillOpacity: .5, strokeColor: 'blue',
                 gradient: 'linear', visible:true })
-                                   
+
        ``` */
-        plane3D(point: Point3D | number[], axis1: number[], axis2: number[], range1: number[], range2: number[], attributes?: Object): Plane3D;
+        plane3D(point: Point3D | number[] | Function, axis1: number[] | Function, axis2: number[] | Function, range1: number[], range2: number[], attributes?: Object): Plane3D;
         /**  */
         functiongraph3D(xyFunction: Function, xRange: NumberFunction[], yRange: NumberFunction[], attributes?: Object): Functiongraph3D;
         /**  */

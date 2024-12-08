@@ -32,7 +32,7 @@ import lib_es6 from "./extraLibs/lib.es6.d.ts.txt";  // not sure why i need both
 // import lib_baby from "./extraLibs/baby.d.ts.txt";
 import lib_dom_mini from "./extraLibs/lib.dom_mini.d.ts.txt";
 // import lib_dom from "./extraLibs/lib.dom.d.ts.txt";
-// import lib_dom_iterable from "./extraLibs/dom.iterable.d.ts.txt";
+import lib_dom_iterable from "./extraLibs/dom.iterable.d.ts.txt";
 
 import lib_es2015_collection from "./extraLibs/lib.es2015.collection.d.ts.txt"
 import lib_es2015_core from "./extraLibs/lib.es2015.core.d.ts.txt"
@@ -152,10 +152,10 @@ export class Editor {
             allowNonTsExtensions: true,
             inlineSourceMap: true,
             inlineSources: true,
-            experimentalDecorators:true,
+            experimentalDecorators: true,
 
             noLib: true,
-            lib: ["dom.iterable"],    // for some reason, dom.iterable is required for destructuring    [x,y] = [1,2]
+            lib: ["es5, es6, es2015.core, es2015.interable, dom.iterable"],    // for some reason, dom.iterable is required for destructuring    [x,y] = [1,2]
 
             sourceMap: true,
             strict: false,
@@ -202,7 +202,7 @@ export class Editor {
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es6, "lib.es6.d.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom_mini, "lib.dom_mini.d.ts");
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom, "lib.dom.d.ts");
-        // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom_iterable, "lib.dom.iterable.d.ts");
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_dom_iterable, "lib.dom.iterable.d.ts");
 
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_promise, "lib.es2015.promise.d.ts");
 
@@ -380,7 +380,7 @@ export class Editor {
 
 
 
-        let plotWindow = window.open("", "jxg", "popup=true,left=100,top=100,width=320,height=320");
+        let plotWindow = window.open("", "jxgframe", "popup=true,left=100,top=100,width=320,height=320");
         let html = '';
 
         html += this.generateSourceCode(tsCode64, editorCode)
@@ -452,11 +452,11 @@ export class Editor {
         html += "\r\n alert(error);"
         html += "\r\n }"
         html += '</script>';
-        html += `<div id='source64' style='display:none;'>${tsCode64}</div>`
+        // html += `<div id='source64' style='display:none;'>${tsCode64}</div>`
         html += '</body>';
         html += '</head>';
 
-        console.log('%cgenerateSourceCode\n', 'background-color:blue;', html)
+        // console.log('%cgenerateSourceCode\n', 'background-color:blue;', html)
         return html
     }
 
