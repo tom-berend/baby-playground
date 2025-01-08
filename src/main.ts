@@ -270,23 +270,7 @@ export class Main {
 
 
                 saveFileExplorer: (s: string) => {
-                    this.editor.download('JSXgraph_Snippet.ts')
-
-                    // let data = 'you saved me'
-                    // let type = 'js'
-                    // let filename = 'JSXgraph_Snippet.ts'
-                    // let blob = new Blob([Main.editor.editor.getValue()], { type: "text/plain" })
-
-                    // let a = document.createElement("a"),
-                    //     url = URL.createObjectURL(blob);
-                    // a.href = url;
-                    // a.download = filename;
-                    // document.body.appendChild(a);
-                    // a.click();
-                    // setTimeout(function() {
-                    //     document.body.removeChild(a);
-                    //     window.URL.revokeObjectURL(url);
-                    // }, 0);
+                    this.editor.createWebPage(main.hiddenCode)  // asnyc
                 },
 
 
@@ -413,33 +397,33 @@ export class Main {
                     // console.log('copyToEditor', codeString)
                 },
 
-                runInCanvas(paragraph: string, textbook: string, code: string) {   // convert from TS to JS first !!
-                    // console.log('runInCanvas',code)
-                    let tsCode = window.atob(code)
-                    // console.log('runInCanvas', tsCode)
+                // runInCanvas(paragraph: string, textbook: string, code: string) {   // convert from TS to JS first !!
+                //     // console.log('runInCanvas',code)
+                //     let tsCode = window.atob(code)
+                //     // console.log('runInCanvas', tsCode)
 
-                    writeMoodleLog({ 'datacode': 'Log_RunIcon', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: tsCode })
-                    let jsCode = ts.transpile(tsCode);
+                //     writeMoodleLog({ 'datacode': 'Log_RunIcon', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: tsCode })
+                //     let jsCode = ts.transpile(tsCode);
 
-                    /*
-                    // before we do anything else, we WIPE OUT any previous
-                    // content of <div id='jxgbox'>
-                    // then add back a simple canvas
-                    let jxgDiv = document.getElementById('jxgbox')
-                    // console.log('removing with method 2')
-                    while (jxgDiv.firstChild) {
-                        jxgDiv.firstChild.remove()
-                    }
-                    let canv = document.createElement("jxgbox")
-                    canv.id = 'jxgbox'
-                    jxgDiv.appendChild(canv)
-                    */
+                //     /*
+                //     // before we do anything else, we WIPE OUT any previous
+                //     // content of <div id='jxgbox'>
+                //     // then add back a simple canvas
+                //     let jxgDiv = document.getElementById('jxgbox')
+                //     // console.log('removing with method 2')
+                //     while (jxgDiv.firstChild) {
+                //         jxgDiv.firstChild.remove()
+                //     }
+                //     let canv = document.createElement("jxgbox")
+                //     canv.id = 'jxgbox'
+                //     jxgDiv.appendChild(canv)
+                //     */
 
 
 
-                    // console.log('runEditorCode', jsCode)
-                    Main.editor.runEditorCode(code, jsCode)//, jsHidden, tsDecls)
-                },
+                //     // console.log('runEditorCode', jsCode)
+                //     Main.editor.runEditorCode(code, jsCode)//, jsHidden, tsDecls)
+                // },
 
 
                 share(paragraph: string, textbook: string, shareKey: string) {   // convert from TS to JS first !!
@@ -501,7 +485,8 @@ export class Main {
 
                     try {
                         // Main.editor.transpileLog(main.hiddenCode)  // also runs
-                        Main.editor.transpile(main.hiddenCode)  // also runs
+                        Main.editor.transpile(main.hiddenCode)
+
                         // writeMoodleLog({ 'datacode': 'SHARE', 'id': main.moodleID, 'textbook': textbook, 'paragraph': '0', 'data05': main.hiddenCode })
 
                     } catch (e) {   // transpile error.  show it in an alert
@@ -684,7 +669,8 @@ export class Main {
 
 
             if (this.download)
-                this.download.onclick = () => Main.editor.download("game.ts");
+                this.download.onclick = () => Main.editor.createWebPage(main.hiddenCode)  // asnyc
+            // / Main.editor.download("game.ts");
             if (this.upload)
                 this.upload.onclick = () => Main.editor.upload();
             if (this.files)
@@ -793,7 +779,7 @@ function writeMoodleLog(payload: HostMsg) {
     let base64 = Buffer.from(JsonData, 'utf8').toString('base64');
     // console.log('base64', base64)
     let formData = new FormData()
-    formData.set('payload',base64)
+    formData.set('payload', base64)
 
     navigator.sendBeacon("ajax.php", formData);
 }

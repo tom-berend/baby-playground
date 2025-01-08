@@ -100,8 +100,30 @@ export declare namespace TXG {
     interface GeometryElement3DAttributes {
         /** used by V2 vector math library */
         scaleXY?: Number;
+        /** label for this item */
+        name?: string | Function;
+        /** label for this item */
+        hasLabel?: boolean;
+        /** Opacity of the element (between 0 and 1). */
+        opacity?: number | Function;
         /** Set whether the element is visibledisplay name  */
         visible?: Boolean;
+        /** Set the width of lines in pixels  */
+        strokeWidth?: number;
+        /** Set the color of lines */
+        strokeColor?: string | Function;
+        /** Set the color of areas */
+        fillColor?: string | Function;
+        /** Arrow at the end of the line? */
+        firstArrow?: Boolean;
+        /** Arrow at the start of the line? */
+        lastArrow?: Boolean;
+        /** Highlight on mouse-over? */
+        highlight?: Boolean;
+        /** Attributes for first point (an object) */
+        point1?: Point3DAttributes;
+        /** Attributes for second point (an object) */
+        point2?: Point3DAttributes;
     }
     interface BoardAttributes {
         /** used by V2 vector math library */
@@ -264,6 +286,14 @@ export declare namespace TXG {
         snapToGrid?: Boolean;
         /** This attribute was used to determined the point layout. It was derived from GEONExT and was replaced by Point#face and Point#size. */
         style?: Number;
+    }
+    interface Point3DAttributes extends GeometryElement3DAttributes {
+        /** Size in pixels */
+        size?: Number | Function;
+        /** If true the element is fixed and can not be dragged around. The element will be repositioned on zoom and moveOrigin events. */
+        fixed?: Boolean;
+        /** If true a label will display the element's name. */
+        withLabel?: Boolean;
     }
     interface PolygonAttributes extends GeometryElementAttributes {
         /** Attributes for the polygon border lines. */
@@ -768,6 +798,8 @@ export declare namespace TXG {
         projection?: `parallel` | `central`;
         /** Support occlusion by ordering points? */
         depthorderpoints?: Boolean;
+        /** use {enable:true, layers:[12]} */
+        depthOrder?: Object;
         /** Position of the main axes in a View3D element. Possible values are 'center' and 'border'. */
         axesPosition?: String;
         /** Allow vertical dragging of objects, i.e. in direction of the z-axis. Subobjects areenabled: truekey: 'shift'Possible values for attribute key: 'shift' or 'ctrl'. */
@@ -874,6 +906,8 @@ export declare namespace TXG {
         };
         /** if grid true, then draw the zeroGrid? */
         drawZero?: Boolean;
+        /** speed optimization.  value should be 'svg' */
+        minimizeReflow?: string;
         /** Attribute(s) to control the fullscreen icon. */
         fullscreen?: Object;
         /** Show grid? */
@@ -969,10 +1003,93 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         static defaultAttributes(attrs: Object): Object;
     }
     export type spaceIcon = 'icons/alien-1.png' | 'icons/alien-2.png' | 'icons/alien-3.png' | 'icons/alien-4.png' | 'icons/alien-5.png' | 'icons/alien-abduction.png' | 'icons/alien-ship-2.png' | 'icons/alien-ship-beam.png' | 'icons/alien-ship.png' | 'icons/asteroid-2.png' | 'icons/asteroid.png' | 'icons/astronaut-helmet.png' | 'icons/atom.png' | 'icons/atronaut.png' | 'icons/bb-8.png' | 'icons/big-dipper.png' | 'icons/black-hole.png' | 'icons/brain-slug.png' | 'icons/cassiopeia.png' | 'icons/chewbacca.png' | 'icons/comet.png' | 'icons/cylon-raider.png' | 'icons/darth-vader.png' | 'icons/death-star.png' | 'icons/earth.png' | 'icons/falling-asteroid.png' | 'icons/falling-space-capsule.png' | 'icons/falling-star.png' | 'icons/flag.png' | 'icons/fly\ icon\ licence.png' | 'icons/flyicon.png' | 'icons/galaxy.png' | 'icons/intl-space-station.png' | 'icons/jupiter.png' | 'icons/landing-space-capsule.png' | 'icons/laser-gun.png' | 'icons/mars.png' | 'icons/millennium-falcon.png' | 'icons/mission-control.png' | 'icons/moon-full-almost.png' | 'icons/moon-full-moon.png' | 'icons/moon-last-quarter.png' | 'icons/moon-new-moon.png' | 'icons/moon-waning-cresent.png' | 'icons/moon-waning-gibbous.png' | 'icons/morty.png' | 'icons/neptune.png' | 'icons/pluto.png' | 'icons/princess-leia.png' | 'icons/rick.png' | 'icons/ring-ship.png' | 'icons/rocket-launch.png' | 'icons/rocket.png' | 'icons/satellite.png' | 'icons/saturn.png' | 'icons/solar-system.png' | 'icons/space-capsule.png' | 'icons/space-cockpit.png' | 'icons/space-invader.png' | 'icons/space-observatory.png' | 'icons/space-rocket.png' | 'icons/space-rover-1.png' | 'icons/space-rover-2.png' | 'icons/space-satellite-dish.png' | 'icons/space-ship_1.png' | 'icons/space-ship_2.png' | 'icons/space-ship_3.png' | 'icons/space-ship.png' | 'icons/space-shuttle-launch.png' | 'icons/space-shuttle.png' | 'icons/sputnick-1.png' | 'icons/sputnick-2.png' | 'icons/star.png' | 'icons/stars.png' | 'icons/stormtrooper.png' | 'icons/sun.png' | 'icons/telescope.png' | 'icons/uranus.png' | 'icons/venus.png' | 'icons/moon-dreamy.png';
+    interface CurveMultiDefn {
+        /**  Plot a set of points or a function from arrays X and Y  */
+        (xArray: number[] | Function, yArray: number[] | Function, attrs?: CurveAttributes): Curve;
+        /**  Plot a set of points or a function from arrays X and Y  */
+        (xArray: number[] | Function, yArray: number[] | Function, left: NumberFunction, right: NumberFunction, attrs?: CurveAttributes): Curve;
+    }
+    interface ImplicitcurveMultiDefn {
+        /**  An implicit curve is a plane curve defined by an implicit equation relating two coordinate variables, commonly x and y. For example, the unit circle is defined by the implicit equation x2 + y2 = 1. In general, every implicit curve is defined by an equation of the form f(x, y) = 0 for some function f of two variables.  IMPLICIT means that the equation is not expressed as a solution for either x in terms of y or vice versa.  */
+        (f: Function | String, attrs?: ImplicitcurveAttributes): Implicitcurve;
+        /**  An implicit curve is a plane curve defined by an implicit equation relating two coordinate variables, commonly x and y. For example, the unit circle is defined by the implicit equation x2 + y2 = 1. In general, every implicit curve is defined by an equation of the form f(x, y) = 0 for some function f of two variables.  IMPLICIT means that the equation is not expressed as a solution for either x in terms of y or vice versa.  */
+        (f: Function | String, dfx: Function | String, dfy: Function | String, attrs?: ImplicitcurveAttributes): Implicitcurve;
+    }
+    interface LineMultiDefn {
+        /**  Create a line defined by two points (or point addresses]
+       
+       *```js
+       TSX.line([3,2],[3,3],{strokeColor:'blue',strokeWidth:5,strokeOpacity:.5})
+       let P1 = TSX.point([3,2])
+       TSX.line(p1,[3,3])
+       
+       *```
+                              */
+        (p1: Point | pointAddr, p2: Point | pointAddr, attrs?: LineAttributes): Line;
+        /**  Create a line for the equation a*x+b*y+c*z = 0',
+       
+       *```js
+       TSX.line(2,3,()=>offset())   // create a line for the equation a*x+b*y+c*z = 0
+       
+       *```
+                              */
+        (A: number | Function, B: number | Function, C: number | Function, attrs?: LineAttributes): Line;
+    }
+    interface AngleMultiDefn {
+        /**  The angle element is used to denote an angle defined by three points (from, around,to), or two lines and two directions (either points or plus-or-minus 1 to indicate direction.
+       ~~~js
+       
+       TSX.angle(p1,p2,p3)                                  // angle from 3 points
+       TSX.angle(l1, l2, [5.5, 0], [4, 3], { radius: 1 })   // 2 lines, two directions
+       TSX.angle(l1, l2, 1, -1, { radius: 2 })              // 2 lines two +/- values
+       ~~~
+                    As opposed to the sector, an angle has two angle points and no radius point.
+        
+        type=='sector': Sector is displayed.
+        
+        type=='square': a parallelogram is displayed.
+        
+        type=='auto':  a square is displayed if the angle is near orthogonal.  */
+        (from: Point | pointAddr, around: Point | pointAddr, to: Point | pointAddr, attrs?: AngleAttributes): Angle;
+        /**  The angle element is used to denote an angle defined by three points (from, around,to), or two lines and two directions (either points or plus-or-minus 1 to indicate direction.
+       ~~~js
+       
+       TSX.angle(p1,p2,p3)                                  // angle from 3 points
+       TSX.angle(l1, l2, [5.5, 0], [4, 3], { radius: 1 })   // 2 lines, two directions
+       TSX.angle(l1, l2, 1, -1, { radius: 2 })              // 2 lines two +/- values
+       ~~~
+                    As opposed to the sector, an angle has two angle points and no radius point.
+        
+        type=='sector': Sector is displayed.
+        
+        type=='square': a parallelogram is displayed.
+        
+        type=='auto':  a square is displayed if the angle is near orthogonal.  */
+        (line1: Line | line, line2: Line | line, direction1: [Number, Number], direction2: [Number, Number], attrs?: AngleAttributes): Angle;
+        /**  The angle element is used to denote an angle defined by three points (from, around,to), or two lines and two directions (either points or plus-or-minus 1 to indicate direction.
+       ~~~js
+       
+       TSX.angle(p1,p2,p3)                                  // angle from 3 points
+       TSX.angle(l1, l2, [5.5, 0], [4, 3], { radius: 1 })   // 2 lines, two directions
+       TSX.angle(l1, l2, 1, -1, { radius: 2 })              // 2 lines two +/- values
+       ~~~
+                    As opposed to the sector, an angle has two angle points and no radius point.
+        
+        type=='sector': Sector is displayed.
+        
+        type=='square': a parallelogram is displayed.
+        
+        type=='auto':  a square is displayed if the angle is near orthogonal.  */
+        (line1: Line | line, line2: Line | line, dirPlusMinus1: Number, dirPlusMinus2: Number, attrs?: AngleAttributes): Angle;
+    }
+    interface ParallelMultiDefn {
+        /**  A line parallel to a given line (or two points), through a point.  */
+        (line: Line | [Point, Point], point: Point | pointAddr, attrs?: ParallelAttributes): Parallel;
+        /**  A line parallel to a given line (or two points), through a point.  */
+        (lineP1: Point | pointAddr, lineP2: Point | pointAddr, Point: Point | pointAddr, attrs?: ParallelAttributes): Parallel;
+    }
     interface ConicIface {
         z_ignore: Object;
-        /** Line defined by solution to a*x + b*y = c */
-        line(a: Number | Function, b: Number | Function, c?: Number | Function, attributes?: LineAttributes): Line;
         /** Just as two (distinct) points determine a line, five points (no three collinear) determine a conic. */
         fivePoints(A: Point | pointAddr, B: Point | pointAddr, C: Point | pointAddr, D: Point | pointAddr, E: Point | pointAddr, attributes?: ConicAttributes): Conic;
         /** Build a plane algebraic curve from six numbers that satisfies Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0, and A,B,C not all zero.  This might be a circle, ellipse, parabola, or hyperbola. */
@@ -981,6 +1098,64 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         threePoints(focalPoint1: Point | pointAddr, focalPoint2: Point | pointAddr, outerPoint: Point | pointAddr, attributes?: EllipseAttributes): Ellipse;
         /** Three Points, plus start and end. */
         ellipseArc(focalPoint1: Point | pointAddr, focalPoint2: Point | pointAddr, outerPoint: Point | pointAddr, startAngle: Number | Function, endAngle: Number | Function, attributes?: EllipseAttributes): Ellipse;
+    }
+    interface GliderMultiDefn {
+        /**  A point bound to a GeometryElement like Line, Circle, or Curve, with  optionally a starting point defined by [X,Y]
+       ```js
+       let c1 = TSX.circle(a, 1)
+       let g1 = TSX.glider(c1)
+       let g2 = TSX.glider(c1,[0,0])  // includes initial point
+       ```   */
+        (hostElement: GeometryElement, attrs?: GliderAttributes): Glider;
+        /**  A point bound to a GeometryElement like Line, Circle, or Curve, with  optionally a starting point defined by [X,Y]
+       ```js
+       let c1 = TSX.circle(a, 1)
+       let g1 = TSX.glider(c1)
+       let g2 = TSX.glider(c1,[0,0])  // includes initial point
+       ```   */
+        (hostElement: GeometryElement, initialPosition: number[], attrs?: GliderAttributes): Glider;
+    }
+    interface GridMultiDefn {
+        /**  Creates a grid to support the user with element placement or to improve determination of position.  */
+        (axis1: Axis, axis2: Axis, attrs?: GridAttributes): Grid;
+        /**  Creates a grid to support the user with element placement or to improve determination of position.  */
+        (attrs?: GridAttributes): Grid;
+    }
+    interface MidpointMultiDefn {
+        /**  A point in the middle of two given points or a line segment.  */
+        (p1: Point, p2: Point, attrs?: MidpointAttributes): Midpoint;
+        /**  A point in the middle of two given points or a line segment.  */
+        (line: Line, attrs?: MidpointAttributes): Midpoint;
+    }
+    interface NormalMultiDefn {
+        /**  A line through a given point on an element of type line, circle, curve, or turtle and orthogonal (at right angle) to that object.  */
+        (object: Line | Circle | Curve, point: Point, attrs?: NormalAttributes): Normal;
+        /**  A line through a given point on an element of type line, circle, curve, or turtle and orthogonal (at right angle) to that object.  */
+        (glider: Glider, attrs?: NormalAttributes): Normal;
+    }
+    interface ParallelpointMultiDefn {
+        /**  A parallel point is given by three points, or a line and a point. Taking the Euclidean vector from the first to the second point, the parallel point is determined by adding that vector to the third point. The line determined by the first two points is parallel to the line determined by the third point and the constructed point.  */
+        (line: Line | [Point, Point], point: Point | pointAddr, attrs?: ParallelpointAttributes): Parallelpoint;
+        /**  A parallel point is given by three points, or a line and a point. Taking the Euclidean vector from the first to the second point, the parallel point is determined by adding that vector to the third point. The line determined by the first two points is parallel to the line determined by the third point and the constructed point.  */
+        (P1: Point, P2: Point, P3: Point, attrs?: ParallelpointAttributes): Parallelpoint;
+    }
+    interface SegmentMultiDefn {
+        /**  Create a line segment between two points. If there is a third variable then the segment has a fixed length (which may be a function) determined by the absolute value of that number.  */
+        (P1: Point | pointAddr, P2: Point | pointAddr, attrs?: SegmentAttributes): Segment;
+        /**  Create a line segment between two points. If there is a third variable then the segment has a fixed length (which may be a function) determined by the absolute value of that number.  */
+        (P1: Point | pointAddr, P2: Point | pointAddr, length: number | Function, attrs?: SegmentAttributes): Segment;
+    }
+    interface SlopetriangleMultiDefn {
+        /**  A slope triangle is an imaginary triangle that helps you find the slope of a line or a line segment (use the method '.Value()' ). The hypotenuse of the triangle (the diagonal) is the line you are interested in finding the slope of. The two 'legs' of the triangle are the 'rise' and 'run' used in the slope formula.  */
+        (tangent: Point | Tangent, attrs?: SlopetriangleAttributes): Slopetriangle;
+        /**  A slope triangle is an imaginary triangle that helps you find the slope of a line or a line segment (use the method '.Value()' ). The hypotenuse of the triangle (the diagonal) is the line you are interested in finding the slope of. The two 'legs' of the triangle are the 'rise' and 'run' used in the slope formula.  */
+        (line: Line, point: Point, attrs?: SlopetriangleAttributes): Slopetriangle;
+    }
+    interface TangentMultiDefn {
+        /**  A tangent to a point on a line, circle, or curve.  Usually the point is a Glider.  */
+        (point: Glider, attrs?: TangentAttributes): Tangent;
+        /**  A tangent to a point on a line, circle, or curve.  Usually the point is a Glider.  */
+        (point: Point, curve: Line | Circle | Curve, attrs?: TangentAttributes): Tangent;
     }
     interface JSXMathJSXMathIface {
     }
@@ -1169,38 +1344,35 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         /** A circle can be constructed by providing a center and a point on the circle,
                                 or a center and a radius (given as a number, function, line, or circle).
                                 If the radius is a negative value, its absolute values is taken.
-
+                       
        *```js
                        TSX.circle(P1,1])
                        TSX.circle([0,0],[1,0])
-
+                       
        *```
-
+                       
        Also see: Circumcircle is a circle described by three points.  An Arc is a segment of a circle. */
-        circle(centerPoint: Point | pointAddr, remotePoint: Point | pointAddr | Line | line | Number | Function | Circle, attributes?: CircleAttributes): Circle;
-        /** Plot a set of points or a function from arrays X and Y */
-        curve(xArray: number[], yArray: number[], attributes?: CurveAttributes): Curve;
-        curve(xArray: Function, yArray: Function, attributes?: CurveAttributes): Curve;
-        curve(xArray: number[] | Function, yArray: number[] | Function, left: NumberFunction, right: NumberFunction, attributes?: CurveAttributes): Curve;
+        circle(centerPoint: Point | pointAddr | Function, remotePoint: Point | pointAddr | Line | line | Number | Function | Circle, attributes?: CircleAttributes): Circle;
+        curve: CurveMultiDefn;
         /** A cubic bezier curve.  The input is 3k + 1 points; those at positions k mod 3 = 0 (eg: 0, 3, 6 are the data points, the two points between each data points are the control points.
-
+                       
        *```js
            let points: TXG.Point[] = []
            points.push(TSX.point([-2, -1], { size: 4, color: 'blue', name: '0' }))
-
+       
            points.push(TSX.point([-2, -2.5], { name: '1' }))
            points.push(TSX.point([-1, -2.5], { name: '2' }))
-
+       
            points.push(TSX.point([2, -2], { size: 4, color: 'blue', name: '3' }))
-
+       
            let curve = TSX.bezierCurve(points, { strokeColor: 'orange', strokeWidth: 5, fixed: false }); // Draggable curve
-
+       
            // 'BezierCurve()' is just a shorthand for the following two lines:
            // let bz = TSX.NumericsMath.bezier(points)
            // let curve = TSX.curve(bz[0], bz[1])
-
+                       
        *```
-
+       
                         */
         bezierCurve(points: Point[], attributes?: BezierCurveAttributes): Curve;
         /** This element is used to provide a constructor for arbitrary content in an SVG foreignObject container.
@@ -1218,100 +1390,67 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
                        A collection of space icons is provided, press CTRL+I to show the list.
                        The second parameter sets the lower left point of the image.
                        The optional third parameter sets the size multiplier of the image, default is [1,1].
-
+                       
        If you want to move the image, just tie the image to a point, maybe at the center of the image.
                         For more flexibility, see TSX.Rotate() and TSX.Translate()
-
+                       
        *```js
                    TSX.image('icons/earth.png', [0, 0],[2,2])
                    let p1 = TSX.point([3, 2], { opacity: .1 })
                    TSX.image('icons/moon-full-moon.png', [()=>p1.X(),()=>p1.Y()])
-
+                       
        *``` */
         image(url: String | spaceIcon, lowerLeft: pointAddr, widthHeight?: [Number, Number], attributes?: ImageAttributes): Image;
-        /** An implicit curve is a plane curve defined by an implicit equation relating two coordinate variables, commonly x and y. For example, the unit circle is defined by the implicit equation x2 + y2 = 1. In general, every implicit curve is defined by an equation of the form f(x, y) = 0 for some function f of two variables.  IMPLICIT means that the equation is not expressed as a solution for either x in terms of y or vice versa. */
-        implicitcurve(f: Function | String, attributes?: ImplicitcurveAttributes): Implicitcurve;
-        implicitcurve(f: Function | String, dfx: Function | String, dfy: Function | String, attributes?: ImplicitcurveAttributes): Implicitcurve;
-        /** This element is used to provide a constructor for a general line given by two points.
-                                       By setting additional properties a line can be used as an arrow and/or axis.
-
-       *```js
-                                       TSX.line([3,2],[3,3],{strokeColor:'blue',strokeWidth:5,strokeOpacity:.5})
-                                       let P1 = TSX.point([3,2])
-                                       TSX.line(p1,[3,3])
-
-       *```
-
-        also create lines with Segment, Arrow, Transform.Point, Circumcenter, Glider, and others.
-                                        Look at .conic.line() for a line defined by the equation 'az +bx +cy = 0'
-                           */
-        line(p1: Point | pointAddr, p2: Point | pointAddr, attributes?: LineAttributes): Line;
+        implicitcurve: ImplicitcurveMultiDefn;
+        line: LineMultiDefn;
         /** Create a point. If any parent elements are functions or the attribute 'fixed' is true then point will be constrained.
-
+                   
        *```js
        TSX.point([3,2],{strokeColor:'blue',strokeWidth:5,strokeOpacity:.5})
        TSX.point([3,3]),{fixed:true, showInfobox:true}
        TSX.point([()=>p1.X()+2,()=>p1.Y()+2]) // 2 up 2 right from p1
        TSX.point([1,2,2])  // three axis definition - [z,x,y]
-
+                   
        *```
-
+                   
         also create points with Intersection, Midpoint, TransformPoint, Circumcenter, Glider, and others. */
         point(position: pointAddr, attributes?: PointAttributes): Point;
         /** Array of Points */
         polygon(pointArray: Point[] | pointAddr[], attributes?: PolygonAttributes): Polygon;
         /** Display a message
-
+                                       
        *```js
        TSX.text([3,2],[3,3], {fontSize:20, strokeColor:'blue'})
        TSX.text([0, 4], () => 'BD ' + B.distance(D).toFixed(2))
        TSX.text([-4, 2], '\pm\sqrt{a^2 + b^2}', { useKatex: true })
-
+                                       
        *``` */
         text(position: Point | pointAddr, label: String | Function, attributes?: TextAttributes): Text;
         /** A circular sector is a subarea of the area enclosed by a circle. It is enclosed by two radii and an arc. */
         sector(P1: Point | pointAddr, P2: Point | pointAddr, P3: Point | pointAddr, attributes?: SectorAttributes): Sector;
         /** Vector field. Plot a vector field either given by two functions f1(x, y) and f2(x,y) or by a function f(x, y) returning an array of size 2. */
         vectorfield(fxfy: Function[], horizontalMesh?: Number[], verticalMesh?: Number[], attributes?: VectorfieldAttributes): Vectorfield;
-        /** The angle element is used to denote an angle defined by three points (from, around,to), or two lines and two directions (either points or plus-or-minus 1 to indicate direction.
-       ~~~js
-
-       TSX.angle(p1,p2,p3)                                  // angle from 3 points
-       TSX.angle(l1, l2, [5.5, 0], [4, 3], { radius: 1 })   // 2 lines, two directions
-       TSX.angle(l1, l2, 1, -1, { radius: 2 })              // 2 lines two +/- values
-       ~~~
-                    As opposed to the sector, an angle has two angle points and no radius point.
-
-        type=='sector': Sector is displayed.
-
-        type=='square': a parallelogram is displayed.
-
-        type=='auto':  a square is displayed if the angle is near orthogonal. */
-        angle(from: Point | pointAddr, around: Point | pointAddr, to: Point | pointAddr, attributes?: AngleAttributes): Angle;
-        angle(line1: Line | line, line2: Line | line, direction1: [Number, Number], direction2: [Number, Number], attributes?: AngleAttributes): Angle;
-        angle(line1: Line | line, line2: Line | line, dirPlusMinus1: Number, dirPlusMinus2: Number, attributes?: AngleAttributes): Angle;
+        angle: AngleMultiDefn;
         /** Create a circular Arc defined by three points (because a circle can be defined by three points - see circumcircle).
-
+                                   
        *```js
                                    let arc = TSX.arc([-8,5],[-4,5],[-9,9]])
-
+                                   
        *```
-
+                                   
         To create an arc with origin, startpoint, and angle, look at MajorArc/MinorArc. */
         arc(origin: Point | pointAddr, from: Point | pointAddr, to: Point | pointAddr, attributes?: ArcAttributes): Arc;
         /** Arrow defined by two points (like a Segment) with arrow at P2
-
+                                   
        *```js
-
+                                   
         let arrow = TSX.arrow([-8,5],[-4,5])
-
+                                   
        *```
-
+                                   
         */
         arrow(p1: Point | pointAddr, p2: Point | pointAddr, attributes?: ArrowAttributes): Arrow;
-        /** A line parallel to a given line (or two points), through a point. */
-        parallel(line: Line | [Point, Point], point: Point | pointAddr, attributes?: ParallelAttributes): Parallel;
-        parallel(lineP1: Point | pointAddr, lineP2: Point | pointAddr, Point: Point | pointAddr, attributes?: ParallelAttributes): Parallel;
+        parallel: ParallelMultiDefn;
         /** Create an Arrow parallel to a segment. The constructed arrow contains p3 and has the same slope as the line through p1 and p2. */
         arrowparallel(p1: Point | pointAddr, p2: Point | pointAddr, p3: Point | pointAddr, attributes?: ArrowparallelAttributes): Arrowparallel;
         /** Create an Axis with two points (like a Line) */
@@ -1346,23 +1485,13 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         derivative(curve: Curve, attributes?: DerivativeAttributes): Derivative;
         /**  An ellipse is given by two points (the foci) and a third point on the ellipse or the length of the major axis. */
         ellipse(p1: Point | pointAddr, p2: Point | pointAddr, radius: Point | pointAddr | Number | Function, attributes?: EllipseAttributes): Ellipse;
-        /** A wrapper for element Curve with X() set to x. The graph is drawn for x in the interval [a,b] default -10 to 10.
+        /** Functiongraph visualizes a map x → f(x).  It is a wrapper for element Curve. The graph is drawn for x in the interval [a,b] default -10 to 10.
        ```js
        let f = TSX.functiongraph((x: number) => 3 * Math.pow(x, 2))
        ``` */
-        functiongraph(funct: Function, leftBorder?: number, rightBorder?: number, attributes?: FunctiongraphAttributes): Curve;
-        /** A point bound to a GeometryElement like Line, Circle, or Curve, with  optionally a starting point defined by [X,Y]
-       ```js
-       let c1 = TSX.circle(a, 1)
-       let g1 = TSX.glider(c1)
-       let g2 = TSX.glider(c1,[0,0])  // includes initial point
-       ```  */
-        glider(hostElement: GeometryElement, attributes?: GliderAttributes): Glider;
-        glider(hostElement: GeometryElement, initialPosition: number[], attributes?: GliderAttributes): Glider;
-        glider(attributes?: GliderAttributes): Glider;
-        /** Creates a grid to support the user with element placement or to improve determination of position. */
-        grid(axis1: Axis, axis2: Axis, attributes?: GridAttributes): Grid;
-        grid(attributes?: GridAttributes): Grid;
+        functiongraph(funct: (x: number) => number, leftBorder?: number, rightBorder?: number, attributes?: FunctiongraphAttributes): Curve;
+        glider: GliderMultiDefn;
+        grid: GridMultiDefn;
         /** Hatches can be used to mark congruent lines or curves. */
         hatch(line: Line | line, numberHatches: Number, attributes?: HatchAttributes): Hatch;
         /** This element is used to provide a constructor for an hyperbola. An hyperbola is given by two points (the foci) and a third point on the hyperbola or the length of the major axis. */
@@ -1383,9 +1512,7 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         majorArc(p1: Point | pointAddr, p2: Point | pointAddr, p3: Point | pointAddr, attributes?: MajorArcAttributes): MajorArc;
         /** A major sector is a sector of a circle having measure greater than or equal to 180 degrees (pi radians). It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
         majorSector(p1: Point | pointAddr, p2: Point | pointAddr, p3: Point | pointAddr, attributes?: MajorSectorAttributes): MajorSector;
-        /** A point in the middle of two given points or a line segment. */
-        midpoint(p1: Point, p2: Point, attributes?: MidpointAttributes): Midpoint;
-        midpoint(line: Line, attributes?: MidpointAttributes): Midpoint;
+        midpoint: MidpointMultiDefn;
         /** A minor arc is a segment of the circumference of a circle having measure less than or equal to 180 degrees (pi radians). It is defined by a center, one point that defines the radius, and a third point that defines the angle of the arc. */
         minorArc(p1: Point | pointAddr, p2: Point | pointAddr, p3: Point | pointAddr, attributes?: MinorArcAttributes): MinorArc;
         /** A minor sector is a sector of a circle having measure less than or equal to 180 degrees (pi radians). It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
@@ -1396,9 +1523,7 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         mirrorpoint(p1: Point, p2: Point, attributes?: MirrorpointAttributes): Mirrorpoint;
         /** A non-reflex angle is the acute or obtuse instance of an angle. It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
         nonReflexAngle(point1: Point, point2: Point, point3: Point, attributes?: NonReflexAngleAttributes): NonReflexAngle;
-        /** A line through a given point on an element of type line, circle, curve, or turtle and orthogonal (at right angle) to that object. */
-        normal(object: Line | Circle | Curve, point: Point, attributes?: NormalAttributes): Normal;
-        normal(glider: Glider, attributes?: NormalAttributes): Normal;
+        normal: NormalMultiDefn;
         /** An `orthogonalprojection` is a locked point determined by projecting a point orthogonally onto a line.
        ```js
        let s1 = TSX.segment(p1, p2)
@@ -1410,12 +1535,8 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         otherIntersection(element1: Line | Circle, element2: Line | Circle, firstIntersection: Point, attributes?: OtherIntersectionAttributes): Point;
         /** This element is used to provide a constructor for a parabola. A parabola is given by one point (the focus) and a line (the directrix). */
         parabola(focalPoint: Point | pointAddr, line: Line | line, attributes?: ParabolaAttributes): Parabola;
-        /** A parallel point is given by three points, or a line and a point. Taking the Euclidean vector from the first to the second point, the parallel point is determined by adding that vector to the third point. The line determined by the first two points is parallel to the line determined by the third point and the constructed point. */
-        parallelpoint(line: Line | [Point, Point], point: Point | pointAddr, attributes?: ParallelpointAttributes): Parallelpoint;
-        parallelpoint(P1: Point, P2: Point, P3: Point, attributes?: ParallelpointAttributes): Parallelpoint;
-        /** Create a line segment between two points. If there is a third variable then the segment has a fixed length (which may be a function) determined by the absolute value of that number. */
-        segment(P1: Point | pointAddr, P2: Point | pointAddr, attributes?: SegmentAttributes): Segment;
-        segment(P1: Point | pointAddr, P2: Point | pointAddr, length: number | Function, attributes?: SegmentAttributes): Segment;
+        parallelpoint: ParallelpointMultiDefn;
+        segment: SegmentMultiDefn;
         /**  */
         parallelogram(p1: Point | pointAddr, p2: Point | pointAddr, p3: Point | pointAddr, attributes?: ParallelogramAttributes): Parallelogram;
         /** Create a line orthogonal to a given line and containing a given point. If you want a Perpendicular to a Curve, look at Normal(). */
@@ -1443,7 +1564,7 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         /** An input widget for choosing values from a given range of numbers.  Parameters are startpoint, endpoint,
                        and an array with [minimum, initialValue, maximum].  Query the value with slider.Value().  Set the slider either by
                        dragging the control or clicking on the line (you can disable clicking with {moveOnUp:false}
-
+               
        *```js
                 let s = TSX.slider([1, 2], [3, 2], [1, 5, 10])           //  query with s.Value()
                 let s = TSX.slider([1, 2], [3, 2], [1, 5, 10],{snapWidth:1})     //  only values 1,2,3...
@@ -1455,19 +1576,15 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
                    label: {fontSize: 16, strokeColor: 'orange'},
                    suffixLabel: ' x=',         // really a prefix
                    postLabel: ' meters'        // this is a suffix
-
+               
        *``` */
         slider(StartPoint: Point | pointAddr, EndPoint: Point | pointAddr, minimum_initial_maximum: [number, number, number], attributes?: SliderAttributes): Slider;
         /** Slope field. Plot a slope field given by a function f(x, y) returning a number. */
         slopefield(func: Function, xData: NumberFunction[], yData: NumberFunction[], attributes?: SlopefieldAttributes): Slopefield;
-        /** A slope triangle is an imaginary triangle that helps you find the slope of a line or a line segment (use the method '.Value()' ). The hypotenuse of the triangle (the diagonal) is the line you are interested in finding the slope of. The two 'legs' of the triangle are the 'rise' and 'run' used in the slope formula. */
-        slopetriangle(tangent: Point | Tangent, attributes?: SlopetriangleAttributes): Slopetriangle;
-        slopetriangle(line: Line, point: Point, attributes?: SlopetriangleAttributes): Slopetriangle;
+        slopetriangle: SlopetriangleMultiDefn;
         /** This element is used to provide a constructor for (natural) cubic spline curves. Create a dynamic spline interpolated curve given by sample points p_1 to p_n. */
         spline(points: Point[] | number[][], attributes?: SplineAttributes): Curve;
-        /** A tangent to a point on a line, circle, or curve.  Usually the point is a Glider. */
-        tangent(point: Glider, attributes?: TangentAttributes): Tangent;
-        tangent(point: Point, curve: Line | Circle | Curve, attributes?: TangentAttributes): Tangent;
+        tangent: TangentMultiDefn;
         /** Construct the tangent line through a point to a conic or a circle. There will be either two, one or no such tangent, depending if the point is outside of the conic, on the conic, or inside of the conic. Similar to the intersection of a line with a circle, the specific tangent can be chosen with a third (optional) parameter number. */
         tangentTo(conic: Conic | Circle, point: Point | pointAddr, N?: Number, attributes?: tangentToAttributes): tangentTo;
         /** A tape measure can be used to measure distances between points. */
@@ -1508,7 +1625,6 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         tsxBoard: TSXBoard;
         scaleXY: number;
         constructor(className: string, params: any[], attrs: GeometryElementAttributes);
-        protected initProps(props: any): void;
         /**  */
         get x(): GeometryElement;
         /**  */
@@ -1624,6 +1740,8 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         get fillColor(): String;
         /**  */
         get visible(): Boolean;
+        /**  */
+        setAttribute(attrs: GeometryElement3DAttributes): void;
     }
     export class Board {
         elValue: Object;
@@ -1951,6 +2069,9 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         /** Treat the line as parametric curve in homogeneous coordinates. */
         Z(): number;
     }
+    export class LineEqn extends Line {
+        constructor(className: string, params: any[], attrs: Object);
+    }
     export class Line3D extends GeometryElement3D {
         constructor(className: string, params: any[], attrs: Object);
         /**  */
@@ -1991,6 +2112,8 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         constructor(className: string, params: any[], attrs: Object);
         /**  */
         coords(): Number[];
+        /**  */
+        startAnimation(direction: Number, stepCount: Number, delayMSec: Number): void;
         /** Calculates Euclidean distance for two Points, eg:  p1.Dist(p2) */
         Dist(toPoint: Point | pointAddr): number;
         /** Set the face of a point element. */
@@ -2006,21 +2129,21 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         /** Moves an element towards coordinates, optionally tweening over time.  Time is in ms.  WATCH OUT, there
                                is no AWAIT for the tween to finish, a second moveTo() starts immediately. Thats GOOD if you
                                want to move two different points at the same time, BAD if you want to move the same point repeatedly.  EG:
-
+                               
        ```js
-
+       
        P.moveTo([A.X(), A.Y()], 5000)
-
+       
        ``` */
         moveTo(p: number[] | Function[], time?: number, callback?: Function, effect?: "==" | "<>" | ">" | "<"): any;
         /** Moves an element towards coordinates, optionally tweening over time.  Time is in ms.  WATCH OUT, there
                                is no AWAIT for the tween to finish, a second moveTo() starts immediately. Thats GOOD if you
                                want to move two different points at the same time, BAD if you want to move the same point repeatedly.  EG:
-
+                               
        ```js
-
+       
        P.moveTo([A.X(), A.Y()], 5000)
-
+       
        ``` */
         visit(p: number[] | Function[], time?: number, callback?: Function, effect?: "==" | "<>" | ">" | "<", repeat?: number): any;
         /** Point location in vector form [n,n] */
@@ -2331,6 +2454,15 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
     export class ParametricSurface3D extends Curve3D {
         constructor(className: string, params: any[], attrs: Object);
     }
+    export class Face3D extends GeometryElement3D {
+        constructor(className: string, params: any[], attrs: Object);
+        /**  */
+        get dataX(): number[];
+        /**  */
+        get dataY(): number[];
+        /**  */
+        get dataZ(): number[];
+    }
     export class Functiongraph extends Curve {
         constructor(className: string, params: any[], attrs: Object);
     }
@@ -2339,8 +2471,6 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
     }
     export class Glider extends Point {
         constructor(className: string, params: any[], attrs: Object);
-        /** Animate the point. */
-        startAnimation(direction: Number, stepCount: Number, delayMSec: Number): void;
     }
     export class Glider3D extends Point3D {
         constructor(className: string, params: any[], attrs: Object);
@@ -2468,6 +2598,11 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
     export class PolygonalChain extends Polygon {
         constructor(className: string, params: any[], attrs: Object);
     }
+    export class Polyhedron3D extends GeometryElement3D {
+        constructor(className: string, params: any[], attrs: Object);
+        /**  */
+        get faces(): Face3D[];
+    }
     export class RadicalAxis extends Line {
         constructor(className: string, params: any[], attrs: Object);
     }
@@ -2544,7 +2679,7 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         /** Create a new Point from a Point and Transform.  Translation just requires dx and dy.
                                    Rotation requires a point to rotate around, and a rotation transform around that point, and
                                    a remote point that sets both the radius and the initial angle of the rotation.
-
+                                   
        Example: Given a rotation transform controlled by a slider, create a rotating point using the transform method Point() and the
                                    radius point.
        ```js
@@ -2571,34 +2706,38 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
     export class View3D extends GeometryElement3D {
         constructor(className: string, params: any[], attrs: Object);
         /**  */
+        get defaultAxes(): Object;
+        /**  */
         get matrix3D(): Object;
         /** This element is used to provide a constructor for a 3D Point. */
-        point3D(xyz: NumberFunction[] | Function, attributes?: Object): Point3D;
+        point3D(xyz: NumberFunction[] | Function, attributes?: Point3DAttributes): Point3D;
         /** This element is used to provide a constructor for a 3D line. */
-        line3D(point1: Point3D | NumberFunction[], point2: Point3D | NumberFunction[], attributes?: Object): Line3D;
+        line3D(point1: Point3D | NumberFunction[], point2: Point3D | NumberFunction[], attributes?: GeometryElement3DAttributes): Line3D;
         /** This element creates a 3D parametric curve. */
         curve3D(xFunction: Function, yFunction: Function, zFunction: Function, range: NumberFunction[], attributes?: Object): Curve3D;
         /**  */
         sphere3D(center: number[] | Point3D, radius: number | number[] | Point3D, attributes?: Object): Sphere3D;
         /**  */
-        polygon3D(points: Point3D[], attributes?: Object): Sphere3D;
+        polygon3D(points: Point3D[] | number[][], attributes?: Object): Sphere3D;
         /** In 3D space, a circle consists of all points on a given plane with a given distance from a given point. The given point is called the center, and the given distance is called the radius. A circle can be constructed by providing a center, a normal vector, and a radius (given as a number or function). */
         circle3D(point: Point3D, normal: number[], radius: number, attributes?: Object): Circle3D;
         /** Glider3D is an alias for JSXGraph's Point3d(). */
         glider3D(element: Curve3D, initial?: number[], attributes?: Object): Point3D;
         /** This element is used to provide a constructor for a 3D Text. */
         text3D(position: NumberFunction[], text: string | Function, attributes?: Object): Text3D;
+        /** This element is used to provide a constructor for a 3D Polyhedron. */
+        polyhedron3D(points: [number, number, number][] | Object, faces: number[][] | string[][], attributes?: Object): Polyhedron3D;
         /** Create a 3D plane object defined by a point and two directions, and extending negative and positive distanced in those directions by a range.  Remember to set visible:true.
-
+                                   
        *```js
-
+       
         let pnt = [[-1, 1, 1]]
         let axis1 = [0, 1, 0], axis2 = [0, 0, 1]
         let range1 = [0,3], range2 = [0,3]
         view.plane3D'(pnt, axis1, axis2, range1, range2,
                { fillColor: 'red', gradientSecondColor: 'blue', fillOpacity: .5, strokeColor: 'blue',
                 gradient: 'linear', visible:true })
-
+                                   
        ``` */
         plane3D(point: Point3D | number[] | Function, axis1: number[] | Function, axis2: number[] | Function, range1: number[], range2: number[], attributes?: Object): Plane3D;
         /**  */

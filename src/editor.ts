@@ -38,8 +38,10 @@ import lib_es2015_collection from "./extraLibs/lib.es2015.collection.d.ts.txt"
 import lib_es2015_core from "./extraLibs/lib.es2015.core.d.ts.txt"
 import lib_es2015_promise from "./extraLibs/lib.es2015.promise.d.ts.txt"
 import lib_es2015_iterable from "./extraLibs/lib.es2015.iterable.d.ts.txt"
+import lib_es2015_symbol_wellknown from "./extraLibs/lib.es2015.symbol.wellknown.d.ts.txt"
 import lib_es2016_array_include from "./extraLibs/lib.es2016.array.include.d.ts.txt"
 import lib_es2017_string from "./extraLibs/lib.es2017.string.d.ts.txt"
+import lib_es2017_object from "./extraLibs/lib.es2017.object.d.ts.txt"
 import lib_es2017_typedarrays from "./extraLibs/lib.es2017.typedarrays.d.ts.txt"
 import lib_es2018_asynciterable from "./extraLibs/lib.es2018.asynciterable.d.ts.txt"
 import lib_es2019_string from "./extraLibs/lib.es2019.string.d.ts.txt"
@@ -155,7 +157,7 @@ export class Editor {
             experimentalDecorators: true,
 
             noLib: true,
-            lib: ["es5, es6, es2015.core, es2015.interable, dom.iterable"],    // for some reason, dom.iterable is required for destructuring    [x,y] = [1,2]
+            lib: ["es5, es6, es2015.core, es2015.iterable, dom.iterable"],    // for some reason, dom.iterable is required for destructuring    [x,y] = [1,2]
 
             sourceMap: true,
             strict: false,
@@ -171,9 +173,11 @@ export class Editor {
 
             strictFunctionTypes: true,       // show the error, it will run anyhow
             strictNullChecks: true,
-            target: monaco.languages.typescript.ScriptTarget.ES2020
+            target: monaco.languages.typescript.ScriptTarget.Latest
 
             // noImplicitReturns: true,
+
+            // allowJs:true,   // very bad!! defaults to JS files, gives 'type annotations not allowed' errors
 
         });
 
@@ -181,7 +185,8 @@ export class Editor {
         monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
             noSemanticValidation: true,
             noSyntaxValidation: true,
-            target: monaco.languages.typescript.ScriptTarget.ES2020,
+            allowNonTsExtensions: true,
+            target: monaco.languages.typescript.ScriptTarget.ES2015,
             noLib: true,                        // don't bring DOM into intellisense
             strictNullChecks: false,
         });
@@ -210,7 +215,9 @@ export class Editor {
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_core)
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_promise)
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_iterable)
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_symbol_wellknown)
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2016_array_include)
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2017_object)
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2017_string)
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2017_typedarrays)
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2018_asynciterable)
@@ -269,18 +276,6 @@ export class Editor {
         });
     }
 
-    download(fileName: string) {
-        // console.log('clicked on upload')
-        const data = new Blob([this.editor.getValue()], { type: "text/plain" });
-        if (this.initFile) {
-            window.URL.revokeObjectURL(this.initFile);
-        }
-        this.initFile = window.URL.createObjectURL(data);
-        const link = document.createElement("a");
-        link.download = fileName;
-        link.href = this.initFile;
-        link.dispatchEvent(new MouseEvent("click"));
-    }
 
     upload() {
         // console.log('clicked on upload')
@@ -323,6 +318,7 @@ export class Editor {
 
         // const args = names.map((key) => scope[key]);
         const model = this.editor.getModel();
+        let source64: string;
         // console.log('model from editor is', model)
 
         if (model !== null) {    // typescript needs a typeguard to be happy
@@ -345,7 +341,7 @@ export class Editor {
                 // alert('errors coming')
                 alert(errorString)    //
                 console.log(errors);
-                return
+                return '';
             }
 
 
@@ -359,92 +355,129 @@ export class Editor {
 
 
             this.editorCode = output.outputFiles[0].text as string;
-            let source64 = Buffer.from(sourceCode, 'utf8').toString('base64');
+            source64 = Buffer.from(sourceCode, 'utf8').toString('base64');
 
 
             // TODO, get correct ID and textbook
             // writeMoodleLog({'datacode': 'LOG_EditorRun', id:0, textbook:'', data05: sourceCode})
+            this.runEditorCode(this.editorCode)     // and run the whole mess
 
-            this.runEditorCode(source64, this.editorCode)      // and run the whole mess
+            // this.runEditorCode(source64, this.editorCode)      // and run the whole mess
         }
-
-        // if model is null, do nothing
+        return;
     }
 
 
-    runEditorCode(tsCode64: string, editorCode: string) {
+
+    async createWebPage(hiddenCode: string) {
+
+        // const args = names.map((key) => scope[key]);
+        const model = this.editor.getModel();
+        let source64: string;
+
+        if (model !== null) {    // typescript needs a typeguard to be happy
+            const resource = model.uri;  // returns an ITextModel
+
+            const worker = await monaco.languages.typescript.getTypeScriptWorker();
+            const client = await worker(resource);
+            const output = await client.getEmitOutput(resource.toString());
+            const sourceCode = await client.getScriptText(resource.toString())
+
+            this.editorCode = output.outputFiles[0].text as string;
+            let html = this.generateSourceCode(this.editorCode, true) // html web version
+
+            //source64 = Buffer.from(html, 'utf8').toString('base64');
+
+            const downloadSource = new Blob([html], { type: "text/plain" });
+
+            if (this.initFile) {
+                window.URL.revokeObjectURL(this.initFile);
+            }
+            this.initFile = window.URL.createObjectURL(downloadSource);
+            const link = document.createElement("a");
+            link.download = 'jsxgraph.html';
+            link.href = this.initFile;
+            link.dispatchEvent(new MouseEvent("click"));
+        }
+
+
+    }
+
+
+
+
+
+    runEditorCode(tsCode64: string) {
         // console.log('runeditorcode', editorCode, hiddenCode)
-
-
         // console.log('code', code)
 
 
 
         let plotWindow = window.open("", "jxgframe", "popup=true,left=100,top=100,width=320,height=320");
-        let html = '';
 
-        html += this.generateSourceCode(tsCode64, editorCode)
+        let html = this.generateSourceCode(tsCode64)
 
         // console.log('code to write:', html)
         plotWindow.document.open();
         plotWindow.document.write(html);
         plotWindow.document.close();
 
-        //////////////////////////
-        // end popup
-        //////////////////////////
+    }
 
+    generateWebPage() {
+        const data = new Blob([this.editor.getValue()], { type: "text/plain" });
 
-
-        // wipe any observables from the last run
-        // Observable.resetUserObservers()
-
-        // eval() is crazy dangerous because it runs in the local context
-        // Function() is a bit safer
-
-        // eval(code)
-
-        // try {
-        //     let f = new Function(code)
-        //     f()
-        // }
-        // catch (err) {
-        //     alert(err.message);
-        // }
 
 
     }
 
     /** create <script></script>  */
-    generateSourceCode(tsCode64: string, editorCode: string): string {
+    generateSourceCode(editorCode: string, forWeb?: boolean): string {
         // console.log('%chiddencode','color:pink;', this.hiddenCode, this.hiddenDecl)
         // let code = ''
         // code += "\r\n" + this.hiddenCode + "\r\n"
         // code += "\r\n" + editorCode + "\r\n"
 
+        // https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@1.1.4/lib/tsxgraph.js
+
         let html = '<!DOCTYPE html>';
         html += '<head>';
 
-        html += `\n<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.js"></script>`
-        html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.css" />`;
+        if (forWeb) {  // for downloading a working web page - everything from jsdelivr
+            // html += `\n<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.js"></script>`
+            // html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.css" />`;
 
-        html += `\n<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/jsxgraphcore.js"></script>`
-        html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/jsxgraph.css" />`;
+            html += `\n<script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>`
+            html += `\n<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />`;
+
+            // html += `\n<script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@main/lib/tsxgraph.js"></script>`
+
+        } else {
+            html += `\n<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.js"></script>`
+            html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.css" />`;
+
+            html += `\n<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/jsxgraphcore.js"></script>`
+            html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/jsxgraph.css" />`;
+        }
+
         html += '</head>';
         html += '<body>';
 
-        html += `<div id='source64' style='display:none;'>${tsCode64}</div>`
         html += '<div id="jxgbox" class="jxgbox" style="width:850px; height:850px;"></div>';
 
         html += '<script type="module" defer>'
-        html += "\r\n" + `import { TXG } from "./dist.${LIB_VERSION}/tsxgraph.js";`  // this import is always provided because lib version
+        if (forWeb) {  // web version load tsxgraph.js from jsdelivr
+            html += "\r\n" + "import { TXG } from 'https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@main/lib/tsxgraph.js'"
+        }else{
+            html += "\r\n" + `import { TXG } from "dist.${LIB_VERSION}/tsxgraph.js"`
+        }
+        html += "\r\n" + this.hiddenCode   // before try/catch
         html += "\r\n" + `let TSX = TXG.TSXGraph.initBoard('jxgbox');`
 
 
-        html += "\r\n" + this.hiddenCode   // before try/catch
         html += "\r\n try {"
 
-        html += editorCode
+        html += "\r\n" + editorCode
 
         html += "\r\n }"
         html += "\r\n catch(error) {"
@@ -455,8 +488,6 @@ export class Editor {
         // html += `<div id='source64' style='display:none;'>${tsCode64}</div>`
         html += '</body>';
         html += '</head>';
-
-        // console.log('%cgenerateSourceCode\n', 'background-color:blue;', html)
         return html
     }
 
