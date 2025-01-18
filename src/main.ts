@@ -353,7 +353,7 @@ export class Main {
                     main.hiddenDecl = b.toString()
 
 
-                    main.setupMonacoEditor(main.hiddenCode, main.hiddenDecl)
+                    main.setupMonacoEditor(main.hiddenCode, main.hiddenDecl, false) // not popup
                     // console.log('hidden code', main.hiddenCode)
                     // console.log('hidden decl', main.hiddenDecl)
                 },
@@ -370,7 +370,7 @@ export class Main {
                     main.hiddenDecl = b.toString()
 
 
-                    main.setupMonacoEditor(main.hiddenCode, main.hiddenDecl, main.initVisibleCode)
+                    main.setupMonacoEditor(main.hiddenCode, main.hiddenDecl,true, main.initVisibleCode) // popup true for playground
                     // Main.editor.editor.setValue(main.initVisibleCode)
 
                     //TODO:  write the hidden and visible code AFTER initialization
@@ -397,33 +397,6 @@ export class Main {
                     // console.log('copyToEditor', codeString)
                 },
 
-                // runInCanvas(paragraph: string, textbook: string, code: string) {   // convert from TS to JS first !!
-                //     // console.log('runInCanvas',code)
-                //     let tsCode = window.atob(code)
-                //     // console.log('runInCanvas', tsCode)
-
-                //     writeMoodleLog({ 'datacode': 'Log_RunIcon', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: tsCode })
-                //     let jsCode = ts.transpile(tsCode);
-
-                //     /*
-                //     // before we do anything else, we WIPE OUT any previous
-                //     // content of <div id='jxgbox'>
-                //     // then add back a simple canvas
-                //     let jxgDiv = document.getElementById('jxgbox')
-                //     // console.log('removing with method 2')
-                //     while (jxgDiv.firstChild) {
-                //         jxgDiv.firstChild.remove()
-                //     }
-                //     let canv = document.createElement("jxgbox")
-                //     canv.id = 'jxgbox'
-                //     jxgDiv.appendChild(canv)
-                //     */
-
-
-
-                //     // console.log('runEditorCode', jsCode)
-                //     Main.editor.runEditorCode(code, jsCode)//, jsHidden, tsDecls)
-                // },
 
 
                 share(paragraph: string, textbook: string, shareKey: string) {   // convert from TS to JS first !!
@@ -454,6 +427,7 @@ export class Main {
 
                 //// these are the buttons on the Editor
                 runEditor(stepUniq: string, textbook: string, shareKey: string = '') {
+                    console.log(`runEditor(${stepUniq},${textbook})`)
 
                     // write log with a callback, this is an async function
                     let blob = new Blob([Main.editor.editor.getValue()], { type: "text/plain" })
@@ -470,22 +444,9 @@ export class Main {
                     }
 
 
-                    // this.eraseFileExplorer()    // in case it is open (also resets '2D')
-                    /*
-                                        let jxgDiv = document.getElementById('jxgbox')
-                                        // console.log('removing with method 1')
-                                        while (jxgDiv.lastElementChild) {
-                                            // console.log('removing', jxgDiv.lastElementChild)
-                                            jxgDiv.removeChild(jxgDiv.lastElementChild);
-                                        }
-                                        let canv = document.createElement("jxgbox")
-                                        canv.id = 'jxgbox'
-                                        jxgDiv.appendChild(canv)
-                    */
-
                     try {
                         // Main.editor.transpileLog(main.hiddenCode)  // also runs
-                        Main.editor.transpile(main.hiddenCode)
+                        Main.editor.transpile(main.hiddenCode,false)
 
                         // writeMoodleLog({ 'datacode': 'SHARE', 'id': main.moodleID, 'textbook': textbook, 'paragraph': '0', 'data05': main.hiddenCode })
 
@@ -494,6 +455,21 @@ export class Main {
                     }
 
                 },
+
+                // almost the same as runEditor but code is sent
+                runInCanvas(paragraph: string, textbook: string, code: string) {   // convert from TS to JS first !!
+                    console.log(`runInCanvas(${paragraph})`)
+                    let tsCode = window.atob(code)
+                    // console.log('runInCanvas', tsCode)
+
+                    writeMoodleLog({ 'datacode': 'Log_RunIcon', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: tsCode })
+                    // Main.editor.transpile(tsCode);
+                    Main.editor.runEditorCode(tsCode,false)     // and run the whole mess - NOT A POPUP
+
+
+                },
+
+
                 //// these are the buttons on the Editor
                 stopEditor() {
                     try {
@@ -645,7 +621,7 @@ export class Main {
 
 
 
-    setupMonacoEditor(hiddenCode: string, hiddenDecl: string, visibleCode = '') {
+    setupMonacoEditor(hiddenCode: string, hiddenDecl: string,popup:boolean, visibleCode = '') {
         // monaco.editor.createModel(lib_baby, 'typescript', monaco.Uri.parse(babyUri));
 
         this.editorDiv = document.getElementById("editor") as HTMLDivElement
@@ -700,8 +676,7 @@ export class Main {
 
                         // const fn = await this.editor.transpile(this.game.scope);
                         //this.editorDiv.hidden = true;
-                        Main.editor.transpile(main.hiddenCode)  // also runs
-                        // this.editor.runEditorCode()
+                        Main.editor.transpile(main.hiddenCode,popup)  // also runs
 
                     } catch (e) {   // transpile error.  show it in an alert
                         alert(e);

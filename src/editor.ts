@@ -58,6 +58,7 @@ import lib_es2099 from "./extraLibs/lib.es2099.d.ts.txt"
 import lib_tsxgraph from "./extraLibs/tsxgraph.d.ts.txt"
 
 import mathcode from "./extraLibs/mathcode.d.ts.txt"
+import { textSpanContainsPosition } from 'typescript';
 // import matter from "./extraLibs/matter.d.ts.txt"
 
 // import { RuntimeAnimation } from "babylonjs/Animations/runtimeAnimation";
@@ -311,9 +312,9 @@ export class Editor {
     }
 
 
-    async transpile(hiddenCode: string) {
+    async transpile(hiddenCode: string, popup: boolean) {
 
-        // console.log('transpile()\n', hiddenCode)
+        console.log(`transpile(popup: ${popup})\n`)
 
 
         // const args = names.map((key) => scope[key]);
@@ -360,9 +361,8 @@ export class Editor {
 
             // TODO, get correct ID and textbook
             // writeMoodleLog({'datacode': 'LOG_EditorRun', id:0, textbook:'', data05: sourceCode})
-            this.runEditorCode(this.editorCode)     // and run the whole mess
+            this.runEditorCode(this.editorCode, popup)     // and run the whole mess
 
-            // this.runEditorCode(source64, this.editorCode)      // and run the whole mess
         }
         return;
     }
@@ -384,7 +384,7 @@ export class Editor {
             const sourceCode = await client.getScriptText(resource.toString())
 
             this.editorCode = output.outputFiles[0].text as string;
-            let html = this.generateSourceCode(this.editorCode, true) // html web version
+            let html = this.generateSourceCode(this.editorCode, false, true) // html web version    // ALWAYS jsDelivr
 
             //source64 = Buffer.from(html, 'utf8').toString('base64');
 
@@ -404,18 +404,20 @@ export class Editor {
     }
 
 
-
-
-
-    runEditorCode(tsCode64: string) {
-        // console.log('runeditorcode', editorCode, hiddenCode)
+    runEditorCode(tsCode64: string, popup: boolean, tabIndex0: boolean = true, jsDelivr: boolean = true,) {
+        console.log(`runeditorcode(popup:${popup})`)
         // console.log('code', code)
 
+        let pop = popup ? 'popup=true,' : ''
+        let target = pop ? '_blank' : 'jxgframe'
+        let plotWindow = window.open(target, target, `${pop}left=100,top=100,width=320,height=320`);
+        if (!plotWindow) {
+            // The window wasn't allowed to open
+            // This is likely caused by built-in popup blockers.
+            // …
+        }
 
-
-        let plotWindow = window.open("", "jxgframe", "popup=true,left=100,top=100,width=320,height=320");
-
-        let html = this.generateSourceCode(tsCode64)
+        let html = this.generateSourceCode(tsCode64, true)
 
         // console.log('code to write:', html)
         plotWindow.document.open();
@@ -423,6 +425,7 @@ export class Editor {
         plotWindow.document.close();
 
     }
+
 
     generateWebPage() {
         const data = new Blob([this.editor.getValue()], { type: "text/plain" });
@@ -432,47 +435,76 @@ export class Editor {
     }
 
     /** create <script></script>  */
-    generateSourceCode(editorCode: string, forWeb?: boolean): string {
+    generateSourceCode(editorCode: string, tabIndex0: boolean = false, jsDelivr: boolean = true): string {
         // console.log('%chiddencode','color:pink;', this.hiddenCode, this.hiddenDecl)
         // let code = ''
         // code += "\r\n" + this.hiddenCode + "\r\n"
         // code += "\r\n" + editorCode + "\r\n"
 
-        // https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@1.1.4/lib/tsxgraph.js
+
+        let hostname = location.hostname;
+        console.log('hostname',hostname)
+        jsDelivr = hostname !== 'localhost';
 
         let html = '<!DOCTYPE html>';
         html += '<head>';
 
-        if (forWeb) {  // for downloading a working web page - everything from jsdelivr
+
+        if (jsDelivr) {  // for downloading a working web page - everything from jsdelivr
             // html += `\n<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.js"></script>`
             // html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.css" />`;
 
             html += `\n<script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>`
             html += `\n<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />`;
 
-            // html += `\n<script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@main/lib/tsxgraph.js"></script>`
+            html += `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" integrity="sha384-zh0CIslj+VczCZtlzBcjt5ppRcsAmDnRem7ESsYwWwg3m/OaJ2l4x7YBZl9Kxxib" crossorigin="anonymous">`;
+            html += `<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" integrity="sha384-Rma6DA2IPUwhNxmrB/7S3Tno0YY7sFu9WSYMCuulLhIqYSGZ2gKCJWIqhBWqMQfh" crossorigin="anonymous"></script>`;
 
         } else {
-            html += `\n<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.js"></script>`
-            html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.css" />`;
+            // html += `\n<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.js"></script>`
+            // html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.css" />`;
 
-            html += `\n<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/jsxgraphcore.js"></script>`
+            html += `\n<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/jsxgraphcore.js"></script>`;
             html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/jsxgraph.css" />`;
+
+            html += `<link rel="stylesheet" href="dist.${LIB_VERSION}/katex.min.css">`;
+            html += `<script defer src="dist.${LIB_VERSION}/katex.min.js"`;
+
         }
 
         html += '</head>';
         html += '<body>';
 
-        html += '<div id="jxgbox" class="jxgbox" style="width:850px; height:850px;"></div>';
+        html += `<script>
+        window.WebFontConfig = {
+            custom: {
+                families: ['KaTeX_AMS', 'KaTeX_Caligraphic:n4,n7', 'KaTeX_Fraktur:n4,n7',
+                    'KaTeX_Main:n4,n7,i4,i7', 'KaTeX_Math:i4,i7', 'KaTeX_Script',
+                    'KaTeX_SansSerif:n4,n7,i4', 'KaTeX_Size1', 'KaTeX_Size2', 'KaTeX_Size3',
+                    'KaTeX_Size4', 'KaTeX_Typewriter'],
+            },
+        };
+        </script>`;
+
+        if (jsDelivr) {  // for downloading a working web page - everything from jsdelivr
+            html += "<script src='https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js'></script>";
+        } else {
+            html += `<script defer src='dist.${LIB_VERSION}/webfontloader.js'></script>`;
+        }
+
+
+
+        let tabIndex = tabIndex0 ? `tabindex='0'` : ``;
+        html += `<div id="jxgbox" class="jxgbox" style="width:850px; height:850px;" ${tabIndex}></div>`;
 
         html += '<script type="module" defer>'
-        if (forWeb) {  // web version load tsxgraph.js from jsdelivr
-            html += "\r\n" + "import { TXG } from 'https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@main/lib/tsxgraph.js'"
-        }else{
-            html += "\r\n" + `import { TXG } from "dist.${LIB_VERSION}/tsxgraph.js"`
+        if (jsDelivr) {  // web version load tsxgraph.js from jsdelivr
+            html += "\r\n" + `import { TXG } from 'https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@${LIB_VERSION}.0/lib/tsxgraph.js';`
+        } else {
+            html += "\r\n" + `import { TXG } from "./dist.${LIB_VERSION}/tsxgraph.js";`
         }
         html += "\r\n" + this.hiddenCode   // before try/catch
-        html += "\r\n" + `let TSX = TXG.TSXGraph.initBoard('jxgbox');`
+        html += "\r\n" + `let TSX = TXG.TSXGraph.initBoard('jxgbox',{ showScreenshot:true});`
 
 
         html += "\r\n try {"
@@ -485,7 +517,6 @@ export class Editor {
         html += "\r\n alert(error);"
         html += "\r\n }"
         html += '</script>';
-        // html += `<div id='source64' style='display:none;'>${tsCode64}</div>`
         html += '</body>';
         html += '</head>';
         return html

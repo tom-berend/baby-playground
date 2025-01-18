@@ -19,7 +19,7 @@
 //    DEALINGS IN THE SOFTWARE.
 //
 /////////////////////////////////////////////////////////////////////////////
-//   Generated on January 8, 2025, 2:39 am 
+//   Generated on January 18, 2025, 2:47 pm 
 export var TXG;
 (function (TXG) {
     // utility function for determining whether an object is a JSX object (or part of this wrapper)
@@ -103,14 +103,14 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         static freeBoard(board) {
             window.JXG.JSXGraph.freeBoard(board);
         }
-        /** set Katex as default for board (names, labels, everything).  useKatex() need only be set ONCE, no way to unset. the text element has a 'useKatex' attribute that lets you turn Katex on and off for individual text fields.
-        * ```js
-        *     TXG.TSXGraph.useKatex()
-        * ```
-        */
-        static useKatex() {
-            window.JXG.Options.text.useKatex = true;
-        }
+        // /** set Katex as default for board (names, labels, everything).  useKatex() need only be set ONCE, no way to unset. the text element has a 'useKatex' attribute that lets you turn Katex on and off for individual text fields.
+        // * ```js
+        // *     TSX.useKatex()
+        // * ```
+        // */
+        // static useKatex(){
+        //     (window as any).JXG.Options.text.useKatex = true;
+        // }
         // utility to dereference parameter- if they use TSXGraph objects then  use the JSXGraph objects instead
         static dereference(params) {
             let ret;
@@ -197,6 +197,14 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         }
         removeGrids() {
             return this.board.removeGrids(); // Note: remove GRIDS, not GRID
+        }
+        /** set Katex as default for board (names, labels, everything).  useKatex() need only be set ONCE, no way to unset. the text element has a 'useKatex' attribute that lets you turn Katex on and off for individual text fields.
+        * ```js
+        *     TSX.useKatex()
+        * ```
+        */
+        useKatex() {
+            window.JXG.Options.text.useKatex = true;
         }
         addAxis() {
             this.axis([0, 0], [1, 0]);
@@ -3898,6 +3906,10 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         /**  */
         get matrix3D() {
             return this.elValue.matrix3D;
+        }
+        /**  */
+        setView(azimuth, elevation, radius) {
+            return this.elValue.setView(azimuth, elevation, radius);
         }
         /** This element is used to provide a constructor for a 3D Point. */
         point3D(xyz, attributes = {}) {
