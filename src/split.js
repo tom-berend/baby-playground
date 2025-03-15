@@ -1,73 +1,51 @@
-type MouseDown = {
-    e: any,
-    offsetLeft: number,
-    offsetTop: number,
-    lessonWidth: number,
-    editorWidth: number,
-    editorHeight: number,
-};
-
-
-export let mouseDown: MouseDown; // remember mouse down info
-
-export function dragElement(element: HTMLElement, direction: 'H' | 'V') {
-
-    element.onmousedown = (e: any) => {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.dragElement = exports.mouseDown = void 0;
+function dragElement(element, direction) {
+    element.onmousedown = (e) => {
         // console.log("split: mouse down: " + e.clientX);
         let lesson = document.getElementById("lesson");
         let editor = document.getElementById("editor");
-        let canvas = document.getElementById("canvas") as HTMLCanvasElement
+        let canvas = document.getElementById("canvas");
         // console.log('lesson, editor, canvas', lesson, editor, canvas)
-
-        let lessonOffsetWidth = lesson?lesson.offsetWidth : 0
-
-        mouseDown = {
+        let lessonOffsetWidth = lesson ? lesson.offsetWidth : 0;
+        exports.mouseDown = {
             e: e,
             offsetLeft: element.offsetLeft,
             offsetTop: element.offsetTop,
-            lessonWidth:lessonOffsetWidth,
+            lessonWidth: lessonOffsetWidth,
             editorWidth: editor.offsetWidth,
             editorHeight: editor.offsetHeight,
         };
-
-        document.onmousemove = onMouseMove
+        document.onmousemove = onMouseMove;
         document.onmouseup = () => {
             document.onmousemove = document.onmouseup = null;
-        }
-    }
-
-
-    function onMouseMove(e: any) {
-        // console.log("split: mouse move: " + e.clientX, direction);
-
-        let delta = {
-            x: e.clientX - mouseDown.e.clientX,
-            y: e.clientY - mouseDown.e.clientY
         };
-
+    };
+    function onMouseMove(e) {
+        // console.log("split: mouse move: " + e.clientX, direction);
+        let delta = {
+            x: e.clientX - exports.mouseDown.e.clientX,
+            y: e.clientY - exports.mouseDown.e.clientY
+        };
         // console.log('delta',delta)
-
         let lesson = document.getElementById("lesson");
         let editor = document.getElementById("editor");
-        let canvas = document.getElementById("jxgframe") as HTMLCanvasElement
-
+        let canvas = document.getElementById("jxgframe");
         if (direction === "H") // Horizontal
-        {
+         {
             // Prevent negative-sized elements
-            lesson.style.width = (mouseDown.lessonWidth + delta.x) + "px";
-            canvas.style.width = (mouseDown.editorWidth - delta.x) + "px";
+            lesson.style.width = (exports.mouseDown.lessonWidth + delta.x) + "px";
+            canvas.style.width = (exports.mouseDown.editorWidth - delta.x) + "px";
         }
         if (direction === "V") // Vertical (between editor and canvas)
-        {
-            element.style.left = mouseDown.offsetLeft + delta.y + "px";
-            editor.style.height = (mouseDown.editorHeight + delta.y) + "px";
-
+         {
+            element.style.left = exports.mouseDown.offsetLeft + delta.y + "px";
+            editor.style.height = (exports.mouseDown.editorHeight + delta.y) + "px";
             // don't need canvas anymore, we moved into an iframe
             // canvas.style.height = (mouseDown.editorHeight - delta.y) + "px";
         }
-
     }
 }
-
-
-
+exports.dragElement = dragElement;
+//# sourceMappingURL=split.js.map

@@ -1,31 +1,12 @@
 import { HostMsg, writeMoodleLog } from './writeMoodleLog';
 
 
-/****  I had to add this to node_modules/babylonjs/babylon.module.d.ts
- * issue is latest version of typescript vs latest version of babylon
- *
- *
-interface OffscreenCanvas extends HTMLCanvasElement{}
-interface MouseWheelEvent extends PointerEvent{}
-interface OffscreenCanvasRenderingContext2D extends CanvasRenderingContext2D{}
-type NavigatorUserMediaSuccessCallback = any
-type NavigatorUserMediaErrorCallback = any
-type MSGesture = any
-interface WebGLObject {}
-declare var WebGLObject: {
-    prototype: WebGLObject;
-    new(): WebGLObject;
-};
-
-*/
-
 import { LIB_VERSION } from './version';
 import { Buffer } from "buffer";
+import { DOM } from "./DOM"
+
 
 import * as monaco from "monaco-editor";
-// import * as BABYLON from 'babylonjs';
-// import * as PlanetCute from './planetcute'
-// import { TXG } from './tsxgraph'
 
 import lib_es5 from "./extraLibs/lib.es5.d.ts.txt";
 import lib_es6 from "./extraLibs/lib.es6.d.ts.txt";  // not sure why i need both but parseInt() fails without es5
@@ -58,7 +39,8 @@ import lib_es2099 from "./extraLibs/lib.es2099.d.ts.txt"
 import lib_tsxgraph from "./extraLibs/tsxgraph.d.ts.txt"
 
 import mathcode from "./extraLibs/mathcode.d.ts.txt"
-import { textSpanContainsPosition } from 'typescript';
+
+
 // import matter from "./extraLibs/matter.d.ts.txt"
 
 // import { RuntimeAnimation } from "babylonjs/Animations/runtimeAnimation";
@@ -130,6 +112,8 @@ export class Editor {
     hiddenDecl: string
     visibleCode: string
 
+    plotWindow: Window | null = null;       // the window we run the code in.  keep it around.
+
 
     // prefixDecl = ''     // hidden decl for TS for THIS instance of the editor
     // prefixCode = ''     // hidden code for THIS instance of the editor
@@ -148,7 +132,7 @@ export class Editor {
 
 
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(`import { TXG } from './dist.${LIB_VERSION}/tsxgraph.js'; let TSX = TXG.TXGraph.initBoard('jxgbox');`)
-        monaco.languages.typescript.typescriptDefaults.addExtraLib(`let TSX = TXG.TXGraph.initBoard('jxgbox') as TXG.TSXBoard;`)
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(`TSX.initBoard('jxgbox');`)
 
 
         monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
@@ -202,6 +186,7 @@ export class Editor {
             }
         });
 
+        // monaco.languages.typescript.typescriptDefaults.addExtraLib(matter)
 
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_baby_plus, "lib.baby.d.ts");
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es5, "lib.es5.d.ts");
@@ -236,7 +221,6 @@ export class Editor {
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_tsxgraph)    // wrapper version
         monaco.languages.typescript.typescriptDefaults.addExtraLib(mathcode)    // my simple remix of the upper level call
-        // monaco.languages.typescript.typescriptDefaults.addExtraLib(matter)    // my simply remix of the upper level call
 
         // this stuff has to go into the EVAL, since it doesn't see otherwise
 
@@ -368,7 +352,7 @@ export class Editor {
     }
 
 
-
+    /** this creates a TEXT webpage for download. */
     async createWebPage(hiddenCode: string) {
 
         // const args = names.map((key) => scope[key]);
@@ -404,25 +388,39 @@ export class Editor {
     }
 
 
+
+
+    /** the 'RUN' button in th playground.  Create  */
     runEditorCode(tsCode64: string, popup: boolean, tabIndex0: boolean = true, jsDelivr: boolean = true,) {
         console.log(`runeditorcode(popup:${popup})`)
         // console.log('code', code)
 
         let pop = popup ? 'popup=true,' : ''
+        pop += ', noopener'     // for security
+
         let target = pop ? '_blank' : 'jxgframe'
-        let plotWindow = window.open(target, target, `${pop}left=100,top=100,width=320,height=320`);
-        if (!plotWindow) {
+
+        // if the window is open, we must first close (Chrome's new security)
+        // TODO: if window is open, substitute the innerHTML.  \
+        if (this.plotWindow !== null && !this.plotWindow.closed) {
+            this.plotWindow.close();
+        }
+
+        // reopen
+        this.plotWindow = window.open(target, target, `${pop}left=100,top=100,width=320,height=320`);
+        if (!this.plotWindow) {
             // The window wasn't allowed to open
             // This is likely caused by built-in popup blockers.
             // …
         }
 
-        let html = this.generateSourceCode(tsCode64, true)
+        if (true) {     // old way to generate the popup window
+            let html = this.generateSourceCode(tsCode64, true)
 
-        // console.log('code to write:', html)
-        plotWindow.document.open();
-        plotWindow.document.write(html);
-        plotWindow.document.close();
+            this.plotWindow.document.open();    // creates a page with <html><head><body>, but nothing else
+            this.plotWindow.document.write(html);
+            this.plotWindow.document.close();
+        }
 
     }
 
@@ -434,7 +432,9 @@ export class Editor {
 
     }
 
-    /** create <script></script>  */
+    /** pull together the source code for a TEXt webpage for download  It is used in the
+     * playground to download a page.
+    */
     generateSourceCode(editorCode: string, tabIndex0: boolean = false, jsDelivr: boolean = true): string {
         // console.log('%chiddencode','color:pink;', this.hiddenCode, this.hiddenDecl)
         // let code = ''
@@ -443,7 +443,7 @@ export class Editor {
 
 
         let hostname = location.hostname;
-        console.log('hostname',hostname)
+        console.log('hostname', hostname)
         jsDelivr = hostname !== 'localhost';
 
         let html = '<!DOCTYPE html>';
@@ -489,7 +489,7 @@ export class Editor {
         if (jsDelivr) {  // for downloading a working web page - everything from jsdelivr
             html += "<script src='https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js'></script>";
         } else {
-            html += `<script defer src='dist.${LIB_VERSION}/webfontloader.js'></script>`;
+            html += `<script defer src='dist.${LIB_VERSION}/webfontloader.min.js'></script>`;
         }
 
 
@@ -499,12 +499,12 @@ export class Editor {
 
         html += '<script type="module" defer>'
         if (jsDelivr) {  // web version load tsxgraph.js from jsdelivr
-            html += "\r\n" + `import { TXG } from 'https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@${LIB_VERSION}.0/lib/tsxgraph.js';`
+            html += "\r\n" + `import { TSX } from 'https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@${LIB_VERSION}.0/lib/tsxgraph.js';`
         } else {
-            html += "\r\n" + `import { TXG } from "./dist.${LIB_VERSION}/tsxgraph.js";`
+            html += "\r\n" + `import { TSX } from "./dist.${LIB_VERSION}/tsxgraph.js";`
         }
         html += "\r\n" + this.hiddenCode   // before try/catch
-        html += "\r\n" + `let TSX = TXG.TSXGraph.initBoard('jxgbox',{ showScreenshot:true});`
+        // html += "\r\n" + `TSX.initBoard('jxgbox',{ showScreenshot:true});`
 
 
         html += "\r\n try {"
@@ -539,3 +539,4 @@ export class Editor {
 
 
 
+// generateSourceCode(editorCode: string, tabIndex0: boolean = false, jsDelivr: boolean = true): string {

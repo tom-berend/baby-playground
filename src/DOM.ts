@@ -19,7 +19,7 @@ export type DOMAttribute = {
 // for some reason, observers needs to be a 'let', not a 'const'.
 // otherwise gets optimized by TS and Webpack, and doesn't work reliably.
 // that was a wasted afternoon.
-var observers: Observer[] = []
+let observers: Observer[] = []
 
 export var bakeryDispenser = 0  // initial value
 
