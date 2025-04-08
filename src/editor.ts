@@ -368,9 +368,8 @@ export class Editor {
             const sourceCode = await client.getScriptText(resource.toString())
 
             this.editorCode = output.outputFiles[0].text as string;
-            let html = this.generateSourceCode(this.editorCode, false, true) // html web version    // ALWAYS jsDelivr
 
-            //source64 = Buffer.from(html, 'utf8').toString('base64');
+            let html = this.generateSourceCode(hiddenCode, this.editorCode, true) // html web version    // ALWAYS jsDelivr
 
             const downloadSource = new Blob([html], { type: "text/plain" });
 
@@ -392,62 +391,108 @@ export class Editor {
 
     /** the 'RUN' button in th playground.  Create  */
     runEditorCode(tsCode64: string, popup: boolean, tabIndex0: boolean = true, jsDelivr: boolean = true,) {
+
+        // this is a mess
+
+        popup = false;
         console.log(`runeditorcode(popup:${popup})`)
         // console.log('code', code)
 
         let pop = popup ? 'popup=true,' : ''
         pop += ', noopener'     // for security
 
-        let target = pop ? '_blank' : 'jxgframe'
+        let target = pop ? '_blank' : 'jxgbox'
+        let html: string
 
         // if the window is open, we must first close (Chrome's new security)
         // TODO: if window is open, substitute the innerHTML.  \
-        if (this.plotWindow !== null && !this.plotWindow.closed) {
-            this.plotWindow.close();
-        }
+        if (popup && this.plotWindow !== null && !this.plotWindow.closed) {
+            // console.log('plotwindow exists, closing');
+            console.log('pipup && plotwindow exists, injecting');
+            this.injectScript('jxgframe', this.injectableScript(this.hiddenCode, this.editorCode, false))
+        } else {
 
-        // reopen
-        this.plotWindow = window.open(target, target, `${pop}left=100,top=100,width=320,height=320`);
-        if (!this.plotWindow) {
-            // The window wasn't allowed to open
-            // This is likely caused by built-in popup blockers.
-            // …
-        }
+            if (this.plotWindow !== null && !this.plotWindow.closed) {
+                this.plotWindow.close();
+            }
+            // reopen
+            this.plotWindow = window.open(target, target, `${pop}left=100,top=100,width=320,height=320`);
+            if (!this.plotWindow) {
+                this.injectScript('jxgframe', this.injectableScript(this.hiddenCode, this.editorCode, false))
+            } else
 
-        if (true) {     // old way to generate the popup window
-            let html = this.generateSourceCode(tsCode64, true)
+                html = this.generateSourceCode(this.hiddenCode, this.editorCode, jsDelivr)
 
-            this.plotWindow.document.open();    // creates a page with <html><head><body>, but nothing else
+            // this.plotWindow.document.open();    // creates a page with <html><head><body>, but nothing else
             this.plotWindow.document.write(html);
             this.plotWindow.document.close();
         }
-
     }
 
 
-    generateWebPage() {
-        const data = new Blob([this.editor.getValue()], { type: "text/plain" });
-
-
-
-    }
 
     /** pull together the source code for a TEXt webpage for download  It is used in the
      * playground to download a page.
     */
-    generateSourceCode(editorCode: string, tabIndex0: boolean = false, jsDelivr: boolean = true): string {
-        // console.log('%chiddencode','color:pink;', this.hiddenCode, this.hiddenDecl)
-        // let code = ''
-        // code += "\r\n" + this.hiddenCode + "\r\n"
-        // code += "\r\n" + editorCode + "\r\n"
-
+    generateSourceCode(hiddenCode: string, editorCode: string, jsDelivr: boolean = true): string {
 
         let hostname = location.hostname;
         console.log('hostname', hostname)
-        jsDelivr = hostname !== 'localhost';
 
+        let html = ''
+
+        html += this.HTMLBoilerPlate(jsDelivr);
+        html += '<script type="module" defer>'
+        html += this.generateSourceInjectible(hiddenCode, editorCode, jsDelivr)
+        html += '</script>';
+
+        html += '</body>';
+        html += '</head>';
+        html += '</html>';
+        return html
+    }
+
+
+    /** pull together the source code for a TEXt webpage for download  It is used in the
+     * playground to download a page.
+    */
+    generateSourceInjectible(hiddenCode: string, editorCode: string, tabIndex0: boolean = false, jsDelivr: boolean = true): string {
+
+        // jsDelivr = false;   // TBTB
+
+        let html = ''
+
+        if (jsDelivr) {  // web version load tsxgraph.js from jsdelivr
+            html += "\r\n" + `import { TSX } from 'https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@${LIB_VERSION}.0/lib/tsxgraph.js';`
+        } else {
+            html += "\r\n" + `import { TSX } from "./dist.${LIB_VERSION}/tsxgraph.js";`
+        }
+        html += "\r\n" + hiddenCode   // before try/catch
+        // html += "\r\n" + `TSX.initBoard('jxgbox',{ showScreenshot:true});`
+
+
+        html += "\r\n try {"
+
+        html += "\r\n" + editorCode
+
+        html += "\r\n }"
+        html += "\r\n catch(error) {"
+        html += "\r\n console.log(error);"
+        html += "\r\n alert(error);"
+        html += "\r\n }"
+        return html
+    }
+
+
+
+
+
+
+    HTMLBoilerPlate(jsDelivr: boolean): string {
         let html = '<!DOCTYPE html>';
         html += '<head>';
+
+        // jsDelivr = false;   // TBTB
 
 
         if (jsDelivr) {  // for downloading a working web page - everything from jsdelivr
@@ -492,42 +537,53 @@ export class Editor {
             html += `<script defer src='dist.${LIB_VERSION}/webfontloader.min.js'></script>`;
         }
 
+        html += `<div id="jxgbox" class="jxgbox" style="width:850px; height:850px;" tabindex= '0'></div>`;
+        html += `<div id="jxgframe" class="jxgframe" style="display:none;"></div>`;
+        return html;
+    }
 
 
-        let tabIndex = tabIndex0 ? `tabindex='0'` : ``;
-        html += `<div id="jxgbox" class="jxgbox" style="width:850px; height:850px;" ${tabIndex}></div>`;
+    injectableScript(hiddenCode: string, editorCode: string, jsDelivr: Boolean) {
 
-        html += '<script type="module" defer>'
+        let html = '';
+
         if (jsDelivr) {  // web version load tsxgraph.js from jsdelivr
             html += "\r\n" + `import { TSX } from 'https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@${LIB_VERSION}.0/lib/tsxgraph.js';`
         } else {
             html += "\r\n" + `import { TSX } from "./dist.${LIB_VERSION}/tsxgraph.js";`
         }
         html += "\r\n" + this.hiddenCode   // before try/catch
-        // html += "\r\n" + `TSX.initBoard('jxgbox',{ showScreenshot:true});`
-
-
         html += "\r\n try {"
 
         html += "\r\n" + editorCode
 
         html += "\r\n }"
         html += "\r\n catch(error) {"
-        html += "\r\n console.log(error);"
-        html += "\r\n alert(error);"
+        html += "\r\n    alert(error);"
         html += "\r\n }"
-        html += '</script>';
-        html += '</body>';
-        html += '</head>';
-        return html
+
+        return html;
     }
 
 
+    injectScript(parentID: string, injectable: string) {
+
+        let parent = document.getElementById(parentID);
+        let scriptElement: HTMLScriptElement
+
+        if (parent === null) {
+            console.error(`tag ${parentID} not found`)
+        } else {
+            scriptElement = document.createElement("script");
+            scriptElement.type = "module";
+        }
+
+        let scriptText = document.createTextNode(injectable);
+        scriptElement.appendChild(scriptText);
+
+        parent.replaceChildren(scriptElement);
+    }
 }
-
-
-
-
 // new Function(src) is a safer form of eval().
 // code = `app.floor(30,30,5);let cube = app.cube().color('blue').move('up',1)`
 // var app = new Baby(code)
