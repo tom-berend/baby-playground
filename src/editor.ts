@@ -141,8 +141,8 @@ export class Editor {
             inlineSources: true,
             experimentalDecorators: true,
 
-            noLib: true,
-            lib: ["es5, es6, es2015.core, es2015.iterable, dom.iterable"],    // for some reason, dom.iterable is required for destructuring    [x,y] = [1,2]
+            // noLib: true,
+            lib: ["es5, es6, es2020, es2015.core, es2015.iterable, dom.iterable"],    // for some reason, dom.iterable is required for destructuring    [x,y] = [1,2]
 
             sourceMap: true,
             strict: false,
@@ -172,7 +172,7 @@ export class Editor {
             noSyntaxValidation: true,
             allowNonTsExtensions: true,
             target: monaco.languages.typescript.ScriptTarget.ES2015,
-            noLib: true,                        // don't bring DOM into intellisense
+            // noLib: true,                        // don't bring DOM into intellisense
             strictNullChecks: false,
         });
 
@@ -423,6 +423,14 @@ export class Editor {
 
                 html = this.generateSourceCode(this.hiddenCode, this.editorCode, jsDelivr)
 
+            /********** alternative to document write
+                            document.write=function(s){
+                                var scripts = document.getElementsByTagName('script');
+                                var lastScript = scripts[scripts.length-1];
+                                lastScript.insertAdjacentHTML("beforebegin", s);
+                            }
+            */
+
             // this.plotWindow.document.open();    // creates a page with <html><head><body>, but nothing else
             this.plotWindow.document.write(html);
             this.plotWindow.document.close();
@@ -443,7 +451,7 @@ export class Editor {
 
         html += this.HTMLBoilerPlate(jsDelivr);
         html += '<script type="module" defer>'
-        html += this.generateSourceInjectible(hiddenCode, editorCode, jsDelivr)
+        html += this.injectableScript(hiddenCode, editorCode, jsDelivr)
         html += '</script>';
 
         html += '</body>';
@@ -453,53 +461,20 @@ export class Editor {
     }
 
 
-    /** pull together the source code for a TEXt webpage for download  It is used in the
-     * playground to download a page.
-    */
-    generateSourceInjectible(hiddenCode: string, editorCode: string, tabIndex0: boolean = false, jsDelivr: boolean = true): string {
-
-        // jsDelivr = false;   // TBTB
-
-        let html = ''
-
-        if (jsDelivr) {  // web version load tsxgraph.js from jsdelivr
-            html += "\r\n" + `import { TSX } from 'https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@${LIB_VERSION}.0/lib/tsxgraph.js';`
-        } else {
-            html += "\r\n" + `import { TSX } from "./dist.${LIB_VERSION}/tsxgraph.js";`
-        }
-        html += "\r\n" + hiddenCode   // before try/catch
-        // html += "\r\n" + `TSX.initBoard('jxgbox',{ showScreenshot:true});`
-
-
-        html += "\r\n try {"
-
-        html += "\r\n" + editorCode
-
-        html += "\r\n }"
-        html += "\r\n catch(error) {"
-        html += "\r\n console.log(error);"
-        html += "\r\n alert(error);"
-        html += "\r\n }"
-        return html
-    }
-
-
-
-
-
 
     HTMLBoilerPlate(jsDelivr: boolean): string {
         let html = '<!DOCTYPE html>';
         html += '<head>';
 
-        // jsDelivr = false;   // TBTB
+        jsDelivr = false;   // TBTB
+        let gameBoy = true;
 
 
         if (jsDelivr) {  // for downloading a working web page - everything from jsdelivr
             // html += `\n<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.js"></script>`
             // html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.css" />`;
 
-            html += `\n<script type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>`
+            html += `\n<script defer type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>`
             html += `\n<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />`;
 
             html += `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" integrity="sha384-zh0CIslj+VczCZtlzBcjt5ppRcsAmDnRem7ESsYwWwg3m/OaJ2l4x7YBZl9Kxxib" crossorigin="anonymous">`;
@@ -513,23 +488,42 @@ export class Editor {
             html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/jsxgraph.css" />`;
 
             html += `<link rel="stylesheet" href="dist.${LIB_VERSION}/katex.min.css">`;
-            html += `<script defer src="dist.${LIB_VERSION}/katex.min.js"`;
+            html += `<script defer src="dist.${LIB_VERSION}/katex.min.js"></script>`;
 
         }
 
         html += '</head>';
         html += '<body>';
 
+        if (gameBoy)
+            html +=
+                `<style type='text/css'>
+                .wrapper {
+                    float:left;
+                    min-width: 150px;
+                }
+
+                .button {
+                    background: rgb(242, 96, 43);
+                    color: white;
+                    font-size: 32px;
+                    font-weight: bold;
+                    border-radius: 5px;
+                }
+            </style>`;
+
+
+
         html += `<script>
-        window.WebFontConfig = {
-            custom: {
-                families: ['KaTeX_AMS', 'KaTeX_Caligraphic:n4,n7', 'KaTeX_Fraktur:n4,n7',
+            window.WebFontConfig = {
+                custom: {
+                    families: ['KaTeX_AMS', 'KaTeX_Caligraphic:n4,n7', 'KaTeX_Fraktur:n4,n7',
                     'KaTeX_Main:n4,n7,i4,i7', 'KaTeX_Math:i4,i7', 'KaTeX_Script',
                     'KaTeX_SansSerif:n4,n7,i4', 'KaTeX_Size1', 'KaTeX_Size2', 'KaTeX_Size3',
                     'KaTeX_Size4', 'KaTeX_Typewriter'],
-            },
-        };
-        </script>`;
+                    },
+                    };
+                    </script>`;
 
         if (jsDelivr) {  // for downloading a working web page - everything from jsdelivr
             html += "<script src='https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js'></script>";
@@ -537,8 +531,105 @@ export class Editor {
             html += `<script defer src='dist.${LIB_VERSION}/webfontloader.min.js'></script>`;
         }
 
-        html += `<div id="jxgbox" class="jxgbox" style="width:850px; height:850px;" tabindex= '0'></div>`;
-        html += `<div id="jxgframe" class="jxgframe" style="display:none;"></div>`;
+        if (gameBoy)
+            html +=
+                `<div style='width:1000px;max-width:100%;height:1170px;max-height:100%'>
+                 <div style='border:solid 2px black; border-radius: 10px;padding:10px;background-color: rgb(178, 214, 246);width:100%;height:100%;'>
+           `;
+        html += `<div id="jxgbox" class="jxgbox" style="aspect-ratio: 1; width: 100%; max-width:1000px; max-height: calc(100vh - 20px);" tabindex= '0'></div>`;
+
+        if (gameBoy)
+            html +=
+                `<div>
+               <div class="wrapper">
+                    <table style="padding-left:100px;padding-top:20px;">
+                        <tr>
+                            <td></td>
+                            <td><input type="button" class='button' id="btn_Up" value="&#x2B06;"></input>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td><input type="button" class='button' id="btn_Lf" value="&#x2B05;"></input>
+                            <td></td>
+                            <td><input type="button" class='button' id="btn_Rt" value="&#x27A1;"></input>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><input type="button" class='button' id="btn_Dn" value="&#x2B07;"></input>
+                            <td>
+                        </tr>
+                    </table>
+                </div> <!-- end of first wrapper-->
+                <div class="wrapper"><p>&nbsp;</p></div>  <!--spacer-->
+                <div class="wrapper" style="padding-top:30px;">
+                    <input type="button" class='button' style="margin-right:50px;" id="btn_A" value="A"></input>
+                    <input type="button" class='button' style="margin-right:50px;" id="btn_B" value="B"></input>
+                    <input type="button" class='button' style="margin-right:50px;" id="btn_C" value="C"></input>
+                    <input type="button" class='button' id="btn_D" value="D"></input>
+                </div><!-- end of second wrapper-->
+            </div>
+         </div>
+      <!--/div-->
+
+
+
+        <script>
+
+            let btn_A = (e) => dispatchEvent(new KeyboardEvent("keydown", {
+                key: "A",
+                keyCode: 65,
+                code: "KeyA"
+            }))
+            let btn_B = (e) => dispatchEvent(new KeyboardEvent("keydown", {
+                key: "B",
+                keyCode: 66,
+                code: "KeyB"
+            }))
+            let btn_C = (e) => dispatchEvent(new KeyboardEvent("keydown", {
+                key: "C",
+                keyCode: 67,
+                code: "KeyC"
+            }))
+            let btn_D = (e) => dispatchEvent(new KeyboardEvent("keydown", {
+                key: "D",
+                keyCode: 68,
+                code: "KeyD"
+            }))
+            let btn_Up = (e) => dispatchEvent(new KeyboardEvent("keydown", {
+                key: "",
+                keyCode: 38,
+                code: "ArrowUp"
+            }))
+            let btn_Dn = (e) => dispatchEvent(new KeyboardEvent("keydown", {
+                key: "",
+                keyCode: 38,
+                code: "ArrowDown"
+            }))
+            let btn_Lf = (e) => dispatchEvent(new KeyboardEvent("keydown", {
+                key: "",
+                keyCode: 37,
+                code: "ArrowLeft"
+            }))
+            let btn_Rt = (e) => dispatchEvent(new KeyboardEvent("keydown", {
+                key: "",
+                keyCode: 39,
+                code: "ArrowRight"
+            }))
+
+
+            document.getElementById('btn_A').addEventListener("click", btn_A);
+            document.getElementById('btn_B').addEventListener("click", btn_B);
+            document.getElementById('btn_C').addEventListener("click", btn_C);
+            document.getElementById('btn_D').addEventListener("click", btn_D);
+
+            document.getElementById('btn_Up').addEventListener("click", btn_Up);
+            document.getElementById('btn_Dn').addEventListener("click", btn_Dn);
+            document.getElementById('btn_Lf').addEventListener("click", btn_Lf);
+            document.getElementById('btn_Rt').addEventListener("click", btn_Rt);
+
+        </script>`;
+
+
         return html;
     }
 
@@ -553,8 +644,10 @@ export class Editor {
             html += "\r\n" + `import { TSX } from "./dist.${LIB_VERSION}/tsxgraph.js";`
         }
         html += "\r\n" + this.hiddenCode   // before try/catch
+
         html += "\r\n try {"
 
+        html += "\r\n TSX.initBoard('jxgbox')";
         html += "\r\n" + editorCode
 
         html += "\r\n }"
@@ -584,15 +677,3 @@ export class Editor {
         parent.replaceChildren(scriptElement);
     }
 }
-// new Function(src) is a safer form of eval().
-// code = `app.floor(30,30,5);let cube = app.cube().color('blue').move('up',1)`
-// var app = new Baby(code)
-
-// return () => new Function(src).call(window, args);
-// // } else {
-//     return () => { alert("no source"); };  // have to return something if typeguard fails
-
-
-
-
-// generateSourceCode(editorCode: string, tabIndex0: boolean = false, jsDelivr: boolean = true): string {

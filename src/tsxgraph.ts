@@ -22,7 +22,7 @@
         //
         /////////////////////////////////////////////////////////////////////////////
 
-        //   Generated on April 8, 2025, 2:43 pm
+        //   Generated on April 18, 2025, 3:26 am
 
  export namespace TSX {     // match JSXGraph definition for JXG_Point3D, etc
         type NumberFunction = Number | Function
@@ -103,7 +103,7 @@ export class TSXBoard {
             let bounding = (this._jBoard as any).getBoundingBox()
             // console.log(bounding, [[bounding[0], bounding[3]], Math.abs(bounding[2] - bounding[0]), Math.abs(bounding[3] - bounding[1])])
 
-            // axesPosition is immutable.  if it is set in initBoard(), then set it in
+            // axesPosition is immutable.  if it is set in initBoard(), then set it in view
             let attrs = (this._jBoard as any).attr;
             let ap = 'none'
             if ('axesposition' in attrs) {
@@ -165,6 +165,10 @@ export function _jsxView3d() {
     return (window as any).TSXGlobal.jView3d;
 }
 
+function alwaysFalse():Boolean{
+    return (Math.random()<0)  // always false, hoping JS doesn't optimize at compile time
+}
+
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////
@@ -177,7 +181,12 @@ export function _jsxView3d() {
 // }
 
 let jBoard: Object
-let defaultAttrs: Object = { name: '', showinfobox: false }
+let defaultAttrs: Object = {
+    keepAspectRatio: true,
+    name: '', showinfobox: false,
+    pan: { enabled: false },
+    resize: { enabled: false },
+ }
 
 
 
@@ -1749,11 +1758,6 @@ else
   useUnicodeMinus?: Boolean
  }
 
- export interface TurtleAttributes extends GeometryElementAttributes {
- /** Attributes for the turtle arrow. */
-  arrow?: Curve
- }
-
  export interface SectorAttributes extends CurveAttributes {
  /** Attributes for helper point anglepoint in case it is provided by coordinates. */
   anglePoint?: PointAttributes
@@ -2587,1778 +2591,8 @@ Statistics :{
 
 }
 
-
- /** Create a point. If any parent elements are functions or the attribute 'fixed' is true then point will be constrained.
-            
-*```js
-TSX.point([3,2],{strokeColor:'blue',strokeWidth:5,strokeOpacity:.5})
-TSX.point([3,3]),{fixed:true, showInfobox:true}
-TSX.point([()=>p1.X()+2,()=>p1.Y()+2]) // 2 up 2 right from p1
-TSX.point([1,2,2])  // three axis definition - [z,x,y]
-            
-*```
-            
- also create points with Intersection, Midpoint, TransformPoint, Circumcenter, Glider, TransformPoint, and others. */
- export function point(position:pointAddr, attributes: PointAttributes ={} ):Point{
- return _jsxBoard().create('point', position, defaultAttributes(attributes))
-}
-
- /** Line has two signatures. 
- *``` 
-*``` 
- #1  Create a line defined by two points (or point addresses)
-
-*```js
-TSX.line([3,2],[3,3],{strokeColor:'blue',strokeWidth:5,strokeOpacity:.5})
-let P1 = TSX.point([3,2])
-TSX.line(p1,[3,3])
-
-*```
- */
- export function line( p1:Point|pointAddr,p2:Point|pointAddr,attributes?:LineAttributes) : Line
- /** Line has two signatures. 
- *``` 
-*``` 
- #2 Create a line for the equation a*x+b*y+c*z = 0',
-
-*```js
-TSX.line(2,3,1)   // create a line for the equation a*x+b*y+c*z = 0
-
-*```
- */
- export function line( A:number|Function,B:number|Function,C:number|Function,attributes?:LineAttributes) : Line
-// implementation of signature,  hidden from user
- export function line (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Line {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
- if(typeof a == 'number' || typeof a == 'function')
-                             // reorder the a,b,c elements of the line
-                             return _jsxBoard().create('line', [c,a,b], defaultAttributes(d)) // as Line
-                          else  //  two points
-                             return _jsxBoard().create('line', [a,b], defaultAttributes(c)) // as Line
-             
- }
-
- /** create a chart */
- export function chart(f:number[], attributes: ChartAttributes ={} ):Chart{
-   return TSX._jsxBoard().create('chart', [f,], defaultAttributes(attributes))  as Chart
-}
-
-
- /** A circle can be constructed by providing a center and a point on the circle,
-                         or a center and a radius (given as a number, function, line, or circle).
-                         If the radius is a negative value, its absolute values is taken.
-                
-*```js
-                TSX.circle(P1,1])
-                TSX.circle([0,0],[1,0])
-                
-*```
-                
-Also see: Circumcircle is a circle described by three points.  An Arc is a segment of a circle. */
- export function circle(centerPoint:Point|pointAddr|Function, remotePoint:Point|pointAddr|Line|[Point|pointAddr,Point|pointAddr]|number|Function|Circle, attributes: CircleAttributes ={} ):Circle{
-  let newObject:any  // special case for circle with immediate segment eg:  circle(point,[[1,2],[3,4]]  )
-                            if (Array.isArray(remotePoint) && Array.isArray(remotePoint[0] ) && Array.isArray(remotePoint[1] )) {
-                                return _jsxBoard().create("circle", [centerPoint, remotePoint[0] ,remotePoint[1]], defaultAttributes(attributes))
-                            } else {
-                                return _jsxBoard().create("circle", [centerPoint, remotePoint], defaultAttributes(attributes))
-                            }
-}
-
-
- /** In 3D space, a circle consists of all points on a given plane with a given distance from a given point.
-                    The given point is called the center, and the given distance is called the radius.
-                    A circle can be constructed by providing a center, a normal vector (either homogenous or cartesian),
-                    and a radius (given as a number or function).
-                    
-*```js
-let a = TSX.point3D([-3, 0, 0])
-let circle = TSX.circle3D(a, [1, 1, 1], 2, { strokeWidth: 5, strokeColor: 'blue' })
-```
- */
- export function circle3d(center:TSX.Point3D, normal:number[]|Function, radius:number|Function, attributes: Circle3DAttributes ={} ):Circle3D{
- 
-                let tempNormal:number[] = (typeof normal === "function") ? normal() : normal;
-                if(tempNormal.length ===3) tempNormal.unshift(0);   // convert [a,b,c] to [0,a,b,c]
-                return _jsxView3d().create("circle3d",[center,normal,radius],attributes)
-}
-
- export function curve( xArray:number[]|Function,yArray:number[]|Function,attributes?:CurveAttributes) : Curve
- export function curve( xArray:number[]|Function,yArray:number[]|Function,left:NumberFunction,right:NumberFunction,attributes?:CurveAttributes) : Curve
-// implementation of signature,  hidden from user
- export function curve (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Curve {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxBoard().create('curve', params, defaultAttributes(attrs))  as Curve
- }
- /** Three signatures: A curve in 3D is given by a function returning [x,y,z], three functions returning [x], [y],and [z], or three arrays containing coordinate points. 
- *``` 
-*``` 
- FX(u), FY(u), FZ(u) are functions returning a number, range is the array containing lower and upper bound for the range of the parameter u. range may also be a function returning an array of length two. */
- export function curve3d( Fx:(x:number)=>number,Fy:(y:number)=>number,Fz:(z:number)=>number,range:pointAddr3D,attributes?:Curve3DAttributes) : Curve3D
- /** Three signatures: A curve in 3D is given by a function returning [x,y,z], three functions returning [x], [y],and [z], or three arrays containing coordinate points. 
- *``` 
-*``` 
- A function of one variable returns an array of [x,y,z] values. */
- export function curve3d( Fxyz:(x:number)=>[number,number,number]|number[],range:pointAddr3D,attributes?:Curve3DAttributes) : Curve3D
- /** Three signatures: A curve in 3D is given by a function returning [x,y,z], three functions returning [x], [y],and [z], or three arrays containing coordinate points. 
- *``` 
-*``` 
- A curve is drawn through the XYZ points described by three arrays. */
- export function curve3d( X:number[],Y:number[],Z:number[],attributes?:Curve3DAttributes) : Curve3D
-// implementation of signature,  hidden from user
- export function curve3d (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Curve3D {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxView3d().create('curve3d', params, defaultAttributes(attrs))  as Curve3D
- }
-
- /** This element is used to provide a constructor for arbitrary content in an SVG foreignObject container.
-```js
-TSX.foreignObject(
-    `<video width="300" height="200" src="https://eucbeniki.sio.si/vega2/278/Video_metanje_oge_.mp4" type="html5video" controls>`,
-    [0, -3], [9, 6],
-    {layer: 8, fixed: true})
-```
-              */
- export function foreignObject(content:string, position:number[], size:number[]|null=null, attributes: ForeignObjectAttributes ={} ):ForeignObject{
-   return TSX._jsxBoard().create('foreignObject', [content,position,size,], defaultAttributes(attributes))  as ForeignObject
-}
-
-
- /** Array of Points */
- export function group(pointArray:Point[]|Polygon, attributes: GroupAttributes ={} ):Group{
-   return TSX._jsxBoard().create('group', [pointArray,].flat(), defaultAttributes(attributes))  as Group
-}
-
-
- /** Display an image.  The first element is the location URL of the image.
-                A collection of space icons is provided, press CTRL+I to show the list.
-                The second parameter sets the lower left point of the image.
-                The optional third parameter sets the size multiplier of the image, default is [1,1].
-                
-If you want to move the image, just tie the image to a point, maybe at the center of the image.
-                 For more flexibility, see TSX.Rotate() and TSX.Translate()
-                
-*```js
-            TSX.image('icons/earth.png', [0, 0],[2,2])
-            let p1 = TSX.point([3, 2], { opacity: .1 })
-            TSX.image('icons/moon-full-moon.png', [()=>p1.X(),()=>p1.Y()])
-                
-*``` */
- export function image(url:String|spaceIcon, lowerLeft:pointAddr, widthHeight:[number,number]=[1,1], attributes: ImageAttributes ={} ):Image{
-   return TSX._jsxBoard().create('image', [url,lowerLeft,widthHeight,], defaultAttributes(attributes))  as Image
-}
-
- export function implicitcurve( f:Function|String,attributes?:ImplicitcurveAttributes) : Implicitcurve
- export function implicitcurve( f:Function|String,dfx:Function|String,dfy:Function|String,attributes?:ImplicitcurveAttributes) : Implicitcurve
-// implementation of signature,  hidden from user
- export function implicitcurve (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Implicitcurve {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxBoard().create('implicitcurve', params, defaultAttributes(attrs))  as Implicitcurve
- }
-
- /** The circle that is the intersection of two elements (plane3d or sphere3d) in 3D. */
- export function intersectionCircle3d(sphere1:TSX.Sphere3D, sphere:TSX.Sphere3D|TSX.Plane3D, attributes: IntersectionCircle3DAttributes ={} ):IntersectionCircle3D{
-   return TSX._jsxView3d().create('intersectioncircle3d', [sphere1,sphere,], defaultAttributes(attributes))  as IntersectionCircle3D
-}
-
-
- /** The circle that is the intersection of two elements (plane3d or sphere3d) in 3D. */
- export function intersectionLine3d(plane1:TSX.Sphere3D, plane2:TSX.Plane3D, attributes: IntersectionLine3DAttributes ={} ):IntersectionLine3D{
-   return TSX._jsxView3d().create('intersectionline3d', [plane1,plane2,], defaultAttributes(attributes))  as IntersectionLine3D
-}
-
- /** Two signatures: A line in 3D is given by two points, or one point and a direction vector. 
- *``` 
-*``` 
- The 3D line is defined by two 3D points (Point3D): The points can be either existing points or coordinate arrays of the form [x, y, z]. */
- export function line3d( point1:Point3D|pointAddr3D,point2:Point3D|pointAddr3D,attributes?:Line3DAttributes) : Line3D
- /** Two signatures: A line in 3D is given by two points, or one point and a direction vector. 
- *``` 
-*``` 
- The 3D line is defined by a point (or coordinate array [x, y, z]) a direction given as array [x, y, z] and an optional range given as array [s, e]. The default value for the range is [-Infinity, Infinity]. */
- export function line3d( point:Point3D|pointAddr3D,direction:Line3D|pointAddr3D,range:number[]|pointAddr,attributes?:Line3DAttributes) : Line3D
-// implementation of signature,  hidden from user
- export function line3d (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Line3D {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxView3d().create('line3d', params, defaultAttributes(attrs))  as Line3D
- }
- export function plane3d( point:Point3D|number[]|Function,direction1:number[]|Function,direction2:number[]|Function,range1?:pointAddr,range2?:pointAddr,attributes?:Plane3DAttributes) : Plane3D
- export function plane3d( point:Point3D|number[]|Function,direction1:number[]|Function|Function[],direction2:number[]|Function|Function[],range1?:pointAddr,range2?:pointAddr,attributes?:Plane3DAttributes) : Plane3D
- export function plane3d( point1:Point3D,point2:Point3D,point3:Point3D,range1?:pointAddr,range2?:pointAddr,attributes?:Plane3DAttributes) : Plane3D
- export function plane3d( point1:Point3D,point2:Point3D,point3:Point3D,attributes?:Plane3DAttributes) : Plane3D
-// implementation of signature,  hidden from user
- export function plane3d (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Plane3D {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxView3d().create('plane3d', params, defaultAttributes(attrs))  as Plane3D
- }
- export function point3d( xyz:NumberFunction[],attributes?:Point3DAttributes) : Point3D
- export function point3d( fn:()=> number[]|[number,number,number],attributes?:Point3DAttributes) : Point3D
-// implementation of signature,  hidden from user
- export function point3d (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Point3D {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxView3d().create('point3d', params, defaultAttributes(attrs))  as Point3D
- }
-
- /** Array of Points */
- export function polygon(pointArray:Point[]|pointAddr[]|Function, attributes: PolygonAttributes ={} ):Polygon{
-   return TSX._jsxBoard().create('polygon', [pointArray,].flat(), defaultAttributes(attributes))  as Polygon
-}
-
-
- /** A polygon is a sequence of points connected by lines, with the last point connecting back to the first one. The points are given by a list of Point3D objects or a list of coordinate arrays. Each two consecutive points of the list define a line. */
- export function polygon3d(vertices:Point3D[]|pointAddr3D[]|Function, attributes: Polygon3DAttributes ={} ):Polygon3D{
-   return TSX._jsxView3d().create('polygon3d', [vertices,], defaultAttributes(attributes))  as Polygon3D
-}
-
-
- /** Display a message
-                                
-*```js
-TSX.text([3,2],[3,3], {fontSize:20, strokeColor:'blue'})
-TSX.text([0, 4], () => 'BD ' + B.distance(D).toFixed(2))
-TSX.text([-4, 2], '\pm\sqrt{a^2 + b^2}', { useKatex: true })
-                                
-*``` */
- export function text(position:Point|pointAddr, label:String|Function, attributes: TextAttributes ={} ):Text{
- (position as any).push(label);
-                        return _jsxBoard().create('text', position,defaultAttributes(attributes));
-}
-
- export function text3d( position:Point3D|number[]|Function,text:string|Function,attributes?:Text3DAttributes) : Text3D
- export function text3d( position:Point3D|number[]|Function,text:string|Function,slide:GeometryElement3D,attributes?:Text3DAttributes) : Text3D
-// implementation of signature,  hidden from user
- export function text3d (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Text3D {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
- return _jsxView3d().create('text3d',[params].flat(),defaultAttributes(attrs))
- }
-
- /** Ticks are used as distance markers on a line or curve. They are mainly used for axis elements and slider elements.  */
- export function ticks(line:Line, attributes: TicksAttributes ={} ):Ticks{
-   return TSX._jsxBoard().create('ticks', [line,], defaultAttributes(attributes))  as Ticks
-}
-
-
- /** A circular sector is a subarea of the area enclosed by a circle. It is enclosed by two radii and an arc. */
- export function sector(P1:Point|pointAddr, P2:Point|pointAddr, P3:Point|pointAddr, attributes: SectorAttributes ={} ):Sector{
-   return TSX._jsxBoard().create('sector', [P1,P2,P3,], defaultAttributes(attributes))  as Sector
-}
-
-
- /** Vector field. Plot a vector field either given by two functions f1(x, y) and f2(x,y) or by a function f(x, y) returning an array of size 2. */
- export function vectorfield(fxfy:Function[], horizontalMesh:number[]=[-6,25,6], verticalMesh:number[]=[-6,25,6], attributes: VectorfieldAttributes ={} ):Vectorfield{
-   return TSX._jsxBoard().create('vectorfield', [fxfy,horizontalMesh,verticalMesh,], defaultAttributes(attributes))  as Vectorfield
-}
-
- export function angle( from:Point|pointAddr,around:Point|pointAddr,to:Point|pointAddr,attributes?:AngleAttributes) : Angle
- export function angle( line1:Line|[Point|pointAddr,Point|pointAddr],line2:Line|[Point|pointAddr,Point|pointAddr],direction1:[number,number],direction2:[number,number],attributes?:AngleAttributes) : Angle
- export function angle( line1:Line|[Point|pointAddr,Point|pointAddr],line2:Line|[Point|pointAddr,Point|pointAddr],dirPlusMinus1:number,dirPlusMinus2:number,attributes?:AngleAttributes) : Angle
-// implementation of signature,  hidden from user
- export function angle (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Angle {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxBoard().create('angle', params, defaultAttributes(attrs))  as Angle
- }
-
- /** Create a circular Arc defined by three points (because a circle can be defined by three points - see circumcircle).
-                            
-*```js
-                            let arc = TSX.arc([-8,5],[-4,5],[-9,9]])
-                            
-*```
-                            
- To create an arc with origin, startpoint, and angle, look at MajorArc/MinorArc. */
- export function arc(origin:Point|pointAddr, from:Point|pointAddr, to:Point|pointAddr, attributes: ArcAttributes ={} ):Arc{
-   return TSX._jsxBoard().create('arc', [origin,from,to,], defaultAttributes(attributes))  as Arc
-}
-
-
- /** Arrow defined by two points (like a Segment) with arrow at P2
-                            
-*```js
-                            
- let arrow = TSX.arrow([-8,5],[-4,5])
-                            
-*```
-                            
- */
- export function arrow(p1:Point|pointAddr, p2:Point|pointAddr, attributes: ArrowAttributes ={} ):Arrow{
-   return TSX._jsxBoard().create('arrow', [p1,p2,], defaultAttributes(attributes))  as Arrow
-}
-
- export function parallel( line:Line|[Point,Point],point:Point|pointAddr,attributes?:ParallelAttributes) : Parallel
- export function parallel( lineP1:Point|pointAddr,lineP2:Point|pointAddr,Point:Point|pointAddr,attributes?:ParallelAttributes) : Parallel
-// implementation of signature,  hidden from user
- export function parallel (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Parallel {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxBoard().create('parallel', params, defaultAttributes(attrs))  as Parallel
- }
-
- /** Create an Arrow parallel to a segment. The constructed arrow contains p3 and has the same slope as the line through p1 and p2. */
- export function arrowparallel(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: ArrowparallelAttributes ={} ):Arrowparallel{
-   return TSX._jsxBoard().create('arrowparallel', [p1,p2,p3,], defaultAttributes(attributes))  as Arrowparallel
-}
-
-
- /** Create an Axis with two points (like a Line) */
- export function axis(p1:Point|pointAddr, p2:Point|pointAddr, attributes: AxisAttributes ={} ):Axis{
-   return TSX._jsxBoard().create('axis', [p1,p2,], defaultAttributes(attributes))  as Axis
-}
-
-
- /** A cubic bezier curve.  The input is 3k + 1 points; those at positions k mod 3 = 0 (eg: 0, 3, 6 are the data points, the two points between each data points are the control points.
-                
-*```js
-    let points: Point[] = []
-    points.push(point([-2, -1], { size: 4, color: 'blue', name: '0' }))
-
-    points.push(point([-2, -2.5], { name: '1' }))
-    points.push(point([-1, -2.5], { name: '2' }))
-
-    points.push(TSX.point([2, -2], { size: 4, color: 'blue', name: '3' }))
-
-    let curve = TSX.bezierCurve(points, { strokeColor: 'orange', strokeWidth: 5, fixed: false }); // Draggable curve
-
-    // 'BezierCurve()' is just a shorthand for the following two lines:
-    // let bz = TSX.NumericsMath.bezier(points)
-    // let curve = TSX.curve(bz[0], bz[1])
-                
-*```
-
-                 */
- export function bezierCurve(points:Point[], attributes: BezierCurveAttributes ={} ):Curve{
-  return _jsxBoard().create('curve', (window as any).JXG.Math.Numerics.bezier(points), defaultAttributes(attributes));
-}
-
-
- /** Bisect an Angle defined with three points A,B,C, and divides the angle ABC into two equal sized parts. */
- export function bisector(A:Point|pointAddr, B:Point|pointAddr, C:Point|pointAddr, attributes: BisectorAttributes ={} ):Bisector{
-   return TSX._jsxBoard().create('bisector', [A,B,C,], defaultAttributes(attributes))  as Bisector
-}
-
-
- /** Bisect a Line defined with two points */
- export function bisectorlines(l1:Line, l2:Line, attributes: BisectorlinesAttributes ={} ):Bisectorlines{
-   return TSX._jsxBoard().create('bisectorlines', [l1,l2,], defaultAttributes(attributes))  as Bisectorlines
-}
-
-
- /** Create a button.
-```js
-    let toggleValue = false   // button toggles this value and updates board
-    let butt = TSX.button([0, 0], 'Toggle', () => {
-        toggleValue = !toggleValue;
-        butt.rendNodeButton.innerHTML = toggleValue ? 'On' : 'Off';
-        butt.rendNodeButton.style.backgroundColor = toggleValue ? 'lightgreen' : 'salmon';
-    });
-    TSX.circle([0, 0], 1, { visible: () => toggleValue });  // sees update
-```
- */
- export function button(position:pointAddr, label:String|Function, handler:Function, attributes: ButtonAttributes ={} ):Button{
- (position as any).push(label,handler);  // position is already array, eg: [1,2], just use it as params
-                        return _jsxBoard().create('button', position, defaultAttributes(attributes)) as Button;
-}
-
-
- /** This element is used to provide a constructor for cardinal spline curves. Create a dynamic cardinal spline interpolated curve given by sample points p_1 to p_n. */
- export function cardinalspline(data:Point[]|number[][], funct:Function, splineType:`uniform`|`centripetal`, attributes: CardinalsplineAttributes ={} ):Curve{
-   return TSX._jsxBoard().create('cardinalspline', [data,funct,splineType,], defaultAttributes(attributes))  as Cardinalspline
-}
-
-
- /** This element is used to provide a constructor for special texts containing a form checkbox element. For this element, the attribute ”display” has to have the value 'html' (which is the default). The underlying HTML checkbox element can be accessed through the sub-object 'rendNodeCheck', e.g. to add event listeners. */
- export function checkbox(position:pointAddr, label:String|Function, attributes: CheckboxAttributes ={} ):Checkbox{
- (position as any).push(label);
-                        return _jsxBoard().create('checkbox', position,defaultAttributes(attributes));
-}
-
-
- /** Creates a Point at the center of a circle defined by 3 points */
- export function circumcenter(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: CircumcenterAttributes ={} ):Circumcenter{
-   return TSX._jsxBoard().create('circumcenter', [p1,p2,p3,], defaultAttributes(attributes))  as Circumcenter
-}
-
-
- /** Draw a circle defined by 3 points */
- export function circumcircle(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: CircumcircleAttributes ={} ):Circumcircle{
-   return TSX._jsxBoard().create('circumcircle', [p1,p2,p3,], defaultAttributes(attributes))  as Circumcircle
-}
-
-
- /** Draw an arc from P1 to P3 (missing P3 to P1) defined by 3 points */
- export function circumcircleArc(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: CircumcircleArcAttributes ={} ):CircumcircleArc{
-   return TSX._jsxBoard().create('circumcircleArc', [p1,p2,p3,], defaultAttributes(attributes))  as CircumcircleArc
-}
-
-
- /** Creates a CircumCenter and draws a sector from P1 to P3 (missing P3 to P1) defined by 3 points */
- export function circumcircleSector(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: CircumcircleSectorAttributes ={} ):CircumcircleSector{
-   return TSX._jsxBoard().create('circumcircleSector', [p1,p2,p3,], defaultAttributes(attributes))  as CircumcircleSector
-}
-
-
- /** A comb to display domains of inequalities. */
- export function comb(p1:Point|pointAddr, p2:Point|pointAddr, attributes: CombAttributes ={} ):Comb{
-   return TSX._jsxBoard().create('comb', [p1,p2,], defaultAttributes(attributes))  as Comb
-}
-
- /** Create a generic conic section either by five points or the six numeric coefficients of the general conic's equation.  
- *``` 
-*``` 
- Just as two (distinct) points determine a line, five points (no three collinear) determine a conic. */
- export function conic( A:Point|pointAddr,B:Point|pointAddr,C:Point|pointAddr,D:Point|pointAddr,E:Point|pointAddr,attributes?:ConicAttributes) : Conic
- /** Create a generic conic section either by five points or the six numeric coefficients of the general conic's equation.  
- *``` 
-*``` 
- Build a plane algebraic curve from six numbers that satisfies Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0, and A,B,C not all zero.  This might be a circle, ellipse, parabola, or hyperbola. */
- export function conic( A:number,B:number,C:number,D:number,E:number,F:number,attributes?:ConicAttributes) : Conic
-// implementation of signature,  hidden from user
- export function conic (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Conic {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxBoard().create('conic', params, defaultAttributes(attrs))  as Conic
- }
-
- /** Difference of two closed path elements. The elements may be of type curve, circle, polygon, inequality. If one element is a curve, it has to be closed. The resulting element is of type curve. */
- export function curveDifference(curve1:GeometryElement, curve2:GeometryElement, attributes: CurveDifferenceAttributes ={} ):CurveDifference{
-   return TSX._jsxBoard().create('curveDifference', [curve1,curve2,], defaultAttributes(attributes))  as CurveDifference
-}
-
-
- /** Intersection of two closed path elements. The elements may be of type curve, circle, polygon, inequality. If one element is a curve, it has to be closed. The resulting element is of type curve. */
- export function curveIntersection(curve1:GeometryElement, curve2:GeometryElement, attributes: CurveIntersectionAttributes ={} ):CurveIntersection{
-   return TSX._jsxBoard().create('curveIntersection', [curve1,curve2,], defaultAttributes(attributes))  as CurveIntersection
-}
-
-
- /** Union of two closed path elements. The elements may be of type curve, circle, polygon, inequality. If one element is a curve, it has to be closed. The resulting element is of type curve. */
- export function curveUnion(curve1:GeometryElement, curve2:GeometryElement, attributes: CurveUnionAttributes ={} ):CurveUnion{
-   return TSX._jsxBoard().create('curveUnion', [curve1,curve2,], defaultAttributes(attributes))  as CurveUnion
-}
-
-
- /** This element is used to provide a constructor for the graph showing the (numerical) derivative of a given curve. */
- export function derivative(curve:Curve, attributes: DerivativeAttributes ={} ):Derivative{
-   return TSX._jsxBoard().create('derivative', [curve,], defaultAttributes(attributes))  as Derivative
-}
-
- /** Two methods to create an ellipse;An ellipse is given by two points (the foci) and a third point on the ellipse or the length of the major axis.
-                        Start and End are optional parameters for the curve start (default 0) and end (default 2*PI).  
- *``` 
-*``` 
- Two points plus a radius */
- export function ellipse( p1:Point|pointAddr,p2:Point|pointAddr,radius:Point|pointAddr|number|Function,attributes?:EllipseAttributes) : Ellipse
- /** Two methods to create an ellipse;An ellipse is given by two points (the foci) and a third point on the ellipse or the length of the major axis.
-                        Start and End are optional parameters for the curve start (default 0) and end (default 2*PI).  
- *``` 
-*``` 
- Two points plus a radius, with start and end  */
- export function ellipse( p1:Point|pointAddr,p2:Point|pointAddr,radius:Point|pointAddr|number|Function,start?:number|Function,end?:number|Function,attributes?:EllipseAttributes) : Ellipse
- /** Two methods to create an ellipse;An ellipse is given by two points (the foci) and a third point on the ellipse or the length of the major axis.
-                        Start and End are optional parameters for the curve start (default 0) and end (default 2*PI).  
- *``` 
-*``` 
- Three Points */
- export function ellipse( focalPoint1:Point|pointAddr,focalPoint2:Point|pointAddr,outerPoint:Point|pointAddr,attributes?:EllipseAttributes) : Ellipse
- /** Two methods to create an ellipse;An ellipse is given by two points (the foci) and a third point on the ellipse or the length of the major axis.
-                        Start and End are optional parameters for the curve start (default 0) and end (default 2*PI).  
- *``` 
-*``` 
- Three Points, with  start and end. */
- export function ellipse( focalPoint1:Point|pointAddr,focalPoint2:Point|pointAddr,outerPoint:Point|pointAddr,start?:number|Function,end?:number|Function,attributes?:EllipseAttributes) : Ellipse
-// implementation of signature,  hidden from user
- export function ellipse (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Ellipse {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxBoard().create('ellipse', params, defaultAttributes(attrs))  as Ellipse
- }
- /** A 3D parametric surface visualizes a map (u, v) → [X(u, v), Y(u, v), Z(u, v)]. 
- *``` 
-*``` 
- FX(u,v), FY(u,v), FZ(u,v) are functions returning a number for [x,y,z],
-- rangeU is the array containing lower and upper bound for the range of parameter u,
-- rangeV is the array containing lower and upper bound for the range of parameter v.
-
-rangeU and rangeV may also be functions returning an array of length two. */
- export function parametricSurface3d( FX:(u:number,v:number)=> number,FY:(u:number,v:number)=> number,FZ:(u:number,v:number)=> number,rangeU:number[]|(()=>number[]),rangeV:number[]|(()=>number[]),attributes?:ParametricSurface3DAttributes) : ParametricSurface3D
- /** A 3D parametric surface visualizes a map (u, v) → [X(u, v), Y(u, v), Z(u, v)]. 
- *``` 
-*``` 
- F(u,v) is a function returning a number array [x,y,z],
-- rangeU is the array containing lower and upper bound for the range of parameter u,
-- rangeV is the array containing lower and upper bound for the range of parameter v.
-
-rangeU and rangeV may also be functions returning an array of length two. */
- export function parametricSurface3d( F:(u:number,v:number)=> number[],rangeU:number[]|(()=>number[]),rangeV:number[]|(()=>number[]),attributes?:ParametricSurface3DAttributes) : ParametricSurface3D
-// implementation of signature,  hidden from user
- export function parametricSurface3d (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :ParametricSurface3D {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxView3d().create('parametricsurface3d', params, defaultAttributes(attrs))  as ParametricSurface3D
- }
-
- /** Functiongraph visualizes a map x → f(x).  It is a wrapper for element Curve. The graph is drawn for x in the interval [a,b] default -10 to 10.
-```js
-let f = TSX.functiongraph((x: number) => 3 * Math.pow(x, 2))
-``` */
- export function functiongraph(funct:(x:number)=>number, leftBorder?:number, rightBorder?:number, attributes: FunctiongraphAttributes ={} ):Curve{
-   return TSX._jsxBoard().create('functiongraph', [funct,leftBorder,rightBorder,], defaultAttributes(attributes))  as Functiongraph
-}
-
-
- /** A 3D functiongraph visualizes a map (x, y) → f(x, y).  */
- export function functiongraph3d(xyFunction:(x:number,y:number)=>number, xRange:NumberFunction[], yRange:NumberFunction[], attributes: Functiongraph3DAttributes ={} ):Functiongraph3D{
-   return TSX._jsxView3d().create('functiongraph3d', [xyFunction,xRange,yRange,], defaultAttributes(attributes))  as Functiongraph3D
-}
-
- export function glider( hostElement:GeometryElement,attributes?:GliderAttributes) : Glider
- export function glider( hostElement:GeometryElement,initialPosition:number[],attributes?:GliderAttributes) : Glider
-// implementation of signature,  hidden from user
- export function glider (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Glider {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
- params = b? [b[0]??0,b[1]??0,a]:[0,0,a]
-                         return _jsxBoard().create('glider', params ,defaultAttributes(attrs));
- }
-
- /** Glider3D is an alias for JSXGraph's Point3D(). */
- export function glider3d(element:Curve3D|Line3D|Sphere3D, initial:number[]=[0,0,0], attributes: Glider3DAttributes ={} ):Point3D{
- return _jsxView3d().create("point3d",[initial,element],attributes)
-}
-
- export function grid( axis1:Axis,axis2:Axis,attributes?:GridAttributes) : Grid
- export function grid( attributes?:GridAttributes) : Grid
-// implementation of signature,  hidden from user
- export function grid (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Grid {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxBoard().create('grid', params, defaultAttributes(attrs))  as Grid
- }
-
- /** Hatches can be used to mark congruent lines or curves. */
- export function hatch(line:Line|[Point|pointAddr,Point|pointAddr], numberHatches:number, attributes: HatchAttributes ={} ):Hatch{
-   return TSX._jsxBoard().create('hatch', [line,numberHatches,], defaultAttributes(attributes))  as Hatch
-}
-
-
- /** This element is used to provide a constructor for an hyperbola. An hyperbola is given by two points (the foci) and a third point on the hyperbola or the length of the major axis. */
- export function hyperbola(point1:Point|pointAddr, point2:Point|pointAddr, point3:Point|pointAddr|number, start:number=-3.14, end:number=3.14, attributes: HyperbolaAttributes ={} ):Hyperbola{
-   return TSX._jsxBoard().create('hyperbola', [point1,point2,point3,start,end,], defaultAttributes(attributes))  as Hyperbola
-}
-
-
- /** Constructs the incenter of the triangle described by the three given points. https://mathworld.wolfram.com/Incenter.html */
- export function incenter(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: IncenterAttributes ={} ):Incenter{
-   return TSX._jsxBoard().create('incenter', [p1,p2,p3,], defaultAttributes(attributes))  as Incenter
-}
-
-
- /** An incircle is given by three points. */
- export function incircle(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: IncircleAttributes ={} ):Incircle{
-   return TSX._jsxBoard().create('incircle', [p1,p2,p3,], defaultAttributes(attributes))  as Incircle
-}
-
-
- /** Creates an area indicating the solution of a linear inequality or an inequality of a function graph, i.e. an inequality of type y */
- export function inequality(boundaryLine:Line|[Point|pointAddr,Point|pointAddr]|Curve, attributes: InequalityAttributes ={} ):Inequality{
-   return TSX._jsxBoard().create('inequality', [boundaryLine,], defaultAttributes(attributes))  as Inequality
-}
-
-
- /** This element is used to provide a constructor for special texts containing a HTML form input element. If the width of element is set with the attribute ”cssStyle”, the width of the label must be added. For this element, the attribute ”display” has to have the value 'html' (which is the default). The underlying HTML input field can be accessed through the sub-object 'rendNodeInput', e.g. to add event listeners. */
- export function input(position:Point|pointAddr, label:String|Function, initial:String="", attributes: InputAttributes ={} ):Input{
- (position as any).push(label,initial);
-                        return _jsxBoard().create('input', position,defaultAttributes(attributes));
-}
-
-
- /** This element is used to visualize the integral of a given curve over a given interval. */
- export function integral(range:number[], curve:Curve, attributes: IntegralAttributes ={} ):Integral{
-   return TSX._jsxBoard().create('integral', [range,curve,], defaultAttributes(attributes))  as Integral
-}
-
- export function intersection( element1:Line|Circle|Curve|Polygon|PolygonalChain,element2:Line|Circle|Curve|Polygon|PolygonalChain,i?:number|Function,attributes?:IntersectionAttributes) : Intersection
- export function intersection( element1:Line|Circle|Curve|Polygon|PolygonalChain,element2:Line|Circle|Curve|Polygon|PolygonalChain,attributes?:IntersectionAttributes) : Intersection
-// implementation of signature,  hidden from user
- export function intersection (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Intersection {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
- return _jsxBoard().create('intersection', params, defaultAttributes(attrs)) as Point
- }
-
- /** Creates a Legend for a Chart Element
-                                
-*```js
-* let labels = ['a','b','c']
-* let colors = ['red','green','blue']
-* let legend = TSX.legend([2,2],labels,colors)
-*```
-                                
- */
- export function legend(lowerLeft:pointAddr, labels:string[], colors:string[], attributes: LegendAttributes ={} ):Legend{
- attributes['labels']=labels;
-                attributes['colors']=colors
-                return _jsxBoard().create('legend', lowerLeft,defaultAttributes(attributes));
-}
-
-
- /** This element is used to visualize the locus of a given dependent point. */
- export function locus(point:Point, attributes: LocusAttributes ={} ):Locus{
-   return TSX._jsxBoard().create('locus', [point,], defaultAttributes(attributes))  as Locus
-}
-
-
- /** A major arc is a segment of the circumference of a circle having measure greater than or equal to 180 degrees (pi radians). It is defined by a center, one point that defines the radius, and a third point that defines the angle of the arc. */
- export function majorArc(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: MajorArcAttributes ={} ):MajorArc{
-   return TSX._jsxBoard().create('majorArc', [p1,p2,p3,], defaultAttributes(attributes))  as MajorArc
-}
-
-
- /** A major sector is a sector of a circle having measure greater than or equal to 180 degrees (pi radians). It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
- export function majorSector(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: MajorSectorAttributes ={} ):MajorSector{
-   return TSX._jsxBoard().create('majorSector', [p1,p2,p3,], defaultAttributes(attributes))  as MajorSector
-}
-
-
- /** Display measurements of geometric properties and the arithmetic operations of measurements. Under the hood this is a text element which has a method Value. The text to be displayed is the result of the evaluation of a prefix expression, see JXG.PrefixParser.
-```js
- let p = TSX.point([4, 9]);
- let c = TSX.circle([4, 7], p);
- TSX.measurement([4, 4], 'Area', c, { visible: true, prefix: 'area: ', baseUnit: 'cm' });
- TSX.measurement([4, 3], 'Radius', c, { prefix: 'radius: ', baseUnit: 'cm' });
-```
- */
- export function measurement(locn:Point|pointAddr, measure:string, element:GeometryElement, attributes: MeasurementAttributes ={} ):Measurement{
- let x:any=0,y:any=0;
-                if(Array.isArray(locn)){
-                   x = locn[0];
-                   y = locn[1];
-                }else if(typeof locn == 'object'){
-                    x = locn.X();
-                    y = locn.Y();
-                };
-            return _jsxBoard().create('measurement', [x,y,[measure,element]], attributes)
-}
-
- export function mesh3d( point:Point3D|number[]|Function,direction1:number[]|Function,direction2:number[]|Function,range1?:pointAddr,range2?:pointAddr,attributes?:Mesh3DAttributes) : Mesh3D
- export function mesh3d( point:Point3D|number[]|Function,direction1:number[]|Function|Function[],direction2:number[]|Function|Function[],range1?:pointAddr,range2?:pointAddr,attributes?:Mesh3DAttributes) : Mesh3D
- export function mesh3d( point1:Point3D,point2:Point3D,point3:Point3D,range1?:pointAddr,range2?:pointAddr,attributes?:Mesh3DAttributes) : Mesh3D
- export function mesh3d( point1:Point3D,point2:Point3D,point3:Point3D,attributes?:Mesh3DAttributes) : Mesh3D
-// implementation of signature,  hidden from user
- export function mesh3d (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Mesh3D {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxView3d().create('mesh3d', params, defaultAttributes(attrs))  as Mesh3D
- }
- export function midpoint( p1:Point,p2:Point,attributes?:MidpointAttributes) : Midpoint
- export function midpoint( line:Line,attributes?:MidpointAttributes) : Midpoint
-// implementation of signature,  hidden from user
- export function midpoint (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Midpoint {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxBoard().create('midpoint', params, defaultAttributes(attrs))  as Midpoint
- }
-
- /** A minor arc is a segment of the circumference of a circle having measure less than or equal to 180 degrees (pi radians). It is defined by a center, one point that defines the radius, and a third point that defines the angle of the arc. */
- export function minorArc(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: MinorArcAttributes ={} ):MinorArc{
-   return TSX._jsxBoard().create('minorArc', [p1,p2,p3,], defaultAttributes(attributes))  as MinorArc
-}
-
-
- /** A minor sector is a sector of a circle having measure less than or equal to 180 degrees (pi radians). It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
- export function minorSector(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: MinorSectorAttributes ={} ):MinorSector{
-   return TSX._jsxBoard().create('minorSector', [p1,p2,p3,], defaultAttributes(attributes))  as MinorSector
-}
-
-
- /**  */
- export function mirrorelement(element:Point|Line|Circle|Curve|Polygon, acrossPoint:Point|pointAddr, attributes: MirrorelementAttributes ={} ):Mirrorelement{
-   return TSX._jsxBoard().create('mirrorelement', [element,acrossPoint,], defaultAttributes(attributes))  as Mirrorelement
-}
-
-
- /** A mirror point will be constructed. */
- export function mirrorpoint(p1:Point, p2:Point, attributes: MirrorpointAttributes ={} ):Mirrorpoint{
-   return TSX._jsxBoard().create('mirrorpoint', [p1,p2,], defaultAttributes(attributes))  as Mirrorpoint
-}
-
-
- /** A non-reflex angle is the acute or obtuse instance of an angle. It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
- export function nonReflexAngle(point1:Point, point2:Point, point3:Point, attributes: NonReflexAngleAttributes ={} ):NonReflexAngle{
-   return TSX._jsxBoard().create('nonReflexAngle', [point1,point2,point3,], defaultAttributes(attributes))  as NonReflexAngle
-}
-
- export function normal( object:Line|Circle|Curve,point:Point,attributes?:NormalAttributes) : Normal
- export function normal( glider:Glider,attributes?:NormalAttributes) : Normal
-// implementation of signature,  hidden from user
- export function normal (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Normal {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxBoard().create('normal', params, defaultAttributes(attrs))  as Normal
- }
-
- /** An `orthogonalprojection` is a locked point determined by projecting a point orthogonally onto a line.
-```js
-let s1 = TSX.segment(p1, p2)
-let p3 = TSX.point([0, -1])
-TSX.orthogonalprojection(p3, s1)
-``` */
- export function orthogonalprojection(point:Point|pointAddr, line:Line|[Point|pointAddr,Point|pointAddr], attributes: OrthogonalprojectionAttributes ={} ):Orthogonalprojection{
-   return TSX._jsxBoard().create('orthogonalprojection', [point,line,], defaultAttributes(attributes))  as Orthogonalprojection
-}
-
-
- /** This element is used to provide a constructor for the ”other” intersection point. */
- export function otherIntersection(element1:Line|Circle, element2:Line|Circle, firstIntersection:Point, attributes: OtherIntersectionAttributes ={} ):Point{
-  return _jsxBoard().create('otherintersection', [element1,element2,firstIntersection], attributes)
-}
-
-
- /** This element is used to provide a constructor for a parabola. A parabola is given by one point (the focus) and a line (the directrix). */
- export function parabola(focalPoint:Point|pointAddr, line:Line|[Point|pointAddr,Point|pointAddr], attributes: ParabolaAttributes ={} ):Parabola{
-   return TSX._jsxBoard().create('parabola', [focalPoint,line,], defaultAttributes(attributes))  as Parabola
-}
-
- export function parallelpoint( line:Line|[Point,Point],point:Point|pointAddr,attributes?:ParallelpointAttributes) : Parallelpoint
- export function parallelpoint( P1:Point,P2:Point,P3:Point,attributes?:ParallelpointAttributes) : Parallelpoint
-// implementation of signature,  hidden from user
- export function parallelpoint (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Parallelpoint {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxBoard().create('parallelpoint', params, defaultAttributes(attrs))  as Parallelpoint
- }
- export function segment( P1:Point|pointAddr,P2:Point|pointAddr,attributes?:SegmentAttributes) : Segment
- export function segment( P1:Point|pointAddr,P2:Point|pointAddr,length:number|Function,attributes?:SegmentAttributes) : Segment
-// implementation of signature,  hidden from user
- export function segment (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Segment {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxBoard().create('segment', params, defaultAttributes(attrs))  as Segment
- }
-
- /**  */
- export function parallelogram(p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: ParallelogramAttributes ={} ):Parallelogram{
-   return TSX._jsxBoard().create('parallelogram', [p1,p2,p3,], defaultAttributes(attributes))  as Parallelogram
-}
-
-
- /** Create a line orthogonal to a given line and containing a given point. If you want a Perpendicular to a Curve, look at Normal(). */
- export function perpendicular(line:Line|[Point|pointAddr,Point|pointAddr], point:Point|pointAddr, attributes: PerpendicularAttributes ={} ):Perpendicular{
-   return TSX._jsxBoard().create('perpendicular', [line,point,], defaultAttributes(attributes))  as Perpendicular
-}
-
-
- /** Create a point on a line where a perpendicular to a given point would intersect that line. */
- export function perpendicularPoint(line:Line|[Point|pointAddr,Point|pointAddr], point:Point|pointAddr, attributes: PerpendicularPointAttributes ={} ):PerpendicularPoint{
-   return TSX._jsxBoard().create('perpendicularPoint', [line,point,], defaultAttributes(attributes))  as PerpendicularPoint
-}
-
-
- /** Create a segment orthogonal to a given line and containing a given point.  If you want a Perpendicular to a Curve, look at Normal(). */
- export function perpendicularSegment(line:Line|[Point|pointAddr,Point|pointAddr], point:Point|pointAddr, attributes: PerpendicularSegmentAttributes ={} ):PerpendicularSegment{
-   return TSX._jsxBoard().create('perpendicularSegment', [line,point,], defaultAttributes(attributes))  as PerpendicularSegment
-}
-
-
- /** This element is used to provide a constructor for the polar line of a point with respect to a conic or a circle. */
- export function polarLine(conic:Conic|Circle, point:Point, attributes: PolarLineAttributes ={} ):PolarLine{
-   return TSX._jsxBoard().create('polarLine', [conic,point,], defaultAttributes(attributes))  as PolarLine
-}
-
-
- /** This element is used to provide a constructor for the pole point of a line with respect to a conic or a circle. */
- export function polePoint(conic:Conic|Circle, line:Line, attributes: PolePointAttributes ={} ):PolePoint{
-   return TSX._jsxBoard().create('polePoint', [conic,line,], defaultAttributes(attributes))  as PolePoint
-}
-
-
- /** Array of Points */
- export function polygonalChain(pointArray:Point[]|pointAddr[], attributes: PolygonalChainAttributes ={} ):PolygonalChain{
-   return TSX._jsxBoard().create('polygonalChain', [pointArray,].flat(), defaultAttributes(attributes))  as PolygonalChain
-}
-
-
- /** A polyhedron in a 3D view consists of faces. Faces can be 0-, 1- or 2-dimensional.
-```js
-let rho = 1.6180339887;
-let vertexList = [  // list of vertex points
-    [0, -1, -rho], [0, +1, -rho], [0, -1, rho], [0, +1, rho],[1, rho, 0], [-1, rho, 0],
-    [1, -rho, 0], [-1, -rho, 0],[-rho, 0, 1], [-rho, 0, -1], [rho, 0, 1], [rho, 0, -1]
-];
-
-let faceArray = [  // each triangular face connects three vertex points
-    [4, 1, 11], [11, 1, 0], [6, 11, 0], [0, 1, 9],[11, 10, 4], [9, 1, 5],
-    [8, 9, 5], [5, 3, 8],[6, 10, 11], [2, 3, 10], [2, 10, 6], [8, 3, 2],
-    [3, 4, 10], [7, 8, 2], [9, 8, 7], [0, 9, 7],[4, 3, 5], [5, 1, 4], [0, 7, 6], [7, 2, 6]];
-
-    let ico = TSX.polyhedron3D(vertexList, faceArray, {
-    fillColorArray: [],
-    fillOpacity: 1,
-    strokeWidth: 0.1,
-    layer: 12,
-    shader: {   // shader modifies face colors depending on angle (simulates lighting)
-        enabled: true,
-        type: 'angle',
-        hue: 0,
-        saturation: 90,
-        minlightness: 60,
-        maxLightness: 80
-    }
-});
-``` */
- export function polyhedron3d(vertexList:(TSX.Point3D|TSX.pointAddr3D)[], faceArray:number[][], attributes: Polyhedron3DAttributes ={} ):Polyhedron3D{
-   return TSX._jsxView3d().create('polyhedron3d', [vertexList,faceArray,], defaultAttributes(attributes))  as Polyhedron3D
-}
-
-
- /** This element is used to provide a constructor for the radical axis with respect to two circles with distinct centers. The angular bisector of the polar lines of the circle centers with respect to the other circle is always the radical axis. The radical axis passes through the intersection points when the circles intersect. When a circle about the midpoint of circle centers, passing through the circle centers, intersects the circles, the polar lines pass through those intersection points. */
- export function radicalAxis(circle1:Circle, circle2:Circle, attributes: RadicalAxisAttributes ={} ):RadicalAxis{
-   return TSX._jsxBoard().create('radicalAxis', [circle1,circle2,], defaultAttributes(attributes))  as RadicalAxis
-}
-
-
- /** A reflected element (point, polygon, line or curve) from an object of the same type and a line of reflection. */
- export function reflection(object:Point|Line|Curve|Polygon, reflectLine:Line, attributes: ReflectionAttributes ={} ):Reflection{
-   return TSX._jsxBoard().create('reflection', [object,reflectLine,], defaultAttributes(attributes))  as Reflection
-}
-
-
- /** A reflex angle is the neither acute nor obtuse instance of an angle. It is defined by a center, one point that defines the radius, and a third point that defines the angle of the sector. */
- export function reflexAngle(point1:Point, point2:Point, point3:Point, attributes: ReflexAngleAttributes ={} ):ReflexAngle{
-   return TSX._jsxBoard().create('reflexAngle', [point1,point2,point3,], defaultAttributes(attributes))  as ReflexAngle
-}
-
-
- /** Constructs a regular polygon. It needs two points which define the base line and the number of vertices. */
- export function regularPolygon(P1:Point|pointAddr, P2:Point|pointAddr, nVertices:number, attributes: RegularPolygonAttributes ={} ):RegularPolygon{
-   return TSX._jsxBoard().create('regularPolygon', [P1,P2,nVertices,], defaultAttributes(attributes))  as RegularPolygon
-}
-
-
- /** Visualize the Riemann sum which is an approximation of an integral by a finite sum. It is realized as a special curve. The returned element has the method Value() which returns the sum of the areas of the bars.
-
-                        In case of type 'simpson' and 'trapezoidal', the horizontal line approximating the function value is replaced by a parabola or a secant. IN case of 'simpson', the parabola is approximated visually by a polygonal chain of fixed step width. */
- export function riemannsum(funct:Function|number[], nBars:Function|number, type:'left'|'right'|'middle'|'lower'|'upper'|'random'|'simpson'|'trapezoidal' = 'simpson', leftBorder?:number|Function, rightBorder?:number|Function, attributes: RiemannsumAttributes ={} ):Riemannsum{
-   return TSX._jsxBoard().create('riemannsum', [funct,nBars,type,leftBorder,rightBorder,], defaultAttributes(attributes))  as Riemannsum
-}
-
-
- /** A semicircle is a special arc defined by two points. The arc hits both points. */
- export function semicircle(P1:Point|pointAddr, P2:Point|pointAddr, attributes: SemicircleAttributes ={} ):Semicircle{
-   return TSX._jsxBoard().create('semicircle', [P1,P2,], defaultAttributes(attributes))  as Semicircle
-}
-
-
- /** An input widget for choosing values from a given range of numbers.  Parameters are startpoint, endpoint,
-                and an array with [minimum, initialValue, maximum].  Query the value with slider.Value().  Set the slider either by
-                dragging the control or clicking on the line (you can disable clicking with {moveOnUp:false}
-        
-*```js
-         let s = TSX.slider([1, 2], [3, 2], [1, 5, 10])           //  query with s.Value()
-         let s = TSX.slider([1, 2], [3, 2], [1, 5, 10],{snapWidth:1})     //  only values 1,2,3...
-         let s = TSX.slider([1, 2], [3, 2], [1, 5, 10],{withTicks:false}) //  hide the ticks
-         let s = TSX.slider[-3, 1], [1, 1], [-10, 1, 10], {
-            highline: { strokeColor: 'red'},        // to left of handle
-            baseline: { strokeColor: 'blue'},       // to right of handle
-            fillColor: 'red',                       // handle color
-            label: {fontSize: 16, strokeColor: 'orange'},
-            suffixLabel: ' x=',         // really a prefix
-            postLabel: ' meters'        // this is a suffix
-        
-*``` */
- export function slider(StartPoint:Point|pointAddr, EndPoint:Point|pointAddr, minimum_initial_maximum:[number,number,number], attributes: SliderAttributes ={} ):Slider{
-   return TSX._jsxBoard().create('slider', [StartPoint,EndPoint,minimum_initial_maximum,], defaultAttributes(attributes))  as Slider
-}
-
-
- /** Slope field. Plot a slope field given by a function f(x, y) returning a number. */
- export function slopefield(func:Function, xData:NumberFunction[], yData:NumberFunction[], attributes: SlopefieldAttributes ={} ):Slopefield{
-   return TSX._jsxBoard().create('slopefield', [func,xData,yData,], defaultAttributes(attributes))  as Slopefield
-}
-
- export function slopetriangle( tangent:Point | Tangent,attributes?:SlopetriangleAttributes) : Slopetriangle
- export function slopetriangle( line:Line,point:Point,attributes?:SlopetriangleAttributes) : Slopetriangle
-// implementation of signature,  hidden from user
- export function slopetriangle (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Slopetriangle {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxBoard().create('slopetriangle', params, defaultAttributes(attrs))  as Slopetriangle
- }
- /** Customized text elements for displaying measurements of JSXGraph elements, Examples are length of a segment, perimeter or area of a circle or polygon (including polygonal chain), slope of a line, value of an angle, and coordinates of a point. */
- export function smartlabel( parent:Point|Line|Circle|Polygon|Angle,attributes?:SmartlabelAttributes) : Smartlabel
- /** Customized text elements for displaying measurements of JSXGraph elements, Examples are length of a segment, perimeter or area of a circle or polygon (including polygonal chain), slope of a line, value of an angle, and coordinates of a point. */
- export function smartlabel( parent:Point|Line|Circle|Polygon|Angle,Txt:string|Function,attributes?:SmartlabelAttributes) : Smartlabel
-// implementation of signature,  hidden from user
- export function smartlabel (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Smartlabel {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxBoard().create('smartlabel', params, defaultAttributes(attrs))  as Smartlabel
- }
-
- /**  sphere consists of all points with a given distance from a given point. The given point is called the center, and the given distance is called the radius. */
- export function sphere3d(center:Point3D|pointAddr3D, radius:Point3D|number|pointAddr3D, attributes: Sphere3DAttributes ={} ):Sphere3D{
-   return TSX._jsxView3d().create('sphere3d', [center,radius,], defaultAttributes(attributes))  as Sphere3D
-}
-
-
- /** This element is used to provide a constructor for (natural) cubic spline curves. Create a dynamic spline interpolated curve given by sample points p_1 to p_n. */
- export function spline(points:Point[]|number[][], attributes: SplineAttributes ={} ):Curve{
- return _jsxBoard().create('spline', points, defaultAttributes(attributes))
-}
-
-
- /** A step function is a function graph that is piecewise constant. In case the data points should be updated after creation time, they can be accessed by curve.xterm and curve.yterm.
-```js
-let  curve = TSX.stepfunction([0,1,2,3,4,5], [1,3,0,2,2,1]);
-```
- */
- export function stepfunction(X:number[], Y:number[], attributes: StepfunctionAttributes ={} ):Stepfunction{
-   return TSX._jsxBoard().create('stepfunction', [X,Y,], defaultAttributes(attributes))  as Stepfunction
-}
-
- export function tangent( point:Glider,attributes?:TangentAttributes) : Tangent
- export function tangent( point:Point,curve:Line|Circle|Curve,attributes?:TangentAttributes) : Tangent
-// implementation of signature,  hidden from user
- export function tangent (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Tangent {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxBoard().create('tangent', params, defaultAttributes(attrs))  as Tangent
- }
-
- /** Construct the tangent line through a point to a conic or a circle. There will be either two, one or no such tangent, depending if the point is outside of the conic, on the conic, or inside of the conic. Similar to the intersection of a line with a circle, the specific tangent can be chosen with a third (optional) parameter number. */
- export function tangentTo(conic:Conic|Circle, point:Point|pointAddr, N:number=0, attributes: TangentToAttributes ={} ):TangentTo{
-   return TSX._jsxBoard().create('tangentTo', [conic,point,N,], defaultAttributes(attributes))  as TangentTo
-}
-
-
- /** A tape measure can be used to measure distances between points. */
- export function tapemeasure(P1:Point|pointAddr, P2:Point|pointAddr, attributes: TapemeasureAttributes ={} ):Tapemeasure{
-   return TSX._jsxBoard().create('tapemeasure', [P1,P2,], defaultAttributes(attributes))  as Tapemeasure
-}
-
-
- /** This element is used to provide a constructor for trace curve (simple locus curve).  Given a glider (or slider) and a point controlled by the glider, this element draws the curve that the point will follow when the glider is manipulated.  Use the {trace:true} attribute on the point to mark breadcrumbs along this curve. */
- export function tracecurve(glider:Glider, point:Point, attributes: TracecurveAttributes ={} ):Tracecurve{
-   return TSX._jsxBoard().create('tracecurve', [glider,point,], defaultAttributes(attributes))  as Tracecurve
-}
-
-
- /** Create a new point from an existing point and a concatenation of transforms. This is a powerful way of creating complex constructions that can be rotated, scaled, and translated.  An alternative to using Groups.
-~~~js
-     // define a few sliders to control the model
-     let tX = TSX.slider([-4, 4.0], [3, 4.0], [-10, 0, 10], { name: 'tX' })
-     let tY = TSX.slider([-4, 4.5], [3, 4.5], [-10, 0, 10], { name: 'tY' })
-     let tRotate = TSX.slider([-4, 3.0], [3, 3.0], [-Math.PI * 2, 0, Math.PI * 2], { name: 'tRotate' })
-     let tScale = TSX.slider ([-4, 3.5], [3, 3.5], [0, 1, 5], { name: 'tScale' })
-     // orange is 'geometry' for a complex shape (use opacity:0)
-     let a = TSX.point([0, -1])
-     let b = TSX.point([1, -1])
-     // set up tranforms for rotation, scaling, and translation
-     let trans = TSX.translate(()=>tX.Value(), ()=>tY.Value())
-     let rot = TSX.rotate(() => tRotate.Value(), a)  // rotation around a
-     let scale = TSX.scale(()=>tScale.Value(),()=>tScale.Value())  // scaling is relative to [0,0]
-     // blue shape using transformPoints- starts with model and applies transforms
-     let shapea = TSX.transformPoint(a,[rot,scale,trans],{color:'blue'})
-     let shapeb = TSX.transformPoint(b,[rot,scale,trans],{color:'blue'})
-     TSX.segment(shapea,shapeb)
-~~~             */
- export function transformPoint(point:Point, transform:Transform|Transform[], attributes: TransformPointAttributes ={} ):Point{
-  return _jsxBoard().create('point', [point,transform],defaultAttributes(attributes))
-}
-
-
- /** Create a new point from an existing point and a concatenation of transforms. This is a powerful way of creating complex constructions that can be rotated, scaled, and translated.  An alternative to using Groups.
-~~~js
-     // define a few sliders to control the model
-     let tX = TSX.slider([-4, 4.0], [3, 4.0], [-10, 0, 10], { name: 'tX' })
-     let tY = TSX.slider([-4, 4.5], [3, 4.5], [-10, 0, 10], { name: 'tY' })
-     let tRotate = TSX.slider([-4, 3.0], [3, 3.0], [-Math.PI * 2, 0, Math.PI * 2], { name: 'tRotate' })
-     let tScale = TSX.slider ([-4, 3.5], [3, 3.5], [0, 1, 5], { name: 'tScale' })
-     // orange is 'geometry' for a complex shape (use opacity:0)
-     let a = TSX.point([0, -1])
-     let b = TSX.point([1, -1])
-     // set up tranforms for rotation, scaling, and translation
-     let trans = TSX.translate(()=>tX.Value(), ()=>tY.Value())
-     let rot = TSX.rotate(() => tRotate.Value(), a)  // rotation around a
-     let scale = TSX.scale(()=>tScale.Value(),()=>tScale.Value())  // scaling is relative to [0,0]
-     // blue shape using transformPoints- starts with model and applies transforms
-     let shapea = TSX.transformPoint(a,[rot,scale,trans],{color:'blue'})
-     let shapeb = TSX.transformPoint(b,[rot,scale,trans],{color:'blue'})
-     TSX.segment(shapea,shapeb)
-~~~             */
- export function transformPoint3d(point:Point3D, transform:Transform3D|Transform3D[], attributes: TransformPoint3DAttributes ={} ):Point3D{
-  return _jsxView3d().create('point3d', [point,transform],defaultAttributes(attributes))
-}
-
- export function segment3d( P1:Point|pointAddr,P2:Point|pointAddr,attributes?:Segment3DAttributes) : Segment3D
- export function segment3d( P1:Point|pointAddr,P2:Point|pointAddr,length:number|Function,attributes?:Segment3DAttributes) : Segment3D
-// implementation of signature,  hidden from user
- export function segment3d (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) :Segment3D {
-   let params:any[] = []
-   let attrs = {}
- if(arguments.length == 1) {
-   params = isAttribute(a)?[]:[a,];
-   attrs = isAttribute(a)? a:{};
- }
- if(arguments.length == 2) {
-   params = isAttribute(b)?[a,]:[a,b,];
-   attrs = isAttribute(b)? b:{};
- }
- if(arguments.length == 3) {
-   params = isAttribute(c)?[a,b,]:[a,b,c,];
-   attrs = isAttribute(c)? c:{};
- }
- if(arguments.length == 4) {
-   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
-   attrs = isAttribute(d)? d:{};
- }
- if(arguments.length == 5) {
-   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
-   attrs = isAttribute(e)? e:{};
- }
- if(arguments.length == 6) {
-   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
-   attrs = isAttribute(f)? f:{};
- }
- if(arguments.length == 7) {
-   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
-   attrs = isAttribute(g)? g:{};
- }
-   return TSX._jsxView3d().create('segment3d', params, defaultAttributes(attrs))  as Segment3D
- }
-
- /** Create a Transform object with Translate properties. */
- export function translate(dx:number|Function, dy:number|Function, attributes: TranslateAttributes ={} ):Transform{
- return _jsxBoard().create('transform', [dx,dy], {type:'translate'})
-}
-
-
- /** Create a Transform object with Rotate properties. */
- export function rotate(angle:number|Function, around:Point|pointAddr, attributes: RotateAttributes ={} ):Transform{
- return _jsxBoard().create('Transform', [angle,around], {type:'rotate'})
-}
-
-
- /** Create a Transform object with Scale properties.  Scaling is relative to [0,0]. */
- export function scale(xMultiplier:number|Function, yMultiplier:number|Function, attributes: ScaleAttributes ={} ):Transform{
- return _jsxBoard().create('transform', [xMultiplier,yMultiplier], {type:'scale'})
-}
-
-
- /** Create a Transform3D object with Translate properties. */
- export function translate3d(dx:number|Function, dy:number|Function, dz:number|Function, attributes: Translate3DAttributes ={} ):Transform3D{
- return _jsxView3d().create('transform3d', [dx,dy,dz], {type:'translate'})
-}
-
-
- /** Create a Transform3D object with Rotate properties around the normal vector N. */
- export function rotate3d(angle:number|Function, n:number[], attributes: Rotate3DAttributes ={} ):Transform3D{
- return _jsxView3d().create('transform3d', [angle,n], {type:'rotate'})
-}
-
-
- /** Create a Transform3D object with Rotate properties around the X axis. */
- export function rotateX3d(angle:number|Function, attributes: RotateX3DAttributes ={} ):Transform3D{
- return _jsxView3d().create('transform3d', [angle], {type:'rotateX'})
-}
-
-
- /** Create a Transform3D object with Rotate properties around the Y axis. */
- export function rotateY3d(angle:number|Function, attributes: RotateY3DAttributes ={} ):Transform3D{
- return _jsxView3d().create('transform3d', [angle], {type:'rotateY'})
-}
-
-
- /** Create a Transform3D object with Rotate properties around the Z axis. */
- export function rotateZ3d(angle:number|Function, attributes: RotateZ3DAttributes ={} ):Transform3D{
- return _jsxView3d().create('transform3d', [angle], {type:'rotateZ'})
-}
-
-
- /** Create a Transform object with Scale properties.  Scaling is relative to [0,0,0]. */
- export function scale3d(xMultiplier:number|Function, yMultiplier:number|Function, zMultiplier:number|Function, attributes: Scale3DAttributes ={} ):Transform3D{
- return _jsxView3d().create('transform3d', [xMultiplier,yMultiplier,zMultiplier], {type:'scale'})
-}
-
+ // addClassesforElementsInJSXBoard('GeometryElement', '')
+ // add2('GeometryElement', '')
 
  export class GeometryElement{
 
@@ -4389,207 +2623,11 @@ let  curve = TSX.stepfunction([0,1,2,3,4,5], [1,3,0,2,2,1]);
  public set isDraggable(param:Boolean) {
   _jsxBoard().isDraggable = param
 }
-
- /** Removes all ticks from a line or curve. */
- removeAllTicks(): Object {
-  return  this.removeAllTicks() as Object
-}
-
- /** Add an element as a child to the current element. */
- addChild(): GeometryElement {
-  return  this.addChild() as GeometryElement
-}
-
- /** Adds ids of elements to the array this.parents. */
- addParents(parents:GeometryElement[]): Object {
-  return  this.addParents(parents) as Object
-}
-
- /** Rotate texts or images by a given degree. */
- addRotation(): String {
-  return  this.addRotation() as String
-}
-
- /** Adds ticks to this line or curve. */
- addTicks(): String {
-  return  this.addTicks() as String
-}
-
- /** Animates properties for that object like stroke or fill color, opacity and maybe even more later. */
- animate(): GeometryElement {
-  return  this.animate() as GeometryElement
-}
-
- /** Dimensions of the smallest rectangle enclosing the element. */
- bounds(): number[] {
-  return  this.bounds() as number[]
-}
-
- /** Removes all objects generated by the trace function. */
- clearTrace(): GeometryElement {
-  return  this.clearTrace() as GeometryElement
-}
-
- /** Copy the element to background. */
- cloneToBackground(): GeometryElement {
-  return  this.cloneToBackground() as GeometryElement
-}
-
- /** Creates a label element for this geometry element. */
- createLabel(): boolean {
-  return  this.createLabel() as boolean
-}
-
- /** Format a number according to the locale set in the attribute ”intl”. */
- formatNumberLocale(): String|number {
-  return  this.formatNumberLocale() as String|number
-}
-
- /** Array of strings containing the polynomials defining the element. */
- generatePolynomial(): number[] {
-  return  this.generatePolynomial() as number[]
-}
-
- /** Get the value of the property key. */
- getAttribute(): Object {
-  return  this.getAttribute() as Object
-}
-
- /** Retrieve a copy of the current visProp. */
- getAttributes(): Object {
-  return  this.getAttributes() as Object
-}
-
- /** Returns the elements name. */
- getName(): String {
-  return  this.getName() as String
-}
-
- /** List of the element ids resp. */
- getParents(): number[] {
-  return  this.getParents() as number[]
-}
-
- /** Deprecated alias for JXG.GeometryElement#getAttribute. */
- getProperty(): number[] {
-  return  this.getProperty() as number[]
-}
-
- /** The type of the element as used in JXG.Board#create. */
- getType(): String {
-  return  this.getType() as String
-}
-
- /** Move an element to its nearest grid point. */
- handleSnapToGrid(): GeometryElement {
-  return  this.handleSnapToGrid() as GeometryElement
-}
-
- /** Hide the element. */
- hide(): GeometryElement {
-  return  this.hide() as GeometryElement
-}
-
- /** Hide the element. */
- hideElement(): GeometryElement {
-  return  this.hideElement() as GeometryElement
-}
-
- /**  */
- labelColor(): currentBoard {
-  return  this.labelColor() as currentBoard
-}
-
- /** Uses the ”normal” properties of the element. */
- noHighlight(): currentBoard {
-  return  this.noHighlight() as currentBoard
-}
-
- /** Removes the element from the construction. */
- remove(): Object {
-  return  this.remove() as Object
-}
-
- /** Remove an element as a child from the current element. */
- removeChild(): Object {
-  return  this.removeChild() as Object
-}
-
- /** Alias of JXG.EventEmitter.off. */
- removeEvent(): number {
-  return  this.removeEvent() as number
-}
-
- /** Removes ticks identified by parameter named tick from this line or curve. */
- removeTicks(): Object {
-  return  this.removeTicks() as Object
-}
-
- /** Determines whether the element has arrows at start or end of the arc. */
- setArrow(): GeometryElement {
-  return  this.setArrow() as GeometryElement
-}
-
- /** Sets an arbitrary number of attributes. */
- setAttribute(attrs:GeometryElementAttributes): void {
-  return  this.setAttribute(attrs) as void
-}
-
- /** Sets a label and its text If label doesn't exist, it creates one */
- setLabel(txt:string): Object {
-  return  this.setLabel(txt) as Object
-}
-
- /** Updates the element's label text, strips all html. */
- setLabelText(): Object {
-  return  this.setLabelText() as Object
-}
-
- /** Updates the element's label text and the element's attribute ”name”, strips all html. */
- setName(): Object {
-  return  this.setName() as Object
-}
-
- /** Sets ids of elements to the array this.parents. */
- setParents(): Object {
-  return  this.setParents() as Object
-}
-
- /** Moves an element by the difference of two coordinates.  Valid values for method are TSX.COORDS_BY_USER and TSX.COORDS_BY_SCREEN */
- setPositionDirectly(method:number, coords:NumberFunction[], prevCoords?: NumberFunction[]): Point {
-  return  this.setPositionDirectly(method,coords,prevCoords) as Point
-}
-
- /** Deprecated alias for JXG.GeometryElement#setAttribute. */
- setProperty(): GeometryElement {
-  return  this.setProperty() as GeometryElement
-}
-
- /** Make the element visible. */
- show(): GeometryElement {
-  return  this.show() as GeometryElement
-}
-
- /** Make the element visible. */
- showElement(): GeometryElement {
-  return  this.showElement() as GeometryElement
-}
-
- /** Snaps the element to points. */
- snapToPoints(): GeometryElement {
-  return  this.snapToPoints() as GeometryElement
-}
-
- /** Checks if locale is enabled in the attribute. */
- useLocale(): Boolean {
-  return  this.useLocale() as Boolean
-}
-
- /**  */
- on(event:string,handler:Function): any {
-  return  this.on(event,handler) as any
-}
-}
+ // add3('GeometryElement', '')
+ // Missing signaature array for GeometryElement
+ }
+ // addClassesforElementsInJSXBoard('GeometryElement3D', 'GeometryElement')
+ // add2('GeometryElement3D', 'GeometryElement')
 
  export class GeometryElement3D extends GeometryElement {
 
@@ -4632,6 +2670,9 @@ let  curve = TSX.stepfunction([0,1,2,3,4,5], [1,3,0,2,2,1]);
  public get visible():Boolean {
   return _jsxBoard().visible as Boolean
 }
+ // add3('GeometryElement3D', 'GeometryElement')
+  // constuctor Single
+
 
  /**  */
  setAttribute(attrs:GeometryElement3DAttributes): void {
@@ -4639,10 +2680,39 @@ let  curve = TSX.stepfunction([0,1,2,3,4,5], [1,3,0,2,2,1]);
 }
 }
 
+ // addClassesforElementsInJSXBoard('Board', '')
+ // add2('Board', 'GeometryElement')
+
  export class Board extends GeometryElement {
+ // add3('Board', 'GeometryElement')
+  // constuctor Single
+
 }
 
+ // addClassesforElementsInJSXBoard('Point', 'GeometryElement')
+ // add2('Point', 'GeometryElement')
+
  export class Point extends GeometryElement {
+ // add3('Point', 'GeometryElement')
+  // constuctor Single
+
+
+ /** Create a point. If any parent elements are functions or the attribute 'fixed' is true then point will be constrained.
+            
+*```js
+TSX.point([3,2],{strokeColor:'blue',strokeWidth:5,strokeOpacity:.5})
+TSX.point([3,3]),{fixed:true, showInfobox:true}
+TSX.point([()=>p1.X()+2,()=>p1.Y()+2]) // 2 up 2 right from p1
+TSX.point([1,2,2])  // three axis definition - [z,x,y]
+            
+*```
+            
+ also create points with Intersection, Midpoint, TransformPoint, Circumcenter, Glider, TransformPoint, and others. */
+ constructor (position:pointAddr, attributes: PointAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because GeometryElement does not have a signature array
+ return _jsxBoard().create('point', position, defaultAttributes(attributes))
+}
+
 
  /**  */
  coords(): number[] {
@@ -4721,6 +2791,9 @@ P.moveTo([A.X(), A.Y()], 5000)
                 
 }
 
+ // addClassesforElementsInJSXBoard('Line', 'GeometryElement')
+ // add2('Line', 'GeometryElement')
+
  export class Line extends GeometryElement {
 
  /**  */
@@ -4747,6 +2820,73 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get ticks():number[] {
   return _jsxBoard().ticks as number[]
 }
+ // add3('Line', 'GeometryElement')
+  // constuctor Multi
+
+ /** Line has two signatures. 
+ *``` 
+*``` 
+ #1  Create a line defined by two points (or point addresses)
+
+*```js
+TSX.line([3,2],[3,3],{strokeColor:'blue',strokeWidth:5,strokeOpacity:.5})
+let P1 = TSX.point([3,2])
+TSX.line(p1,[3,3])
+
+*```
+ */
+ constructor( p1:Point|pointAddr,p2:Point|pointAddr,attributes?:LineAttributes)
+ /** Line has two signatures. 
+ *``` 
+*``` 
+ #2 Create a line for the equation a*x+b*y+c*z = 0',
+
+*```js
+TSX.line(2,3,1)   // create a line for the equation a*x+b*y+c*z = 0
+
+*```
+ */
+ constructor( A:number|Function,B:number|Function,C:number|Function,attributes?:LineAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()) {super()}  // missing super because GeometryElement does not have a signature array
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+ if(typeof a == 'number' || typeof a == 'function')
+                             // reorder the a,b,c elements of the line
+                             return _jsxBoard().create('line', [c,a,b], defaultAttributes(d)) // as Line
+                          else  //  two points
+                             return _jsxBoard().create('line', [a,b], defaultAttributes(c)) // as Line
+             
+ }
 
  /** Determines the angle between the positive x axis and the line. */
  getAngle(): number {
@@ -4794,6 +2934,9 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('View3D', 'GeometryElement3D')
+ // add2('View3D', 'GeometryElement3D')
+
  export class View3D extends GeometryElement3D {
 
  /**  */
@@ -4805,86 +2948,32 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get matrix3D():Object {
   return _jsxBoard().matrix3D as Object
 }
-
- /**  */
- setView(azimuth:number,elevation:number,radius?:number): View3D {
-  return  this.setView(azimuth,elevation,radius) as View3D
-}
-
- /**  */
- animateAzimuth(): Object {
-  return  this.animateAzimuth() as Object
-}
-
- /** Creates a new 3D element of type elementType. */
- create(): Object {
-  return  this.create() as Object
-}
-
- /** Intersect a ray with the bounding cube of the 3D view. */
- intersectionLineCube(): number[] {
-  return  this.intersectionLineCube() as number[]
-}
-
- /**  */
- intersectionPlanePlane(): number[] {
-  return  this.intersectionPlanePlane() as number[]
-}
-
- /** Test if coordinates are inside of the bounding cube. */
- isInCube(): number[] {
-  return  this.isInCube() as number[]
-}
-
- /** Project a 2D coordinate to the plane defined by point ”foot” and the normal vector `normal`. */
- project2DTo3DPlane(): number[] {
-  return  this.project2DTo3DPlane() as number[]
-}
-
- /** Project a 2D coordinate to a new 3D position by keeping the 3D x, y coordinates and changing only the z coordinate. */
- project2DTo3DVertical(): number[] {
-  return  this.project2DTo3DVertical() as number[]
-}
-
- /** Project 3D coordinates to 2D board coordinates The 3D coordinates are provides as three numbers x, y, z or one array of length 3. */
- project3DTo2D(): number[] {
-  return  this.project3DTo2D() as number[]
-}
-
- /** Limit 3D coordinates to the bounding cube. */
- project3DToCube(): GeometryElement3D|Composition {
-  return  this.project3DToCube() as GeometryElement3D|Composition
-}
-
- /** Select a single or multiple elements at once. */
- select(): GeometryElement3D|Composition {
-  return  this.select() as GeometryElement3D|Composition
-}
-
- /**  */
- stopAzimuth(): any {
-  return  this.stopAzimuth() as any
-}
-}
+ // add3('View3D', 'GeometryElement3D')
+ // Missing signaature array for View3D
+ }
+ // addClassesforElementsInJSXBoard('currentBoard', '')
+ // add2('currentBoard', '')
 
  export class currentBoard{
-}
+ // add3('currentBoard', '')
+ // Missing signaature array for currentBoard
+ }
+ // addClassesforElementsInJSXBoard('Infobox', '')
+ // add2('Infobox', '')
 
  export class Infobox{
-}
+ // add3('Infobox', '')
+ // Missing signaature array for Infobox
+ }
+ // addClassesforElementsInJSXBoard('CA', '')
+ // add2('CA', '')
 
  export class CA{
-
- /** f = map (x) -> x*sin(x); Usages: h = D(f, x); h = map (x) -> D(f, x); or D(x^2, x); */
- expandDerivatives(): any {
-  return  this.expandDerivatives() as any
-}
-
- /** Declare all subnodes as math nodes, i.e recursively set node.isMath = true; */
- setMath(): any {
-  return  this.setMath() as any
-}
-}
+ // add3('CA', '')
+ // Missing signaature array for CA
+ }
+ // addClassesforElementsInJSXBoard('Chart', 'GeometryElement')
+ // add2('Chart', 'GeometryElement')
 
  export class Chart extends GeometryElement {
 
@@ -4892,6 +2981,16 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get elements():any[] {
   return _jsxBoard().elements as any[]
 }
+ // add3('Chart', 'GeometryElement')
+  // constuctor Single
+
+
+ /** create a chart */
+ constructor (f:number[], attributes: ChartAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because GeometryElement does not have a signature array
+   return TSX._jsxBoard().create('chart', [f,], defaultAttributes(attributes))  as Chart
+}
+
 
  /** Create bar chart defined by two data arrays. */
  drawBar(): any[] {
@@ -4934,6 +3033,9 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Circle', 'GeometryElement')
+ // add2('Circle', 'GeometryElement')
+
  export class Circle extends GeometryElement {
 
  /** Attributes for center point. */
@@ -4965,6 +3067,31 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get radius():number {
   return _jsxBoard().radius as number
 }
+ // add3('Circle', 'GeometryElement')
+  // constuctor Single
+
+
+ /** A circle can be constructed by providing a center and a point on the circle,
+                         or a center and a radius (given as a number, function, line, or circle).
+                         If the radius is a negative value, its absolute values is taken.
+                
+*```js
+                TSX.circle(P1,1])
+                TSX.circle([0,0],[1,0])
+                
+*```
+                
+Also see: Circumcircle is a circle described by three points.  An Arc is a segment of a circle. */
+ constructor (centerPoint:Point|pointAddr|Function, remotePoint:Point|pointAddr|Line|[Point|pointAddr,Point|pointAddr]|number|Function|Circle, attributes: CircleAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because GeometryElement does not have a signature array
+  let newObject:any  // special case for circle with immediate segment eg:  circle(point,[[1,2],[3,4]]  )
+                            if (Array.isArray(remotePoint) && Array.isArray(remotePoint[0] ) && Array.isArray(remotePoint[1] )) {
+                                return _jsxBoard().create("circle", [centerPoint, remotePoint[0] ,remotePoint[1]], defaultAttributes(attributes))
+                            } else {
+                                return _jsxBoard().create("circle", [centerPoint, remotePoint], defaultAttributes(attributes))
+                            }
+}
+
 
  /** Circle area */
  Area(): number {
@@ -4997,8 +3124,38 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Circle3D', 'GeometryElement3D')
+ // add2('Circle3D', 'GeometryElement3D')
+
  export class Circle3D extends GeometryElement3D {
+ // add3('Circle3D', 'GeometryElement3D')
+  // constuctor Single
+
+
+ /** In 3D space, a circle consists of all points on a given plane with a given distance from a given point.
+                    The given point is called the center, and the given distance is called the radius.
+                    A circle can be constructed by providing a center, a normal vector (either homogenous or cartesian),
+                    and a radius (given as a number or function).
+                    
+*```js
+let a = TSX.point3D([-3, 0, 0])
+let circle = TSX.circle3D(a, [1, 1, 1], 2, { strokeWidth: 5, strokeColor: 'blue' })
+```
+ */
+ constructor (center:TSX.Point3D, normal:number[]|Function, radius:number|Function, attributes: Circle3DAttributes ={} ) {
+ if(alwaysFalse()){
+ super(); // plausible super for GeometryElement3D 
+ }
+ 
+                let tempNormal:number[] = (typeof normal === "function") ? normal() : normal;
+                if(tempNormal.length ===3) tempNormal.unshift(0);   // convert [a,b,c] to [0,a,b,c]
+                return _jsxView3d().create("circle3d",[center,normal,radius],attributes)
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Complex', '')
+ // add2('Complex', '')
 
  export class Complex{
 
@@ -5026,80 +3183,18 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get real():number {
   return _jsxBoard().real as number
 }
-
- /** Add another complex number to this complex number. */
- add(): Complex {
-  return  this.add() as Complex
-}
-
- /** Conjugate a complex number in place. */
- conj(): Complex {
-  return  this.conj() as Complex
-}
-
- /** Divide this complex number by the given complex number. */
- div(): Complex {
-  return  this.div() as Complex
-}
-
- /** Multiply another complex number to this complex number. */
- mult(): Complex {
-  return  this.mult() as Complex
-}
-
- /** Subtract another complex number from this complex number. */
- sub(): Complex {
-  return  this.sub() as Complex
-}
-
- /** Converts a complex number into a string. */
- toString(): String {
-  return  this.toString() as String
-}
-}
+ // add3('Complex', '')
+ // Missing signaature array for Complex
+ }
+ // addClassesforElementsInJSXBoard('Composition', '')
+ // add2('Composition', '')
 
  export class Composition{
-
- /** Adds an element to the composition container. */
- add(): Boolean {
-  return  this.add() as Boolean
-}
-
- /** Invokes fullUpdate for every stored element with a fullUpdate method and hands over the given arguments. */
- fullUpdate(): Boolean {
-  return  this.fullUpdate() as Boolean
-}
-
- /** Invokes highlight for every stored element with a highlight method and hands over the given arguments. */
- highlight(): Boolean {
-  return  this.highlight() as Boolean
-}
-
- /** Invokes noHighlight for every stored element with a noHighlight method and hands over the given arguments. */
- noHighlight(): Boolean {
-  return  this.noHighlight() as Boolean
-}
-
- /** Invokes prepareUpdate for every stored element with a prepareUpdate method and hands over the given arguments. */
- prepareUpdate(): Boolean {
-  return  this.prepareUpdate() as Boolean
-}
-
- /** Remove an element from the composition container. */
- remove(): Boolean {
-  return  this.remove() as Boolean
-}
-
- /** Invokes setParents for every stored element with a setParents method and hands over the given arguments. */
- setParents(): any {
-  return  this.setParents() as any
-}
-
- /** Invokes updateRenderer for every stored element with a updateRenderer method and hands over the given arguments. */
- updateRenderer(): Point {
-  return  this.updateRenderer() as Point
-}
-}
+ // add3('Composition', '')
+ // Missing signaature array for Composition
+ }
+ // addClassesforElementsInJSXBoard('Coords', '')
+ // add2('Coords', '')
 
  export class Coords{
 
@@ -5122,17 +3217,11 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get usrCoords():number[] {
   return _jsxBoard().usrCoords as number[]
 }
-
- /** Test if one of the usrCoords is NaN or the coordinates are infinite. */
- isReal(): Boolean {
-  return  this.isReal() as Boolean
-}
-
- /** Set coordinates by either user coordinates or screen coordinates and recalculate the other one. */
- setCoordinates(): Coords {
-  return  this.setCoordinates() as Coords
-}
-}
+ // add3('Coords', '')
+ // Missing signaature array for Coords
+ }
+ // addClassesforElementsInJSXBoard('Curve', 'GeometryElement')
+ // add2('Curve', 'GeometryElement')
 
  export class Curve extends GeometryElement {
 
@@ -5156,6 +3245,51 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get ticks():number[] {
   return _jsxBoard().ticks as number[]
 }
+ // add3('Curve', 'GeometryElement')
+  // constuctor Multi
+
+ constructor( xArray:number[]|Function,yArray:number[]|Function,attributes?:CurveAttributes)
+ constructor( xArray:number[]|Function,yArray:number[]|Function,left:NumberFunction,right:NumberFunction,attributes?:CurveAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()) {super()}  // missing super because GeometryElement does not have a signature array
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxBoard().create('curve', params, defaultAttributes(attrs))
+ }
+
+ /** Add transformations to this curve. */
+ addTransform(): Curve {
+  return  this.addTransform() as Curve
+}
 
  /** Allocate points in the Coords array this.points */
  allocatePoints(): number[] {
@@ -5165,6 +3299,11 @@ P.moveTo([A.X(), A.Y()], 5000)
  /** Converts the JavaScript/JessieCode/GEONExT syntax of the defining function term into JavaScript. */
  generateTerm(): number[] {
   return  this.generateTerm() as number[]
+}
+
+ /** Checks whether (x,y) is near the curve. */
+ hasPoint(): Boolean {
+  return  this.hasPoint() as Boolean
 }
 
  /** Gives the default value of the right bound for the curve. */
@@ -5185,6 +3324,11 @@ P.moveTo([A.X(), A.Y()], 5000)
  /** Finds dependencies in a given term and notifies the parents by adding the dependent object to the found objects child elements. */
  notifyParents(): Curve {
   return  this.notifyParents() as Curve
+}
+
+ /** Computes for equidistant points on the x-axis the values of the function */
+ update(): Curve {
+  return  this.update() as Curve
 }
 
  /** Computes the curve path */
@@ -5223,12 +3367,65 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
- export class Curve3D extends Curve {
+ // addClassesforElementsInJSXBoard('Curve3D', 'Curve')
+ // add2('Curve3D', 'Curve')
 
- /**  */
- addTransform(other:ParametricSurface3D,transforms:Transform3D[]): Curve3D {
-  return  this.addTransform(other,transforms) as Curve3D
-}
+ export class Curve3D extends Curve {
+ // add3('Curve3D', 'Curve')
+  // constuctor Multi
+
+ /** Three signatures: A curve in 3D is given by a function returning [x,y,z], three functions returning [x], [y],and [z], or three arrays containing coordinate points. 
+ *``` 
+*``` 
+ FX(u), FY(u), FZ(u) are functions returning a number, range is the array containing lower and upper bound for the range of the parameter u. range may also be a function returning an array of length two. */
+ constructor( Fx:(x:number)=>number,Fy:(y:number)=>number,Fz:(z:number)=>number,range:pointAddr3D,attributes?:Curve3DAttributes)
+ /** Three signatures: A curve in 3D is given by a function returning [x,y,z], three functions returning [x], [y],and [z], or three arrays containing coordinate points. 
+ *``` 
+*``` 
+ A function of one variable returns an array of [x,y,z] values. */
+ constructor( Fxyz:(x:number)=>[number,number,number]|number[],range:pointAddr3D,attributes?:Curve3DAttributes)
+ /** Three signatures: A curve in 3D is given by a function returning [x,y,z], three functions returning [x], [y],and [z], or three arrays containing coordinate points. 
+ *``` 
+*``` 
+ A curve is drawn through the XYZ points described by three arrays. */
+ constructor( X:number[],Y:number[],Z:number[],attributes?:Curve3DAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxView3d().create('curve3d', params, defaultAttributes(attrs))
+ }
 
  /** Function which maps u to x; i.e. */
  X(): number {
@@ -5246,58 +3443,15 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Dump', '')
+ // add2('Dump', '')
+
  export class Dump{
-
- /** Adds markers to every element of the board */
- addMarkers(): Dump {
-  return  this.addMarkers() as Dump
-}
-
- /** Converts an array of different values into a parameter string that can be used by the code generators. */
- arrayToParamStr(): Dump {
-  return  this.arrayToParamStr() as Dump
-}
-
- /** Removes markers from every element on the board. */
- deleteMarkers(): Dump {
-  return  this.deleteMarkers() as Dump
-}
-
- /** Generate a save-able structure with all elements. */
- dump(): Dump {
-  return  this.dump() as Dump
-}
-
- /** Eliminate default values given by JXG.Options from the attributes object. */
- minimizeObject(): Dump {
-  return  this.minimizeObject() as Dump
-}
-
- /** Prepare the attributes object for an element to be dumped as JavaScript or JessieCode code. */
- prepareAttributes(): Dump {
-  return  this.prepareAttributes() as Dump
-}
-
- /** Stringifies a string, i.e. */
- str(): Dump {
-  return  this.str() as Dump
-}
-
- /** Saves the construction in board to JavaScript. */
- toJavaScript(): Dump {
-  return  this.toJavaScript() as Dump
-}
-
- /** Converts a JavaScript object into a JCAN (JessieCode Attribute Notation) string. */
- toJCAN(): Dump {
-  return  this.toJCAN() as Dump
-}
-
- /** Saves the construction in board to JessieCode. */
- toJessie(): Dump {
-  return  this.toJessie() as Dump
-}
-}
+ // add3('Dump', '')
+ // Missing signaature array for Dump
+ }
+ // addClassesforElementsInJSXBoard('ForeignObject', 'GeometryElement')
+ // add2('ForeignObject', 'GeometryElement')
 
  export class ForeignObject extends GeometryElement {
 
@@ -5310,6 +3464,23 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get size():number[] {
   return _jsxBoard().size as number[]
 }
+ // add3('ForeignObject', 'GeometryElement')
+  // constuctor Single
+
+
+ /** This element is used to provide a constructor for arbitrary content in an SVG foreignObject container.
+```js
+TSX.foreignObject(
+    `<video width="300" height="200" src="https://eucbeniki.sio.si/vega2/278/Video_metanje_oge_.mp4" type="html5video" controls>`,
+    [0, -3], [9, 6],
+    {layer: 8, fixed: true})
+```
+              */
+ constructor (content:string, position:number[], size:number[]|null=null, attributes: ForeignObjectAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because GeometryElement does not have a signature array
+   return TSX._jsxBoard().create('foreignObject', [content,position,size,], defaultAttributes(attributes))  as ForeignObject
+}
+
 
  /** Returns the height of the foreignObject in user coordinates. */
  H(): number {
@@ -5332,12 +3503,29 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Group', 'Composition')
+ // add2('Group', 'Composition')
+
  export class Group extends Composition {
 
  /**  */
  public get coords():Object {
   return _jsxBoard().coords as Object
 }
+ // add3('Group', 'Composition')
+  // constuctor Single
+
+
+ /** Array of Points */
+ constructor (pointArray:Point[]|Polygon, attributes: GroupAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because Composition does not have a signature array
+ if (Array.isArray(pointArray))
+                    return TSX._jsxBoard().create('polygon3d', pointArray.flat(), defaultAttributes(attributes))
+                else
+                    return TSX._jsxBoard().create('polygon3d', [pointArray], defaultAttributes(attributes))
+                
+}
+
 
  /** Adds all points in a group to this group. */
  addGroup(group:Group): Group {
@@ -5430,6 +3618,9 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Image', 'GeometryElement')
+ // add2('Image', 'GeometryElement')
+
  export class Image extends GeometryElement {
 
  /**  */
@@ -5441,6 +3632,29 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get url():string {
   return _jsxBoard().url as string
 }
+ // add3('Image', 'GeometryElement')
+  // constuctor Single
+
+
+ /** Display an image.  The first element is the location URL of the image.
+                A collection of space icons is provided, press CTRL+I to show the list.
+                The second parameter sets the lower left point of the image.
+                The optional third parameter sets the size multiplier of the image, default is [1,1].
+                
+If you want to move the image, just tie the image to a point, maybe at the center of the image.
+                 For more flexibility, see TSX.Rotate() and TSX.Translate()
+                
+*```js
+            TSX.image('icons/earth.png', [0, 0],[2,2])
+            let p1 = TSX.point([3, 2], { opacity: .1 })
+            TSX.image('icons/moon-full-moon.png', [()=>p1.X(),()=>p1.Y()])
+                
+*``` */
+ constructor (url:string|spaceIcon, lowerLeft:pointAddr, widthHeight:[number,number]=[1,1], attributes: ImageAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because GeometryElement does not have a signature array
+   return TSX._jsxBoard().create('image', [url,lowerLeft,widthHeight,], defaultAttributes(attributes))  as Image
+}
+
 
  /** Returns the height of the image in user coordinates. */
  H(): number {
@@ -5463,14 +3677,90 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Implicitcurve', 'GeometryElement')
+ // add2('Implicitcurve', 'GeometryElement')
+
  export class Implicitcurve extends GeometryElement {
+ // add3('Implicitcurve', 'GeometryElement')
+  // constuctor Multi
+
+ constructor( f:Function|String,attributes?:ImplicitcurveAttributes)
+ constructor( f:Function|String,dfx:Function|String,dfy:Function|String,attributes?:ImplicitcurveAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()) {super()}  // missing super because GeometryElement does not have a signature array
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxBoard().create('implicitcurve', params, defaultAttributes(attrs))
+ }
 }
+
+ // addClassesforElementsInJSXBoard('IntersectionCircle3D', 'GeometryElement3D')
+ // add2('IntersectionCircle3D', 'GeometryElement3D')
 
  export class IntersectionCircle3D extends GeometryElement3D {
+ // add3('IntersectionCircle3D', 'GeometryElement3D')
+  // constuctor Single
+
+
+ /** The circle that is the intersection of two elements (plane3d or sphere3d) in 3D. */
+ constructor (sphere1:TSX.Sphere3D, sphere:TSX.Sphere3D|TSX.Plane3D, attributes: IntersectionCircle3DAttributes ={} ) {
+ if(alwaysFalse()){
+ super(); // plausible super for GeometryElement3D 
+ }
+   return TSX._jsxView3d().create('intersectioncircle3d', [sphere1,sphere,], defaultAttributes(attributes))  as IntersectionCircle3D
 }
 
- export class IntersectionLine3D extends GeometryElement3D {
 }
+
+ // addClassesforElementsInJSXBoard('IntersectionLine3D', 'GeometryElement3D')
+ // add2('IntersectionLine3D', 'GeometryElement3D')
+
+ export class IntersectionLine3D extends GeometryElement3D {
+ // add3('IntersectionLine3D', 'GeometryElement3D')
+  // constuctor Single
+
+
+ /** The circle that is the intersection of two elements (plane3d or sphere3d) in 3D. */
+ constructor (plane1:TSX.Sphere3D, plane2:TSX.Plane3D, attributes: IntersectionLine3DAttributes ={} ) {
+ if(alwaysFalse()){
+ super(); // plausible super for GeometryElement3D 
+ }
+   return TSX._jsxView3d().create('intersectionline3d', [plane1,plane2,], defaultAttributes(attributes))  as IntersectionLine3D
+}
+
+}
+
+ // addClassesforElementsInJSXBoard('Line3D', 'GeometryElement3D')
+ // add2('Line3D', 'GeometryElement3D')
 
  export class Line3D extends GeometryElement3D {
 
@@ -5498,7 +3788,60 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get range():number[] {
   return _jsxBoard().range as number[]
 }
+ // add3('Line3D', 'GeometryElement3D')
+  // constuctor Multi
+
+ /** Two signatures: A line in 3D is given by two points, or one point and a direction vector. 
+ *``` 
+*``` 
+ The 3D line is defined by two 3D points (Point3D): The points can be either existing points or coordinate arrays of the form [x, y, z]. */
+ constructor( point1:Point3D|pointAddr3D,point2:Point3D|pointAddr3D,attributes?:Line3DAttributes)
+ /** Two signatures: A line in 3D is given by two points, or one point and a direction vector. 
+ *``` 
+*``` 
+ The 3D line is defined by a point (or coordinate array [x, y, z]) a direction given as array [x, y, z] and an optional range given as array [s, e]. The default value for the range is [-Infinity, Infinity]. */
+ constructor( point:Point3D|pointAddr3D,direction:Line3D|pointAddr3D,range:number[]|pointAddr,attributes?:Line3DAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super(); // plausible super for GeometryElement3D 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxView3d().create('line3d', params, defaultAttributes(attrs))
+ }
 }
+
+ // addClassesforElementsInJSXBoard('Plane3D', 'GeometryElement3D')
+ // add2('Plane3D', 'GeometryElement3D')
 
  export class Plane3D extends GeometryElement3D {
 
@@ -5551,6 +3894,50 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get vec3():number[] {
   return _jsxBoard().vec3 as number[]
 }
+ // add3('Plane3D', 'GeometryElement3D')
+  // constuctor Multi
+
+ constructor( point:Point3D|number[]|Function,direction1:number[]|Function,direction2:number[]|Function,range1?:pointAddr,range2?:pointAddr,attributes?:Plane3DAttributes)
+ constructor( point:Point3D|number[]|Function,direction1:number[]|Function|Function[],direction2:number[]|Function|Function[],range1?:pointAddr,range2?:pointAddr,attributes?:Plane3DAttributes)
+ constructor( point1:Point3D,point2:Point3D,point3:Point3D,range1?:pointAddr,range2?:pointAddr,attributes?:Plane3DAttributes)
+ constructor( point1:Point3D,point2:Point3D,point3:Point3D,attributes?:Plane3DAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super(); // plausible super for GeometryElement3D 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxView3d().create('plane3d', params, defaultAttributes(attrs))
+ }
 
  /** Get coordinate array [x, y, z] of a point on the plane for parameters (u, v). */
  F(u:number, v:number): number[] {
@@ -5573,12 +3960,57 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Point3D', 'GeometryElement3D')
+ // add2('Point3D', 'GeometryElement3D')
+
  export class Point3D extends GeometryElement3D {
 
  /**  */
  public get slide():GeometryElement3D {
   return _jsxBoard().slide as GeometryElement3D
 }
+ // add3('Point3D', 'GeometryElement3D')
+  // constuctor Multi
+
+ constructor( xyz:NumberFunction[],attributes?:Point3DAttributes)
+ constructor( fn:()=> number[]|[number,number,number],attributes?:Point3DAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super(); // plausible super for GeometryElement3D 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxView3d().create('point3d', params, defaultAttributes(attrs))
+ }
 
  /** Set the position of a 3D point. */
  setPosition(coords:number[],noEvent:boolean=true): Point3D {
@@ -5612,6 +4044,9 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Polygon', 'GeometryElement')
+ // add2('Polygon', 'GeometryElement')
+
  export class Polygon extends GeometryElement {
 
  /** Attributes for the polygon border lines. */
@@ -5623,6 +4058,20 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get vertices():Point[] {
   return _jsxBoard().vertices as Point[]
 }
+ // add3('Polygon', 'GeometryElement')
+  // constuctor Single
+
+
+ /** Array of Points */
+ constructor (vertices:Point[]|pointAddr[]|Function, attributes: PolygonAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because GeometryElement does not have a signature array
+ if (typeof vertices === 'function')
+                              return TSX._jsxBoard().create('polygon', [vertices], defaultAttributes(attributes))
+                           else
+                              return TSX._jsxBoard().create('polygon', vertices.flat(), defaultAttributes(attributes))
+                  
+}
+
 
  /** Checks whether (x,y) is near the polygon. */
  hasPoint(x:number,y:number): Boolean {
@@ -5635,8 +4084,30 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Polygon3D', 'GeometryElement3D')
+ // add2('Polygon3D', 'GeometryElement3D')
+
  export class Polygon3D extends GeometryElement3D {
+ // add3('Polygon3D', 'GeometryElement3D')
+  // constuctor Single
+
+
+ /** A polygon is a sequence of points connected by lines, with the last point connecting back to the first one. The points are given by a list of Point3D objects or a list of coordinate arrays. Each two consecutive points of the list define a line. */
+ constructor (vertices:Point3D[]|pointAddr3D[]|Function, attributes: Polygon3DAttributes ={} ) {
+ if(alwaysFalse()){
+ super(); // plausible super for GeometryElement3D 
+ }
+ if (typeof vertices === 'function')
+                            return TSX._jsxBoard().create('polygon3d', [vertices], defaultAttributes(attributes))
+                         else
+                            return TSX._jsxBoard().create('polygon3d', vertices.flat(), defaultAttributes(attributes))
+                        
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Text', 'GeometryElement')
+ // add2('Text', 'GeometryElement')
 
  export class Text extends GeometryElement {
 
@@ -5644,6 +4115,24 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get size():number[] {
   return _jsxBoard().size as number[]
 }
+ // add3('Text', 'GeometryElement')
+  // constuctor Single
+
+
+ /** Display a message
+                                
+*```js
+TSX.text([3,2],[3,3], {fontSize:20, strokeColor:'blue'})
+TSX.text([0, 4], () => 'BD ' + B.distance(D).toFixed(2))
+TSX.text([-4, 2], '\pm\sqrt{a^2 + b^2}', { useKatex: true })
+                                
+*``` */
+ constructor (position:Point|pointAddr, label:string|Function, attributes: TextAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because GeometryElement does not have a signature array
+ (position as any).push(label);
+                        return _jsxBoard().create('text', position,defaultAttributes(attributes));
+}
+
 
  /**  */
  setAttribute(attrs:TextAttributes): void {
@@ -5721,13 +4210,61 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Text3D', 'Text')
+ // add2('Text3D', 'Text')
+
  export class Text3D extends Text {
+ // add3('Text3D', 'Text')
+  // constuctor Multi
+
+ constructor( position:Point3D|number[]|Function,text:string|Function,attributes?:Text3DAttributes)
+ constructor( position:Point3D|number[]|Function,text:string|Function,slide:GeometryElement3D,attributes?:Text3DAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super([0],''); // plausible super for Text 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+ return _jsxView3d().create('text3d',[params].flat(),defaultAttributes(attrs))
+ }
 
  /** Set the position of a 3D point. If `noEvent` true, then no events are triggered. */
  setPosition(coords:number[],noEvent:boolean=false): Text3D {
   return  this.setPosition(coords,noEvent) as Text3D
 }
 }
+
+ // addClassesforElementsInJSXBoard('Ticks', 'GeometryElement')
+ // add2('Ticks', 'GeometryElement')
 
  export class Ticks extends GeometryElement {
 
@@ -5765,6 +4302,16 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get ticks():number[] {
   return _jsxBoard().ticks as number[]
 }
+ // add3('Ticks', 'GeometryElement')
+  // constuctor Single
+
+
+ /** Ticks are used as distance markers on a line or curve. They are mainly used for axis elements and slider elements.  */
+ constructor (line:Line, attributes: TicksAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because GeometryElement does not have a signature array
+   return TSX._jsxBoard().create('ticks', [line,], defaultAttributes(attributes))  as Ticks
+}
+
 
  /** Formats label texts to make labels displayed in scientific notation look beautiful. */
  beautifyScientificNotationLabel(): String {
@@ -5787,208 +4334,8 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
- export class Turtle extends GeometryElement {
-
- /** Move the turtle backwards. */
- back(): Turtle {
-  return  this.back() as Turtle
-}
-
- /** Alias for JXG.Turtle#back */
- bk(): Turtle {
-  return  this.bk() as Turtle
-}
-
- /** Removes the turtle curve from the board. */
- clean(): Turtle {
-  return  this.clean() as Turtle
-}
-
- /** Removes the turtle completely and resets it to its initial position and direction. */
- clearScreen(): Turtle {
-  return  this.clearScreen() as Turtle
-}
-
- /** Alias for JXG.Turtle#clearScreen */
- cs(): number {
-  return  this.cs() as number
-}
-
- /** The ”co”-coordinate of the turtle curve at position t is returned. */
- evalAt(): number {
-  return  this.evalAt() as number
-}
-
- /** Alias for JXG.Turtle#forward */
- fd(): Turtle {
-  return  this.fd() as Turtle
-}
-
- /** Move the turtle forward. */
- forward(): Turtle {
-  return  this.forward() as Turtle
-}
-
- /** Get most recently set turtle color. */
- getHighlightPenColor(): Boolean {
-  return  this.getHighlightPenColor() as Boolean
-}
-
- /** Get most recently set turtle color. */
- getPenColor(): Boolean {
-  return  this.getPenColor() as Boolean
-}
-
- /** Get most recently set turtle size (in pixel). */
- getPenSize(): Boolean {
-  return  this.getPenSize() as Boolean
-}
-
- /** Checks whether (x,y) is near the curve. */
- hasPoint(): Boolean {
-  return  this.hasPoint() as Boolean
-}
-
- /** Sets the visibility of the turtle head to false, */
- hideTurtle(): Turtle {
-  return  this.hideTurtle() as Turtle
-}
-
- /** Moves the turtle to position [0,0]. */
- home(): Turtle {
-  return  this.home() as Turtle
-}
-
- /** Alias for JXG.Turtle#hideTurtle */
- ht(): Turtle {
-  return  this.ht() as Turtle
-}
-
- /** Rotate the turtle direction to the right. */
- left(): Turtle {
-  return  this.left() as Turtle
-}
-
- /** Rotates the turtle into a new direction. */
- lookTo(): Turtle {
-  return  this.lookTo() as Turtle
-}
-
- /** Alias for JXG.Turtle#left */
- lt(): Turtle {
-  return  this.lt() as Turtle
-}
-
- /** Gives the upper bound of the parameter if the turtle is treated as parametric curve. */
- maxX(): Turtle {
-  return  this.maxX() as Turtle
-}
-
- /** Gives the lower bound of the parameter if the turtle is treated as parametric curve. */
- minX(): Turtle {
-  return  this.minX() as Turtle
-}
-
- /** Moves the turtle to a given coordinate pair. */
- moveTo(): Turtle {
-  return  this.moveTo() as Turtle
-}
-
- /** Alias for JXG.Turtle#penDown */
- pd(): Turtle {
-  return  this.pd() as Turtle
-}
-
- /** Pen down, continues visible drawing */
- penDown(): Turtle {
-  return  this.penDown() as Turtle
-}
-
- /** Pen up, stops visible drawing */
- penUp(): Turtle {
-  return  this.penUp() as Turtle
-}
-
- /** Alias for JXG.Turtle#popTurtle */
- pop(): Turtle {
-  return  this.pop() as Turtle
-}
-
- /** Gets the last position of the turtle on the stack, sets the turtle to this position and removes this position from the stack. */
- popTurtle(): Turtle {
-  return  this.popTurtle() as Turtle
-}
-
- /** Alias for JXG.Turtle#penUp */
- pu(): Turtle {
-  return  this.pu() as Turtle
-}
-
- /** Alias for JXG.Turtle#pushTurtle */
- push(): Turtle {
-  return  this.push() as Turtle
-}
-
- /** Pushes the position of the turtle on the stack. */
- pushTurtle(): Turtle {
-  return  this.pushTurtle() as Turtle
-}
-
- /** Rotate the turtle direction to the right */
- right(): Turtle {
-  return  this.right() as Turtle
-}
-
- /** Alias for JXG.Turtle#right */
- rt(): Turtle {
-  return  this.rt() as Turtle
-}
-
- /** Sets the highlight pen color. */
- setHighlightPenColor(): Turtle {
-  return  this.setHighlightPenColor() as Turtle
-}
-
- /** Sets the pen color. */
- setPenColor(): Turtle {
-  return  this.setPenColor() as Turtle
-}
-
- /** Sets the pen size. */
- setPenSize(): Turtle {
-  return  this.setPenSize() as Turtle
-}
-
- /** Moves the turtle without drawing to a new position */
- setPos(): Turtle {
-  return  this.setPos() as Turtle
-}
-
- /** Sets the visibility of the turtle head to true, */
- showTurtle(): Turtle {
-  return  this.showTurtle() as Turtle
-}
-
- /** Alias for JXG.Turtle#showTurtle */
- st(): number {
-  return  this.st() as number
-}
-
- /** if t is not supplied the x-coordinate of the turtle is returned. */
- X(): number {
-  return  this.X() as number
-}
-
- /** if t is not supplied the y-coordinate of the turtle is returned. */
- Y(): number {
-  return  this.Y() as number
-}
-
- /**  */
- Z(): number {
-  return  this.Z() as number
-}
-}
+ // addClassesforElementsInJSXBoard('Sector', 'Curve')
+ // add2('Sector', 'Curve')
 
  export class Sector extends Curve {
 
@@ -6011,6 +4358,16 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get point4():Point {
   return _jsxBoard().point4 as Point
 }
+ // add3('Sector', 'Curve')
+  // constuctor Single
+
+ constructor (P1:Point|pointAddr, P2:Point|pointAddr, P3:Point|pointAddr, attributes: SectorAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('sector', [P1,P2,P3,], defaultAttributes(attributes))  as Sector
+}
+
 
  /** Checks whether (x,y) is within the area defined by the sector. */
  hasPointSector(): Boolean {
@@ -6023,7 +4380,20 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Vectorfield', 'Curve')
+ // add2('Vectorfield', 'Curve')
+
  export class Vectorfield extends Curve {
+ // add3('Vectorfield', 'Curve')
+  // constuctor Single
+
+ constructor (fxfy:Function[], horizontalMesh:number[]=[-6,25,6], verticalMesh:number[]=[-6,25,6], attributes: VectorfieldAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('vectorfield', [fxfy,horizontalMesh,verticalMesh,], defaultAttributes(attributes))  as Vectorfield
+}
+
 
  /** Set the defining functions of vector field. */
  setF(): Object {
@@ -6031,12 +4401,58 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Angle', 'Sector')
+ // add2('Angle', 'Sector')
+
  export class Angle extends Sector {
 
  /**  */
  public get point():Point {
   return _jsxBoard().point as Point
 }
+ // add3('Angle', 'Sector')
+  // constuctor Multi
+
+ constructor( from:Point|pointAddr,around:Point|pointAddr,to:Point|pointAddr,attributes?:AngleAttributes)
+ constructor( line1:Line|[Point|pointAddr,Point|pointAddr],line2:Line|[Point|pointAddr,Point|pointAddr],direction1:[number,number],direction2:[number,number],attributes?:AngleAttributes)
+ constructor( line1:Line|[Point|pointAddr,Point|pointAddr],line2:Line|[Point|pointAddr,Point|pointAddr],dirPlusMinus1:number,dirPlusMinus2:number,attributes?:AngleAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super([0],[0],[0]); // plausible super for Sector 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxBoard().create('angle', params, defaultAttributes(attrs))
+ }
 
  /** Frees an angle from a prescribed value. */
  free(): Object {
@@ -6054,6 +4470,9 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Arc', 'Curve')
+ // add2('Arc', 'Curve')
+
  export class Arc extends Curve {
 
  /**  */
@@ -6065,6 +4484,25 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get radiuspoint():Point {
   return _jsxBoard().radiuspoint as Point
 }
+ // add3('Arc', 'Curve')
+  // constuctor Single
+
+
+ /** Create a circular Arc defined by three points (because a circle can be defined by three points - see circumcircle).
+                            
+*```js
+                            let arc = TSX.arc([-8,5],[-4,5],[-9,9]])
+                            
+*```
+                            
+ To create an arc with origin, startpoint, and angle, look at MajorArc/MinorArc. */
+ constructor (origin:Point|pointAddr, from:Point|pointAddr, to:Point|pointAddr, attributes: ArcAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('arc', [origin,from,to,], defaultAttributes(attributes))  as Arc
+}
+
 
  /**  */
  getRadius(): number {
@@ -6087,14 +4525,100 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Arrow', 'Line')
+ // add2('Arrow', 'Line')
+
  export class Arrow extends Line {
+ // add3('Arrow', 'Line')
+  // constuctor Single
+
+
+ /** Arrow defined by two points (like a Segment) with arrow at P2
+                            
+*```js
+                            
+ let arrow = TSX.arrow([-8,5],[-4,5])
+                            
+*```
+                            
+ */
+ constructor (p1:Point|pointAddr, p2:Point|pointAddr, attributes: ArrowAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],[0]); // plausible super for Line 
+ }
+   return TSX._jsxBoard().create('arrow', [p1,p2,], defaultAttributes(attributes))  as Arrow
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Parallel', 'Line')
+ // add2('Parallel', 'Line')
 
  export class Parallel extends Line {
+ // add3('Parallel', 'Line')
+  // constuctor Multi
+
+ constructor( line:Line|[Point,Point],point:Point|pointAddr,attributes?:ParallelAttributes)
+ constructor( lineP1:Point|pointAddr,lineP2:Point|pointAddr,Point:Point|pointAddr,attributes?:ParallelAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super([0],[0]); // plausible super for Line 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxBoard().create('parallel', params, defaultAttributes(attrs))
+ }
 }
 
+ // addClassesforElementsInJSXBoard('Arrowparallel', 'Parallel')
+ // add2('Arrowparallel', 'Parallel')
+
  export class Arrowparallel extends Parallel {
+ // add3('Arrowparallel', 'Parallel')
+  // constuctor Single
+
+
+ /** Create an Arrow parallel to a segment. The constructed arrow contains p3 and has the same slope as the line through p1 and p2. */
+ constructor (p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: ArrowparallelAttributes ={} ) {
+ if(alwaysFalse()){
+ super(({} as TSX.Line),[0]); // plausible super for Parallel 
+ }
+   return TSX._jsxBoard().create('arrowparallel', [p1,p2,p3,], defaultAttributes(attributes))  as Arrowparallel
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Axis', 'Line')
+ // add2('Axis', 'Line')
 
  export class Axis extends Line {
 
@@ -6102,16 +4626,93 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get defaultTicks():Ticks {
   return _jsxBoard().defaultTicks as Ticks
 }
+ // add3('Axis', 'Line')
+  // constuctor Single
+
+
+ /** Create an Axis with two points (like a Line) */
+ constructor (p1:Point|pointAddr, p2:Point|pointAddr, attributes: AxisAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],[0]); // plausible super for Line 
+ }
+   return TSX._jsxBoard().create('axis', [p1,p2,], defaultAttributes(attributes))  as Axis
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('BezierCurve', 'Curve')
+ // add2('BezierCurve', 'Curve')
 
  export class BezierCurve extends Curve {
+ // add3('BezierCurve', 'Curve')
+  // constuctor Single
+
+
+ /** A cubic bezier curve.  The input is 3k + 1 points; those at positions k mod 3 = 0 (eg: 0, 3, 6 are the data points, the two points between each data points are the control points.
+                
+*```js
+    let points: Point[] = []
+    points.push(point([-2, -1], { size: 4, color: 'blue', name: '0' }))
+
+    points.push(point([-2, -2.5], { name: '1' }))
+    points.push(point([-1, -2.5], { name: '2' }))
+
+    points.push(TSX.point([2, -2], { size: 4, color: 'blue', name: '3' }))
+
+    let curve = TSX.bezierCurve(points, { strokeColor: 'orange', strokeWidth: 5, fixed: false }); // Draggable curve
+
+    // 'BezierCurve()' is just a shorthand for the following two lines:
+    // let bz = TSX.NumericsMath.bezier(points)
+    // let curve = TSX.curve(bz[0], bz[1])
+                
+*```
+
+                 */
+ constructor (points:Point[], attributes: BezierCurveAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+  return _jsxBoard().create('curve', (window as any).JXG.Math.Numerics.bezier(points), defaultAttributes(attributes));
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Bisector', 'Line')
+ // add2('Bisector', 'Line')
 
  export class Bisector extends Line {
+ // add3('Bisector', 'Line')
+  // constuctor Single
+
+
+ /** Bisect an Angle defined with three points A,B,C, and divides the angle ABC into two equal sized parts. */
+ constructor (A:Point|pointAddr, B:Point|pointAddr, C:Point|pointAddr, attributes: BisectorAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],[0]); // plausible super for Line 
+ }
+   return TSX._jsxBoard().create('bisector', [A,B,C,], defaultAttributes(attributes))  as Bisector
 }
 
- export class Bisectorlines extends Composition {
 }
+
+ // addClassesforElementsInJSXBoard('Bisectorlines', 'Composition')
+ // add2('Bisectorlines', 'Composition')
+
+ export class Bisectorlines extends Composition {
+ // add3('Bisectorlines', 'Composition')
+  // constuctor Single
+
+
+ /** Bisect a Line defined with two points */
+ constructor (l1:Line, l2:Line, attributes: BisectorlinesAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because Composition does not have a signature array
+   return TSX._jsxBoard().create('bisectorlines', [l1,l2,], defaultAttributes(attributes))  as Bisectorlines
+}
+
+}
+
+ // addClassesforElementsInJSXBoard('Button', 'Text')
+ // add2('Button', 'Text')
 
  export class Button extends Text {
 
@@ -6119,6 +4720,29 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get rendNodeButton():HTMLButtonElement {
   return _jsxBoard().rendNodeButton as HTMLButtonElement
 }
+ // add3('Button', 'Text')
+  // constuctor Single
+
+
+ /** Create a button.
+```js
+    let toggleValue = false   // button toggles this value and updates board
+    let butt = TSX.button([0, 0], 'Toggle', () => {
+        toggleValue = !toggleValue;
+        butt.rendNodeButton.innerHTML = toggleValue ? 'On' : 'Off';
+        butt.rendNodeButton.style.backgroundColor = toggleValue ? 'lightgreen' : 'salmon';
+    });
+    TSX.circle([0, 0], 1, { visible: () => toggleValue });  // sees update
+```
+ */
+ constructor (position:pointAddr, label:string|Function, handler:Function, attributes: ButtonAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],''); // plausible super for Text 
+ }
+ (position as any).push(label,handler);  // position is already array, eg: [1,2], just use it as params
+                        return _jsxBoard().create('button', position, defaultAttributes(attributes)) as Button;
+}
+
 
  /**  */
  setAttribute(attrs:ButtonAttributes): void {
@@ -6126,10 +4750,37 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Cardinalspline', 'Curve')
+ // add2('Cardinalspline', 'Curve')
+
  export class Cardinalspline extends Curve {
+ // add3('Cardinalspline', 'Curve')
+  // constuctor Single
+
+ constructor (data:Point[]|number[][], funct:Function, splineType:`uniform`|`centripetal`, attributes: CardinalsplineAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('cardinalspline', [data,funct,splineType,], defaultAttributes(attributes))  as Cardinalspline
 }
 
+}
+
+ // addClassesforElementsInJSXBoard('Checkbox', 'Text')
+ // add2('Checkbox', 'Text')
+
  export class Checkbox extends Text {
+ // add3('Checkbox', 'Text')
+  // constuctor Single
+
+ constructor (position:pointAddr, label:string|Function, attributes: CheckboxAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],''); // plausible super for Text 
+ }
+ (position as any).push(label);
+                        return _jsxBoard().create('checkbox', position,defaultAttributes(attributes));
+}
+
 
  /**  */
  setAttribute(attrs:CheckboxAttributes): void {
@@ -6147,14 +4798,62 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Circumcenter', 'Point')
+ // add2('Circumcenter', 'Point')
+
  export class Circumcenter extends Point {
+ // add3('Circumcenter', 'Point')
+  // constuctor Single
+
+
+ /** Creates a Point at the center of a circle defined by 3 points */
+ constructor (p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: CircumcenterAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0]); // plausible super for Point 
+ }
+   return TSX._jsxBoard().create('circumcenter', [p1,p2,p3,], defaultAttributes(attributes))  as Circumcenter
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Circumcircle', 'Circle')
+ // add2('Circumcircle', 'Circle')
 
  export class Circumcircle extends Circle {
+ // add3('Circumcircle', 'Circle')
+  // constuctor Single
+
+
+ /** Draw a circle defined by 3 points */
+ constructor (p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: CircumcircleAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],[0]); // plausible super for Circle 
+ }
+   return TSX._jsxBoard().create('circumcircle', [p1,p2,p3,], defaultAttributes(attributes))  as Circumcircle
 }
 
- export class CircumcircleArc extends Arc {
 }
+
+ // addClassesforElementsInJSXBoard('CircumcircleArc', 'Arc')
+ // add2('CircumcircleArc', 'Arc')
+
+ export class CircumcircleArc extends Arc {
+ // add3('CircumcircleArc', 'Arc')
+  // constuctor Single
+
+
+ /** Draw an arc from P1 to P3 (missing P3 to P1) defined by 3 points */
+ constructor (p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: CircumcircleArcAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],[0],[0]); // plausible super for Arc 
+ }
+   return TSX._jsxBoard().create('circumcircleArc', [p1,p2,p3,], defaultAttributes(attributes))  as CircumcircleArc
+}
+
+}
+
+ // addClassesforElementsInJSXBoard('CircumcircleSector', 'Sector')
+ // add2('CircumcircleSector', 'Sector')
 
  export class CircumcircleSector extends Sector {
 
@@ -6162,31 +4861,292 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get center():Circumcenter {
   return _jsxBoard().center as Circumcenter
 }
+ // add3('CircumcircleSector', 'Sector')
+  // constuctor Single
+
+
+ /** Creates a CircumCenter and draws a sector from P1 to P3 (missing P3 to P1) defined by 3 points */
+ constructor (p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: CircumcircleSectorAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],[0],[0]); // plausible super for Sector 
+ }
+   return TSX._jsxBoard().create('circumcircleSector', [p1,p2,p3,], defaultAttributes(attributes))  as CircumcircleSector
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Comb', 'Curve')
+ // add2('Comb', 'Curve')
 
  export class Comb extends Curve {
+ // add3('Comb', 'Curve')
+  // constuctor Single
+
+ constructor (p1:Point|pointAddr, p2:Point|pointAddr, attributes: CombAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('comb', [p1,p2,], defaultAttributes(attributes))  as Comb
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Conic', 'Curve')
+ // add2('Conic', 'Curve')
 
  export class Conic extends Curve {
+ // add3('Conic', 'Curve')
+  // constuctor Multi
+
+ /** Create a generic conic section either by five points or the six numeric coefficients of the general conic's equation.  
+ *``` 
+*``` 
+ Just as two (distinct) points determine a line, five points (no three collinear) determine a conic. */
+ constructor( A:Point|pointAddr,B:Point|pointAddr,C:Point|pointAddr,D:Point|pointAddr,E:Point|pointAddr,attributes?:ConicAttributes)
+ /** Create a generic conic section either by five points or the six numeric coefficients of the general conic's equation.  
+ *``` 
+*``` 
+ Build a plane algebraic curve from six numbers that satisfies Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0, and A,B,C not all zero.  This might be a circle, ellipse, parabola, or hyperbola. */
+ constructor( A:number,B:number,C:number,D:number,E:number,F:number,attributes?:ConicAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxBoard().create('conic', params, defaultAttributes(attrs))
+ }
 }
+
+ // addClassesforElementsInJSXBoard('CurveDifference', 'Curve')
+ // add2('CurveDifference', 'Curve')
 
  export class CurveDifference extends Curve {
+ // add3('CurveDifference', 'Curve')
+  // constuctor Single
+
+ constructor (curve1:GeometryElement, curve2:GeometryElement, attributes: CurveDifferenceAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('curveDifference', [curve1,curve2,], defaultAttributes(attributes))  as CurveDifference
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('CurveIntersection', 'Curve')
+ // add2('CurveIntersection', 'Curve')
 
  export class CurveIntersection extends Curve {
+ // add3('CurveIntersection', 'Curve')
+  // constuctor Single
+
+ constructor (curve1:GeometryElement, curve2:GeometryElement, attributes: CurveIntersectionAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('curveIntersection', [curve1,curve2,], defaultAttributes(attributes))  as CurveIntersection
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('CurveUnion', 'Curve')
+ // add2('CurveUnion', 'Curve')
 
  export class CurveUnion extends Curve {
+ // add3('CurveUnion', 'Curve')
+  // constuctor Single
+
+ constructor (curve1:GeometryElement, curve2:GeometryElement, attributes: CurveUnionAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('curveUnion', [curve1,curve2,], defaultAttributes(attributes))  as CurveUnion
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Derivative', 'Curve')
+ // add2('Derivative', 'Curve')
 
  export class Derivative extends Curve {
+ // add3('Derivative', 'Curve')
+  // constuctor Single
+
+ constructor (curve:Curve, attributes: DerivativeAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('derivative', [curve,], defaultAttributes(attributes))  as Derivative
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Ellipse', 'Conic')
+ // add2('Ellipse', 'Conic')
 
  export class Ellipse extends Conic {
+ // add3('Ellipse', 'Conic')
+  // constuctor Multi
+
+ /** Two methods to create an ellipse;An ellipse is given by two points (the foci) and a third point on the ellipse or the length of the major axis.
+                        Start and End are optional parameters for the curve start (default 0) and end (default 2*PI).  
+ *``` 
+*``` 
+ Two points plus a radius */
+ constructor( p1:Point|pointAddr,p2:Point|pointAddr,radius:Point|pointAddr|number|Function,attributes?:EllipseAttributes)
+ /** Two methods to create an ellipse;An ellipse is given by two points (the foci) and a third point on the ellipse or the length of the major axis.
+                        Start and End are optional parameters for the curve start (default 0) and end (default 2*PI).  
+ *``` 
+*``` 
+ Two points plus a radius, with start and end  */
+ constructor( p1:Point|pointAddr,p2:Point|pointAddr,radius:Point|pointAddr|number|Function,start?:number|Function,end?:number|Function,attributes?:EllipseAttributes)
+ /** Two methods to create an ellipse;An ellipse is given by two points (the foci) and a third point on the ellipse or the length of the major axis.
+                        Start and End are optional parameters for the curve start (default 0) and end (default 2*PI).  
+ *``` 
+*``` 
+ Three Points */
+ constructor( focalPoint1:Point|pointAddr,focalPoint2:Point|pointAddr,outerPoint:Point|pointAddr,attributes?:EllipseAttributes)
+ /** Two methods to create an ellipse;An ellipse is given by two points (the foci) and a third point on the ellipse or the length of the major axis.
+                        Start and End are optional parameters for the curve start (default 0) and end (default 2*PI).  
+ *``` 
+*``` 
+ Three Points, with  start and end. */
+ constructor( focalPoint1:Point|pointAddr,focalPoint2:Point|pointAddr,outerPoint:Point|pointAddr,start?:number|Function,end?:number|Function,attributes?:EllipseAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super([0],[0],[0],[0],[0]); // plausible super for Conic 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxBoard().create('ellipse', params, defaultAttributes(attrs))
+ }
 }
 
+ // addClassesforElementsInJSXBoard('ParametricSurface3D', 'Curve3D')
+ // add2('ParametricSurface3D', 'Curve3D')
+
  export class ParametricSurface3D extends Curve3D {
+ // add3('ParametricSurface3D', 'Curve3D')
+  // constuctor Multi
+
+ /** A 3D parametric surface visualizes a map (u, v) → [X(u, v), Y(u, v), Z(u, v)]. 
+ *``` 
+*``` 
+ FX(u,v), FY(u,v), FZ(u,v) are functions returning a number for [x,y,z],
+- rangeU is the array containing lower and upper bound for the range of parameter u,
+- rangeV is the array containing lower and upper bound for the range of parameter v.
+
+rangeU and rangeV may also be functions returning an array of length two. */
+ constructor( FX:(u:number,v:number)=> number,FY:(u:number,v:number)=> number,FZ:(u:number,v:number)=> number,rangeU:number[]|(()=>number[]),rangeV:number[]|(()=>number[]),attributes?:ParametricSurface3DAttributes)
+ /** A 3D parametric surface visualizes a map (u, v) → [X(u, v), Y(u, v), Z(u, v)]. 
+ *``` 
+*``` 
+ F(u,v) is a function returning a number array [x,y,z],
+- rangeU is the array containing lower and upper bound for the range of parameter u,
+- rangeV is the array containing lower and upper bound for the range of parameter v.
+
+rangeU and rangeV may also be functions returning an array of length two. */
+ constructor( F:(u:number,v:number)=> number[],rangeU:number[]|(()=>number[]),rangeV:number[]|(()=>number[]),attributes?:ParametricSurface3DAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+super([0],[0],[0]);
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxView3d().create('parametricsurface3d', params, defaultAttributes(attrs))
+ }
 }
+
+ // addClassesforElementsInJSXBoard('Face3D', 'Curve')
+ // add2('Face3D', 'Curve')
 
  export class Face3D extends Curve {
 
@@ -6204,22 +5164,167 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get dataZ():number[] {
   return _jsxBoard().dataZ as number[]
 }
+ // add3('Face3D', 'Curve')
+  // constuctor Single
+
 }
+
+ // addClassesforElementsInJSXBoard('Functiongraph', 'Curve')
+ // add2('Functiongraph', 'Curve')
 
  export class Functiongraph extends Curve {
+ // add3('Functiongraph', 'Curve')
+  // constuctor Single
+
+
+ /** Functiongraph visualizes a map x → f(x).  It is a wrapper for element Curve. The graph is drawn for x in the interval [a,b] default -10 to 10.
+```js
+let f = TSX.functiongraph((x: number) => 3 * Math.pow(x, 2))
+``` */
+ constructor (funct:(x:number)=>number, leftBorder?:number, rightBorder?:number, attributes: FunctiongraphAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('functiongraph', [funct,leftBorder,rightBorder,], defaultAttributes(attributes))  as Functiongraph
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Functiongraph3D', 'ParametricSurface3D')
+ // add2('Functiongraph3D', 'ParametricSurface3D')
 
  export class Functiongraph3D extends ParametricSurface3D {
+ // add3('Functiongraph3D', 'ParametricSurface3D')
+  // constuctor Single
+
+
+ /** A 3D functiongraph visualizes a map (x, y) → f(x, y).  */
+ constructor (xyFunction:(x:number,y:number)=>number, xRange:NumberFunction[], yRange:NumberFunction[], attributes: Functiongraph3DAttributes ={} ) {
+ if(alwaysFalse()){
+super((x,y)=>0,(x,y)=>0,(x,y)=>0,[0],[0]);
+ }
+   return TSX._jsxView3d().create('functiongraph3d', [xyFunction,xRange,yRange,], defaultAttributes(attributes))  as Functiongraph3D
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Glider', 'Point')
+ // add2('Glider', 'Point')
 
  export class Glider extends Point {
+ // add3('Glider', 'Point')
+  // constuctor Multi
+
+ constructor( hostElement:GeometryElement,attributes?:GliderAttributes)
+ constructor( hostElement:GeometryElement,initialPosition:number[],attributes?:GliderAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super([0]); // plausible super for Point 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+ params = b? [b[0]??0,b[1]??0,a]:[0,0,a]
+                         return _jsxBoard().create('glider', params ,defaultAttributes(attrs));
+ }
 }
+
+ // addClassesforElementsInJSXBoard('Glider3D', 'Point3D')
+ // add2('Glider3D', 'Point3D')
 
  export class Glider3D extends Point3D {
+ // add3('Glider3D', 'Point3D')
+  // constuctor Single
+
+
+ /** Glider3D is an alias for JSXGraph's Point3D(). */
+ constructor (element:Curve3D|Line3D|Sphere3D, initial:number[]=[0,0,0], attributes: Glider3DAttributes ={} ) {
+ if(alwaysFalse()){
+ super([]); // plausible super for Point3D 
+ }
+ return _jsxView3d().create("point3d",[initial,element],attributes)
 }
 
- export class Grid extends Curve {
 }
+
+ // addClassesforElementsInJSXBoard('Grid', 'Curve')
+ // add2('Grid', 'Curve')
+
+ export class Grid extends Curve {
+ // add3('Grid', 'Curve')
+  // constuctor Multi
+
+ constructor( axis1:Axis,axis2:Axis,attributes?:GridAttributes)
+ constructor( attributes?:GridAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxBoard().create('grid', params, defaultAttributes(attrs))
+ }
+}
+
+ // addClassesforElementsInJSXBoard('Hatch', 'Ticks')
+ // add2('Hatch', 'Ticks')
 
  export class Hatch extends Ticks {
 
@@ -6227,19 +5332,84 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get ticksDistance():number {
   return _jsxBoard().ticksDistance as number
 }
+ // add3('Hatch', 'Ticks')
+  // constuctor Single
+
+ constructor (line:Line|[Point|pointAddr,Point|pointAddr], numberHatches:number, attributes: HatchAttributes ={} ) {
+ if(alwaysFalse()){
+ super(({} as TSX.Line)); // plausible super for Ticks 
+ }
+   return TSX._jsxBoard().create('hatch', [line,numberHatches,], defaultAttributes(attributes))  as Hatch
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Hyperbola', 'Conic')
+ // add2('Hyperbola', 'Conic')
 
  export class Hyperbola extends Conic {
+ // add3('Hyperbola', 'Conic')
+  // constuctor Single
+
+ constructor (point1:Point|pointAddr, point2:Point|pointAddr, point3:Point|pointAddr|number, start:number=-3.14, end:number=3.14, attributes: HyperbolaAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],[0],[0],[0],[0]); // plausible super for Conic 
+ }
+   return TSX._jsxBoard().create('hyperbola', [point1,point2,point3,start,end,], defaultAttributes(attributes))  as Hyperbola
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Incenter', 'Point')
+ // add2('Incenter', 'Point')
 
  export class Incenter extends Point {
+ // add3('Incenter', 'Point')
+  // constuctor Single
+
+ constructor (p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: IncenterAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0]); // plausible super for Point 
+ }
+   return TSX._jsxBoard().create('incenter', [p1,p2,p3,], defaultAttributes(attributes))  as Incenter
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Incircle', 'Circle')
+ // add2('Incircle', 'Circle')
 
  export class Incircle extends Circle {
+ // add3('Incircle', 'Circle')
+  // constuctor Single
+
+ constructor (p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: IncircleAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],[0]); // plausible super for Circle 
+ }
+   return TSX._jsxBoard().create('incircle', [p1,p2,p3,], defaultAttributes(attributes))  as Incircle
 }
 
- export class Inequality extends Curve {
 }
+
+ // addClassesforElementsInJSXBoard('Inequality', 'Curve')
+ // add2('Inequality', 'Curve')
+
+ export class Inequality extends Curve {
+ // add3('Inequality', 'Curve')
+  // constuctor Single
+
+ constructor (boundaryLine:Line|[Point|pointAddr,Point|pointAddr]|Curve, attributes: InequalityAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('inequality', [boundaryLine,], defaultAttributes(attributes))  as Inequality
+}
+
+}
+
+ // addClassesforElementsInJSXBoard('Input', 'Text')
+ // add2('Input', 'Text')
 
  export class Input extends Text {
 
@@ -6247,6 +5417,17 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get rendNodeInput():HTMLInputElement {
   return _jsxBoard().rendNodeInput as HTMLInputElement
 }
+ // add3('Input', 'Text')
+  // constuctor Single
+
+ constructor (position:Point|pointAddr, label:string|Function, initial:String="", attributes: InputAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],''); // plausible super for Text 
+ }
+ (position as any).push(label,initial);
+                        return _jsxBoard().create('input', position,defaultAttributes(attributes));
+}
+
 
  /** Sets value of the input element. */
  set(value:String): GeometryElement {
@@ -6258,6 +5439,9 @@ P.moveTo([A.X(), A.Y()], 5000)
   return  this.Value() as string
 }
 }
+
+ // addClassesforElementsInJSXBoard('Integral', 'Curve')
+ // add2('Integral', 'Curve')
 
  export class Integral extends Curve {
 
@@ -6280,6 +5464,16 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get curveRight():Point {
   return _jsxBoard().curveRight as Point
 }
+ // add3('Integral', 'Curve')
+  // constuctor Single
+
+ constructor (range:number[], curve:Curve, attributes: IntegralAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('integral', [range,curve,], defaultAttributes(attributes))  as Integral
+}
+
 
  /** Returns the current value of the integral. */
  Value(): Point {
@@ -6287,11 +5481,65 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Intersection', 'Point')
+ // add2('Intersection', 'Point')
+
  export class Intersection extends Point {
+ // add3('Intersection', 'Point')
+  // constuctor Multi
+
+ constructor( element1:Line|Circle|Curve|Polygon|PolygonalChain,element2:Line|Circle|Curve|Polygon|PolygonalChain,i?:number|Function,attributes?:IntersectionAttributes)
+ constructor( element1:Line|Circle|Curve|Polygon|PolygonalChain,element2:Line|Circle|Curve|Polygon|PolygonalChain,attributes?:IntersectionAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super([0]); // plausible super for Point 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+ return _jsxBoard().create('intersection', params, defaultAttributes(attrs)) as Point
+ }
 }
 
+ // addClassesforElementsInJSXBoard('Label', 'Text')
+ // add2('Label', 'Text')
+
  export class Label extends Text {
+ // add3('Label', 'Text')
+  // constuctor Single
+
 }
+
+ // addClassesforElementsInJSXBoard('Legend', 'GeometryElement')
+ // add2('Legend', 'GeometryElement')
 
  export class Legend extends GeometryElement {
 
@@ -6309,7 +5557,30 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get style():String {
   return _jsxBoard().style as String
 }
+ // add3('Legend', 'GeometryElement')
+  // constuctor Single
+
+
+ /** Creates a Legend for a Chart Element
+                                
+*```js
+* let labels = ['a','b','c']
+* let colors = ['red','green','blue']
+* let legend = TSX.legend([2,2],labels,colors)
+*```
+                                
+ */
+ constructor (lowerLeft:pointAddr, labels:string[], colors:string[], attributes: LegendAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because GeometryElement does not have a signature array
+ attributes['labels']=labels;
+                attributes['colors']=colors
+                return _jsxBoard().create('legend', lowerLeft,defaultAttributes(attributes));
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Locus', 'Curve')
+ // add2('Locus', 'Curve')
 
  export class Locus extends Curve {
 
@@ -6322,64 +5593,512 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get eq():String {
   return _jsxBoard().eq as String
 }
+ // add3('Locus', 'Curve')
+  // constuctor Single
+
+ constructor (point:Point, attributes: LocusAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('locus', [point,], defaultAttributes(attributes))  as Locus
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('MajorArc', 'Curve')
+ // add2('MajorArc', 'Curve')
 
  export class MajorArc extends Curve {
+ // add3('MajorArc', 'Curve')
+  // constuctor Single
+
+ constructor (p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: MajorArcAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('majorArc', [p1,p2,p3,], defaultAttributes(attributes))  as MajorArc
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('MajorSector', 'Curve')
+ // add2('MajorSector', 'Curve')
 
  export class MajorSector extends Curve {
+ // add3('MajorSector', 'Curve')
+  // constuctor Single
+
+ constructor (p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: MajorSectorAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('majorSector', [p1,p2,p3,], defaultAttributes(attributes))  as MajorSector
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Measurement', 'Text')
+ // add2('Measurement', 'Text')
 
  export class Measurement extends Text {
+ // add3('Measurement', 'Text')
+  // constuctor Single
+
+
+ /** Display measurements of geometric properties and the arithmetic operations of measurements. Under the hood this is a text element which has a method Value. The text to be displayed is the result of the evaluation of a prefix expression, see JXG.PrefixParser.
+```js
+ let p = TSX.point([4, 9]);
+ let c = TSX.circle([4, 7], p);
+ TSX.measurement([4, 4], 'Area', c, { visible: true, prefix: 'area: ', baseUnit: 'cm' });
+ TSX.measurement([4, 3], 'Radius', c, { prefix: 'radius: ', baseUnit: 'cm' });
+```
+ */
+ constructor (locn:Point|pointAddr, measure:string, element:GeometryElement, attributes: MeasurementAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],''); // plausible super for Text 
+ }
+ let x:any=0,y:any=0;
+                if(Array.isArray(locn)){
+                   x = locn[0];
+                   y = locn[1];
+                }else if(typeof locn == 'object'){
+                    x = locn.X();
+                    y = locn.Y();
+                };
+            return _jsxBoard().create('measurement', [x,y,[measure,element]], attributes)
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Mesh3D', 'Curve')
+ // add2('Mesh3D', 'Curve')
 
  export class Mesh3D extends Curve {
+ // add3('Mesh3D', 'Curve')
+  // constuctor Multi
+
+ constructor( point:Point3D|number[]|Function,direction1:number[]|Function,direction2:number[]|Function,range1?:pointAddr,range2?:pointAddr,attributes?:Mesh3DAttributes)
+ constructor( point:Point3D|number[]|Function,direction1:number[]|Function|Function[],direction2:number[]|Function|Function[],range1?:pointAddr,range2?:pointAddr,attributes?:Mesh3DAttributes)
+ constructor( point1:Point3D,point2:Point3D,point3:Point3D,range1?:pointAddr,range2?:pointAddr,attributes?:Mesh3DAttributes)
+ constructor( point1:Point3D,point2:Point3D,point3:Point3D,attributes?:Mesh3DAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxView3d().create('mesh3d', params, defaultAttributes(attrs))
+ }
 }
+
+ // addClassesforElementsInJSXBoard('Midpoint', 'Point')
+ // add2('Midpoint', 'Point')
 
  export class Midpoint extends Point {
+ // add3('Midpoint', 'Point')
+  // constuctor Multi
+
+ constructor( p1:Point,p2:Point,attributes?:MidpointAttributes)
+ constructor( line:Line,attributes?:MidpointAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super([0]); // plausible super for Point 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxBoard().create('midpoint', params, defaultAttributes(attrs))
+ }
 }
+
+ // addClassesforElementsInJSXBoard('MinorArc', 'Curve')
+ // add2('MinorArc', 'Curve')
 
  export class MinorArc extends Curve {
+ // add3('MinorArc', 'Curve')
+  // constuctor Single
+
+ constructor (p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: MinorArcAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('minorArc', [p1,p2,p3,], defaultAttributes(attributes))  as MinorArc
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('MinorSector', 'Curve')
+ // add2('MinorSector', 'Curve')
 
  export class MinorSector extends Curve {
+ // add3('MinorSector', 'Curve')
+  // constuctor Single
+
+ constructor (p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: MinorSectorAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('minorSector', [p1,p2,p3,], defaultAttributes(attributes))  as MinorSector
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Mirrorelement', 'GeometryElement')
+ // add2('Mirrorelement', 'GeometryElement')
 
  export class Mirrorelement extends GeometryElement {
+ // add3('Mirrorelement', 'GeometryElement')
+  // constuctor Single
+
+ constructor (element:Point|Line|Circle|Curve|Polygon, acrossPoint:Point|pointAddr, attributes: MirrorelementAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because GeometryElement does not have a signature array
+   return TSX._jsxBoard().create('mirrorelement', [element,acrossPoint,], defaultAttributes(attributes))  as Mirrorelement
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Mirrorpoint', 'Point')
+ // add2('Mirrorpoint', 'Point')
 
  export class Mirrorpoint extends Point {
+ // add3('Mirrorpoint', 'Point')
+  // constuctor Single
+
+ constructor (p1:Point, p2:Point, attributes: MirrorpointAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0]); // plausible super for Point 
+ }
+   return TSX._jsxBoard().create('mirrorpoint', [p1,p2,], defaultAttributes(attributes))  as Mirrorpoint
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('NonReflexAngle', 'Angle')
+ // add2('NonReflexAngle', 'Angle')
 
  export class NonReflexAngle extends Angle {
+ // add3('NonReflexAngle', 'Angle')
+  // constuctor Single
+
+ constructor (point1:Point, point2:Point, point3:Point, attributes: NonReflexAngleAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],[0],[0]); // plausible super for Angle 
+ }
+   return TSX._jsxBoard().create('nonReflexAngle', [point1,point2,point3,], defaultAttributes(attributes))  as NonReflexAngle
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Normal', 'Line')
+ // add2('Normal', 'Line')
 
  export class Normal extends Line {
+ // add3('Normal', 'Line')
+  // constuctor Multi
+
+ constructor( object:Line|Circle|Curve,point:Point,attributes?:NormalAttributes)
+ constructor( glider:Glider,attributes?:NormalAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super([0],[0]); // plausible super for Line 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxBoard().create('normal', params, defaultAttributes(attrs))
+ }
 }
+
+ // addClassesforElementsInJSXBoard('Orthogonalprojection', 'Point')
+ // add2('Orthogonalprojection', 'Point')
 
  export class Orthogonalprojection extends Point {
+ // add3('Orthogonalprojection', 'Point')
+  // constuctor Single
+
+
+ /** An `orthogonalprojection` is a locked point determined by projecting a point orthogonally onto a line.
+```js
+let s1 = TSX.segment(p1, p2)
+let p3 = TSX.point([0, -1])
+TSX.orthogonalprojection(p3, s1)
+``` */
+ constructor (point:Point|pointAddr, line:Line|[Point|pointAddr,Point|pointAddr], attributes: OrthogonalprojectionAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0]); // plausible super for Point 
+ }
+   return TSX._jsxBoard().create('orthogonalprojection', [point,line,], defaultAttributes(attributes))  as Orthogonalprojection
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('OtherIntersection', 'Point')
+ // add2('OtherIntersection', 'Point')
 
  export class OtherIntersection extends Point {
+ // add3('OtherIntersection', 'Point')
+  // constuctor Single
+
+ constructor (element1:Line|Circle, element2:Line|Circle, firstIntersection:Point, attributes: OtherIntersectionAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0]); // plausible super for Point 
+ }
+  return _jsxBoard().create('otherintersection', [element1,element2,firstIntersection], attributes)
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Parabola', 'Conic')
+ // add2('Parabola', 'Conic')
 
  export class Parabola extends Conic {
+ // add3('Parabola', 'Conic')
+  // constuctor Single
+
+ constructor (focalPoint:Point|pointAddr, line:Line|[Point|pointAddr,Point|pointAddr], attributes: ParabolaAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],[0],[0],[0],[0]); // plausible super for Conic 
+ }
+   return TSX._jsxBoard().create('parabola', [focalPoint,line,], defaultAttributes(attributes))  as Parabola
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Parallelpoint', 'Point')
+ // add2('Parallelpoint', 'Point')
 
  export class Parallelpoint extends Point {
+ // add3('Parallelpoint', 'Point')
+  // constuctor Multi
+
+ constructor( line:Line|[Point,Point],point:Point|pointAddr,attributes?:ParallelpointAttributes)
+ constructor( P1:Point,P2:Point,P3:Point,attributes?:ParallelpointAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super([0]); // plausible super for Point 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxBoard().create('parallelpoint', params, defaultAttributes(attrs))
+ }
 }
+
+ // addClassesforElementsInJSXBoard('Segment', 'Line')
+ // add2('Segment', 'Line')
 
  export class Segment extends Line {
+ // add3('Segment', 'Line')
+  // constuctor Multi
+
+ constructor( P1:Point|pointAddr,P2:Point|pointAddr,attributes?:SegmentAttributes)
+ constructor( P1:Point|pointAddr,P2:Point|pointAddr,length:number|Function,attributes?:SegmentAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super([0],[0]); // plausible super for Line 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxBoard().create('segment', params, defaultAttributes(attrs))
+ }
 }
+
+ // addClassesforElementsInJSXBoard('Parallelogram', 'Polygon')
+ // add2('Parallelogram', 'Polygon')
 
  export class Parallelogram extends Polygon {
+ // add3('Parallelogram', 'Polygon')
+  // constuctor Single
+
+ constructor (p1:Point|pointAddr, p2:Point|pointAddr, p3:Point|pointAddr, attributes: ParallelogramAttributes ={} ) {
+ if(alwaysFalse()){
+ super([[0]]); // plausible super for Polygon 
+ }
+   return TSX._jsxBoard().create('parallelogram', [p1,p2,p3,], defaultAttributes(attributes))  as Parallelogram
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Perpendicular', 'Segment')
+ // add2('Perpendicular', 'Segment')
 
  export class Perpendicular extends Segment {
+ // add3('Perpendicular', 'Segment')
+  // constuctor Single
+
+
+ /** Create a line orthogonal to a given line and containing a given point. If you want a Perpendicular to a Curve, look at Normal(). */
+ constructor (line:Line|[Point|pointAddr,Point|pointAddr], point:Point|pointAddr, attributes: PerpendicularAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],[0]); // plausible super for Segment 
+ }
+   return TSX._jsxBoard().create('perpendicular', [line,point,], defaultAttributes(attributes))  as Perpendicular
 }
 
- export class PerpendicularPoint extends Point {
 }
+
+ // addClassesforElementsInJSXBoard('PerpendicularPoint', 'Point')
+ // add2('PerpendicularPoint', 'Point')
+
+ export class PerpendicularPoint extends Point {
+ // add3('PerpendicularPoint', 'Point')
+  // constuctor Single
+
+
+ /** Create a point on a line where a perpendicular to a given point would intersect that line. */
+ constructor (line:Line|[Point|pointAddr,Point|pointAddr], point:Point|pointAddr, attributes: PerpendicularPointAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0]); // plausible super for Point 
+ }
+   return TSX._jsxBoard().create('perpendicularPoint', [line,point,], defaultAttributes(attributes))  as PerpendicularPoint
+}
+
+}
+
+ // addClassesforElementsInJSXBoard('PerpendicularSegment', 'Segment')
+ // add2('PerpendicularSegment', 'Segment')
 
  export class PerpendicularSegment extends Segment {
 
@@ -6387,16 +6106,72 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get point():PerpendicularPoint {
   return _jsxBoard().point as PerpendicularPoint
 }
+ // add3('PerpendicularSegment', 'Segment')
+  // constuctor Single
+
+
+ /** Create a segment orthogonal to a given line and containing a given point.  If you want a Perpendicular to a Curve, look at Normal(). */
+ constructor (line:Line|[Point|pointAddr,Point|pointAddr], point:Point|pointAddr, attributes: PerpendicularSegmentAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],[0]); // plausible super for Segment 
+ }
+   return TSX._jsxBoard().create('perpendicularSegment', [line,point,], defaultAttributes(attributes))  as PerpendicularSegment
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('PolarLine', 'Line')
+ // add2('PolarLine', 'Line')
 
  export class PolarLine extends Line {
+ // add3('PolarLine', 'Line')
+  // constuctor Single
+
+ constructor (conic:Conic|Circle, point:Point, attributes: PolarLineAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],[0]); // plausible super for Line 
+ }
+   return TSX._jsxBoard().create('polarLine', [conic,point,], defaultAttributes(attributes))  as PolarLine
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('PolePoint', 'Point')
+ // add2('PolePoint', 'Point')
 
  export class PolePoint extends Point {
+ // add3('PolePoint', 'Point')
+  // constuctor Single
+
+ constructor (conic:Conic|Circle, line:Line, attributes: PolePointAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0]); // plausible super for Point 
+ }
+   return TSX._jsxBoard().create('polePoint', [conic,line,], defaultAttributes(attributes))  as PolePoint
 }
 
- export class PolygonalChain extends Polygon {
 }
+
+ // addClassesforElementsInJSXBoard('PolygonalChain', 'Polygon')
+ // add2('PolygonalChain', 'Polygon')
+
+ export class PolygonalChain extends Polygon {
+ // add3('PolygonalChain', 'Polygon')
+  // constuctor Single
+
+
+ /** Array of Points */
+ constructor (pointArray:Point[]|pointAddr[], attributes: PolygonalChainAttributes ={} ) {
+ if(alwaysFalse()){
+ super([[0]]); // plausible super for Polygon 
+ }
+   return TSX._jsxBoard().create('polygonalChain', [pointArray,], defaultAttributes(attributes))  as PolygonalChain
+}
+
+}
+
+ // addClassesforElementsInJSXBoard('Polyhedron3D', 'GeometryElement3D')
+ // add2('Polyhedron3D', 'GeometryElement3D')
 
  export class Polyhedron3D extends GeometryElement3D {
 
@@ -6414,21 +6189,129 @@ P.moveTo([A.X(), A.Y()], 5000)
  public get numberFaces():number {
   return _jsxBoard().numberFaces as number
 }
+ // add3('Polyhedron3D', 'GeometryElement3D')
+  // constuctor Single
+
+
+ /** A polyhedron in a 3D view consists of faces. Faces can be 0-, 1- or 2-dimensional.
+```js
+let rho = 1.6180339887;
+let vertexList = [  // list of vertex points
+    [0, -1, -rho], [0, +1, -rho], [0, -1, rho], [0, +1, rho],[1, rho, 0], [-1, rho, 0],
+    [1, -rho, 0], [-1, -rho, 0],[-rho, 0, 1], [-rho, 0, -1], [rho, 0, 1], [rho, 0, -1]
+];
+
+let faceArray = [  // each triangular face connects three vertex points
+    [4, 1, 11], [11, 1, 0], [6, 11, 0], [0, 1, 9],[11, 10, 4], [9, 1, 5],
+    [8, 9, 5], [5, 3, 8],[6, 10, 11], [2, 3, 10], [2, 10, 6], [8, 3, 2],
+    [3, 4, 10], [7, 8, 2], [9, 8, 7], [0, 9, 7],[4, 3, 5], [5, 1, 4], [0, 7, 6], [7, 2, 6]];
+
+    let ico = TSX.polyhedron3D(vertexList, faceArray, {
+    fillColorArray: [],
+    fillOpacity: 1,
+    strokeWidth: 0.1,
+    layer: 12,
+    shader: {   // shader modifies face colors depending on angle (simulates lighting)
+        enabled: true,
+        type: 'angle',
+        hue: 0,
+        saturation: 90,
+        minlightness: 60,
+        maxLightness: 80
+    }
+});
+``` */
+ constructor (vertexList:(TSX.Point3D|TSX.pointAddr3D)[], faceArray:number[][], attributes: Polyhedron3DAttributes ={} ) {
+ if(alwaysFalse()){
+ super(); // plausible super for GeometryElement3D 
+ }
+   return TSX._jsxView3d().create('polyhedron3d', [vertexList,faceArray,], defaultAttributes(attributes))  as Polyhedron3D
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('RadicalAxis', 'Line')
+ // add2('RadicalAxis', 'Line')
 
  export class RadicalAxis extends Line {
+ // add3('RadicalAxis', 'Line')
+  // constuctor Single
+
+ constructor (circle1:Circle, circle2:Circle, attributes: RadicalAxisAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],[0]); // plausible super for Line 
+ }
+   return TSX._jsxBoard().create('radicalAxis', [circle1,circle2,], defaultAttributes(attributes))  as RadicalAxis
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Reflection', 'GeometryElement')
+ // add2('Reflection', 'GeometryElement')
 
  export class Reflection extends GeometryElement {
+ // add3('Reflection', 'GeometryElement')
+  // constuctor Single
+
+
+ /** A reflected element (point, polygon, line or curve) from an object of the same type and a line of reflection. */
+ constructor (object:Point|Line|Curve|Polygon, reflectLine:Line, attributes: ReflectionAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because GeometryElement does not have a signature array
+   return TSX._jsxBoard().create('reflection', [object,reflectLine,], defaultAttributes(attributes))  as Reflection
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('ReflexAngle', 'Angle')
+ // add2('ReflexAngle', 'Angle')
 
  export class ReflexAngle extends Angle {
+ // add3('ReflexAngle', 'Angle')
+  // constuctor Single
+
+ constructor (point1:Point, point2:Point, point3:Point, attributes: ReflexAngleAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],[0],[0]); // plausible super for Angle 
+ }
+   return TSX._jsxBoard().create('reflexAngle', [point1,point2,point3,], defaultAttributes(attributes))  as ReflexAngle
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('RegularPolygon', 'Polygon')
+ // add2('RegularPolygon', 'Polygon')
 
  export class RegularPolygon extends Polygon {
+ // add3('RegularPolygon', 'Polygon')
+  // constuctor Single
+
+ constructor (P1:Point|pointAddr, P2:Point|pointAddr, nVertices:number, attributes: RegularPolygonAttributes ={} ) {
+ if(alwaysFalse()){
+ super([[0]]); // plausible super for Polygon 
+ }
+   return TSX._jsxBoard().create('regularPolygon', [P1,P2,nVertices,], defaultAttributes(attributes))  as RegularPolygon
 }
 
+}
+
+ // addClassesforElementsInJSXBoard('Riemannsum', 'Curve')
+ // add2('Riemannsum', 'Curve')
+
  export class Riemannsum extends Curve {
+ // add3('Riemannsum', 'Curve')
+  // constuctor Single
+
+
+ /** Visualize the Riemann sum which is an approximation of an integral by a finite sum. It is realized as a special curve. The returned element has the method Value() which returns the sum of the areas of the bars.
+
+                        In case of type 'simpson' and 'trapezoidal', the horizontal line approximating the function value is replaced by a parabola or a secant. IN case of 'simpson', the parabola is approximated visually by a polygonal chain of fixed step width. */
+ constructor (funct:Function|number[], nBars:Function|number, type:'left'|'right'|'middle'|'lower'|'upper'|'random'|'simpson'|'trapezoidal' = 'simpson', leftBorder?:number|Function, rightBorder?:number|Function, attributes: RiemannsumAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('riemannsum', [funct,nBars,type,leftBorder,rightBorder,], defaultAttributes(attributes))  as Riemannsum
+}
+
 
  /** Returns the value of the Riemann sum, i.e. */
  Value(): number {
@@ -6436,15 +6319,59 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Semicircle', 'Arc')
+ // add2('Semicircle', 'Arc')
+
  export class Semicircle extends Arc {
 
  /**  */
  public get midpoint():Midpoint {
   return _jsxBoard().midpoint as Midpoint
 }
+ // add3('Semicircle', 'Arc')
+  // constuctor Single
+
+ constructor (P1:Point|pointAddr, P2:Point|pointAddr, attributes: SemicircleAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],[0],[0]); // plausible super for Arc 
+ }
+   return TSX._jsxBoard().create('semicircle', [P1,P2,], defaultAttributes(attributes))  as Semicircle
 }
 
+}
+
+ // addClassesforElementsInJSXBoard('Slider', 'Glider')
+ // add2('Slider', 'Glider')
+
  export class Slider extends Glider {
+ // add3('Slider', 'Glider')
+  // constuctor Single
+
+
+ /** An input widget for choosing values from a given range of numbers.  Parameters are startpoint, endpoint,
+                and an array with [minimum, initialValue, maximum].  Query the value with slider.Value().  Set the slider either by
+                dragging the control or clicking on the line (you can disable clicking with {moveOnUp:false}
+        
+*```js
+         let s = TSX.slider([1, 2], [3, 2], [1, 5, 10])           //  query with s.Value()
+         let s = TSX.slider([1, 2], [3, 2], [1, 5, 10],{snapWidth:1})     //  only values 1,2,3...
+         let s = TSX.slider([1, 2], [3, 2], [1, 5, 10],{withTicks:false}) //  hide the ticks
+         let s = TSX.slider[-3, 1], [1, 1], [-10, 1, 10], {
+            highline: { strokeColor: 'red'},        // to left of handle
+            baseline: { strokeColor: 'blue'},       // to right of handle
+            fillColor: 'red',                       // handle color
+            label: {fontSize: 16, strokeColor: 'orange'},
+            suffixLabel: ' x=',         // really a prefix
+            postLabel: ' meters'        // this is a suffix
+        
+*``` */
+ constructor (StartPoint:Point|pointAddr, EndPoint:Point|pointAddr, minimum_initial_maximum:[number,number,number], attributes: SliderAttributes ={} ) {
+ if(alwaysFalse()){
+ super(({} as TSX.GeometryElement)); // plausible super for Glider 
+ }
+   return TSX._jsxBoard().create('slider', [StartPoint,EndPoint,minimum_initial_maximum,], defaultAttributes(attributes))  as Slider
+}
+
 
  /** Sets the maximum value of the slider. */
  setMax(value:number): Object {
@@ -6472,7 +6399,20 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Slopefield', 'Vectorfield')
+ // add2('Slopefield', 'Vectorfield')
+
  export class Slopefield extends Vectorfield {
+ // add3('Slopefield', 'Vectorfield')
+  // constuctor Single
+
+ constructor (func:Function, xData:NumberFunction[], yData:NumberFunction[], attributes: SlopefieldAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[],[]); // plausible super for Vectorfield 
+ }
+   return TSX._jsxBoard().create('slopefield', [func,xData,yData,], defaultAttributes(attributes))  as Slopefield
+}
+
 
  /** Set the defining functions of slope field. */
  setF(): Object {
@@ -6480,7 +6420,52 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Slopetriangle', 'Line')
+ // add2('Slopetriangle', 'Line')
+
  export class Slopetriangle extends Line {
+ // add3('Slopetriangle', 'Line')
+  // constuctor Multi
+
+ constructor( tangent:Point | Tangent,attributes?:SlopetriangleAttributes)
+ constructor( line:Line,point:Point,attributes?:SlopetriangleAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super([0],[0]); // plausible super for Line 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxBoard().create('slopetriangle', params, defaultAttributes(attrs))
+ }
 
  /** Returns the value of the slope triangle, that is the slope of the tangent. */
  Value(): number {
@@ -6488,25 +6473,192 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Smartlabel', 'Text')
+ // add2('Smartlabel', 'Text')
+
  export class Smartlabel extends Text {
+ // add3('Smartlabel', 'Text')
+  // constuctor Multi
+
+ /** Customized text elements for displaying measurements of JSXGraph elements, Examples are length of a segment, perimeter or area of a circle or polygon (including polygonal chain), slope of a line, value of an angle, and coordinates of a point. */
+ constructor( parent:Point|Line|Circle|Polygon|Angle,attributes?:SmartlabelAttributes)
+ /** Customized text elements for displaying measurements of JSXGraph elements, Examples are length of a segment, perimeter or area of a circle or polygon (including polygonal chain), slope of a line, value of an angle, and coordinates of a point. */
+ constructor( parent:Point|Line|Circle|Polygon|Angle,Txt:string|Function,attributes?:SmartlabelAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super([0],''); // plausible super for Text 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxBoard().create('smartlabel', params, defaultAttributes(attrs))
+ }
 }
+
+ // addClassesforElementsInJSXBoard('Sphere3D', 'GeometryElement3D')
+ // add2('Sphere3D', 'GeometryElement3D')
 
  export class Sphere3D extends GeometryElement3D {
+ // add3('Sphere3D', 'GeometryElement3D')
+  // constuctor Single
+
+
+ /**  sphere consists of all points with a given distance from a given point. The given point is called the center, and the given distance is called the radius. */
+ constructor (center:Point3D|pointAddr3D, radius:Point3D|number|pointAddr3D, attributes: Sphere3DAttributes ={} ) {
+ if(alwaysFalse()){
+ super(); // plausible super for GeometryElement3D 
+ }
+   return TSX._jsxView3d().create('sphere3d', [center,radius,], defaultAttributes(attributes))  as Sphere3D
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Spline', 'Curve')
+ // add2('Spline', 'Curve')
 
  export class Spline extends Curve {
+ // add3('Spline', 'Curve')
+  // constuctor Single
+
+ constructor (points:Point[]|number[][], attributes: SplineAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+ return _jsxBoard().create('spline', points, defaultAttributes(attributes))
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Stepfunction', 'Curve')
+ // add2('Stepfunction', 'Curve')
 
  export class Stepfunction extends Curve {
+ // add3('Stepfunction', 'Curve')
+  // constuctor Single
+
+
+ /** A step function is a function graph that is piecewise constant. In case the data points should be updated after creation time, they can be accessed by curve.xterm and curve.yterm.
+```js
+let  curve = TSX.stepfunction([0,1,2,3,4,5], [1,3,0,2,2,1]);
+```
+ */
+ constructor (X:number[], Y:number[], attributes: StepfunctionAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('stepfunction', [X,Y,], defaultAttributes(attributes))  as Stepfunction
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Tangent', 'Line')
+ // add2('Tangent', 'Line')
 
  export class Tangent extends Line {
+ // add3('Tangent', 'Line')
+  // constuctor Multi
+
+ constructor( point:Glider,attributes?:TangentAttributes)
+ constructor( point:Point,curve:Line|Circle|Curve,attributes?:TangentAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super([0],[0]); // plausible super for Line 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxBoard().create('tangent', params, defaultAttributes(attrs))
+ }
 }
+
+ // addClassesforElementsInJSXBoard('TangentTo', 'Line')
+ // add2('TangentTo', 'Line')
 
  export class TangentTo extends Line {
+ // add3('TangentTo', 'Line')
+  // constuctor Single
+
+
+ /** Construct the tangent line through a point to a conic or a circle. There will be either two, one or no such tangent, depending if the point is outside of the conic, on the conic, or inside of the conic. Similar to the intersection of a line with a circle, the specific tangent can be chosen with a third (optional) parameter number. */
+ constructor (conic:Conic|Circle, point:Point|pointAddr, N:number=0, attributes: TangentToAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],[0]); // plausible super for Line 
+ }
+   return TSX._jsxBoard().create('tangentTo', [conic,point,N,], defaultAttributes(attributes))  as TangentTo
 }
 
+}
+
+ // addClassesforElementsInJSXBoard('Tapemeasure', 'Segment')
+ // add2('Tapemeasure', 'Segment')
+
  export class Tapemeasure extends Segment {
+ // add3('Tapemeasure', 'Segment')
+  // constuctor Single
+
+ constructor (P1:Point|pointAddr, P2:Point|pointAddr, attributes: TapemeasureAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0],[0]); // plausible super for Segment 
+ }
+   return TSX._jsxBoard().create('tapemeasure', [P1,P2,], defaultAttributes(attributes))  as Tapemeasure
+}
+
 
  /** Returns the length of the tape measure. */
  Value(): number {
@@ -6514,80 +6666,299 @@ P.moveTo([A.X(), A.Y()], 5000)
 }
 }
 
+ // addClassesforElementsInJSXBoard('Tracecurve', 'Curve')
+ // add2('Tracecurve', 'Curve')
+
  export class Tracecurve extends Curve {
+ // add3('Tracecurve', 'Curve')
+  // constuctor Single
+
+
+ /** This element is used to provide a constructor for trace curve (simple locus curve).  Given a glider (or slider) and a point controlled by the glider, this element draws the curve that the point will follow when the glider is manipulated.  Use the {trace:true} attribute on the point to mark breadcrumbs along this curve. */
+ constructor (glider:Glider, point:Point, attributes: TracecurveAttributes ={} ) {
+ if(alwaysFalse()){
+ super([],[]); // plausible super for Curve 
+ }
+   return TSX._jsxBoard().create('tracecurve', [glider,point,], defaultAttributes(attributes))  as Tracecurve
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Transform', 'GeometryElement')
+ // add2('Transform', 'GeometryElement')
 
  export class Transform extends GeometryElement {
-
- /** Create a new Point from a Point and Transform.  Translation just requires dx and dy.
-                            Rotation requires a point to rotate around, and a rotation transform around that point, and
-                            a remote point that sets both the radius and the initial angle of the rotation.
-                            
-Example: Given a rotation transform controlled by a slider, create a rotating point using the transform method Point() and the
-                            radius point.
-```js
-    let slid = TSX.slider([-4,0],[-2,0],[-20,0,20])  // controls rotation
-    let c = TSX.point([-1,-1],{name:'c'})     //center
-    let rot = TSX.rotate(()=>slid.Value(),c)  // rotation around c
-    let initial = TSX.point([-1,1],{name:'initial'})
-    let d = rot.point(initial,{name:'rotation around c'})  // new point
-    TSX.segment(c,d)    // to illustrate
-``` */
- point(fromPoint:Point,attributes:PointAttributes={}): Point {
-  return _jsxBoard().create('point',[fromPoint, this],defaultAttributes(attributes)) as Point
-}
-
- /**  */
- applyOnce(element:GeometryElement): void {
-  return  this.applyOnce(element) as void
-}
-
- /**  Binds a transformation to a GeometryElement or an array of elements. In every update of the GeometryElement(s), the transformation is executed. That means, in order to immediately apply the transformation, a call of currentBoard.update() has to follow. */
- bindTo(element:GeometryElement|GeometryElement[]): void {
-  return  this.bindTo(element) as void
-}
-
- /**  */
- setMatrix(): Transform {
-  return  this.setMatrix() as Transform
-}
-}
+ // add3('Transform', 'GeometryElement')
+ // Missing signaature array for Transform
+ }
+ // addClassesforElementsInJSXBoard('Transform3D', 'GeometryElement3D')
+ // add2('Transform3D', 'GeometryElement3D')
 
  export class Transform3D extends GeometryElement3D {
-}
+ // add3('Transform3D', 'GeometryElement3D')
+ // Missing signaature array for Transform3D
+ }
+ // addClassesforElementsInJSXBoard('TransformPoint', 'Point')
+ // add2('TransformPoint', 'Point')
 
  export class TransformPoint extends Point {
+ // add3('TransformPoint', 'Point')
+  // constuctor Single
+
+
+ /** Create a new point from an existing point and a concatenation of transforms. This is a powerful way of creating complex constructions that can be rotated, scaled, and translated.  An alternative to using Groups.
+~~~js
+     // define a few sliders to control the model
+     let tX = TSX.slider([-4, 4.0], [3, 4.0], [-10, 0, 10], { name: 'tX' })
+     let tY = TSX.slider([-4, 4.5], [3, 4.5], [-10, 0, 10], { name: 'tY' })
+     let tRotate = TSX.slider([-4, 3.0], [3, 3.0], [-Math.PI * 2, 0, Math.PI * 2], { name: 'tRotate' })
+     let tScale = TSX.slider ([-4, 3.5], [3, 3.5], [0, 1, 5], { name: 'tScale' })
+     // orange is 'geometry' for a complex shape (use opacity:0)
+     let a = TSX.point([0, -1])
+     let b = TSX.point([1, -1])
+     // set up tranforms for rotation, scaling, and translation
+     let trans = TSX.translate(()=>tX.Value(), ()=>tY.Value())
+     let rot = TSX.rotate(() => tRotate.Value(), a)  // rotation around a
+     let scale = TSX.scale(()=>tScale.Value(),()=>tScale.Value())  // scaling is relative to [0,0]
+     // blue shape using transformPoints- starts with model and applies transforms
+     let shapea = TSX.transformPoint(a,[rot,scale,trans],{color:'blue'})
+     let shapeb = TSX.transformPoint(b,[rot,scale,trans],{color:'blue'})
+     TSX.segment(shapea,shapeb)
+~~~             */
+ constructor (point:Point, transform:Transform|Transform[], attributes: TransformPointAttributes ={} ) {
+ if(alwaysFalse()){
+ super([0]); // plausible super for Point 
+ }
+  return _jsxBoard().create('point', [point,transform],defaultAttributes(attributes))
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('TransformPoint3D', 'Point3D')
+ // add2('TransformPoint3D', 'Point3D')
 
  export class TransformPoint3D extends Point3D {
+ // add3('TransformPoint3D', 'Point3D')
+  // constuctor Single
+
+
+ /** Create a new point from an existing point and a concatenation of transforms. This is a powerful way of creating complex constructions that can be rotated, scaled, and translated.  An alternative to using Groups.
+~~~js
+     // define a few sliders to control the model
+     let tX = TSX.slider([-4, 4.0], [3, 4.0], [-10, 0, 10], { name: 'tX' })
+     let tY = TSX.slider([-4, 4.5], [3, 4.5], [-10, 0, 10], { name: 'tY' })
+     let tRotate = TSX.slider([-4, 3.0], [3, 3.0], [-Math.PI * 2, 0, Math.PI * 2], { name: 'tRotate' })
+     let tScale = TSX.slider ([-4, 3.5], [3, 3.5], [0, 1, 5], { name: 'tScale' })
+     // orange is 'geometry' for a complex shape (use opacity:0)
+     let a = TSX.point([0, -1])
+     let b = TSX.point([1, -1])
+     // set up tranforms for rotation, scaling, and translation
+     let trans = TSX.translate(()=>tX.Value(), ()=>tY.Value())
+     let rot = TSX.rotate(() => tRotate.Value(), a)  // rotation around a
+     let scale = TSX.scale(()=>tScale.Value(),()=>tScale.Value())  // scaling is relative to [0,0]
+     // blue shape using transformPoints- starts with model and applies transforms
+     let shapea = TSX.transformPoint(a,[rot,scale,trans],{color:'blue'})
+     let shapeb = TSX.transformPoint(b,[rot,scale,trans],{color:'blue'})
+     TSX.segment(shapea,shapeb)
+~~~             */
+ constructor (point:Point3D, transform:Transform3D|Transform3D[], attributes: TransformPoint3DAttributes ={} ) {
+ if(alwaysFalse()){
+ super([]); // plausible super for Point3D 
+ }
+  return _jsxView3d().create('point3d', [point,transform],defaultAttributes(attributes))
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Segment3D', 'Line3D')
+ // add2('Segment3D', 'Line3D')
 
  export class Segment3D extends Line3D {
+ // add3('Segment3D', 'Line3D')
+  // constuctor Multi
+
+ constructor( P1:Point|pointAddr,P2:Point|pointAddr,attributes?:Segment3DAttributes)
+ constructor( P1:Point|pointAddr,P2:Point|pointAddr,length:number|Function,attributes?:Segment3DAttributes)
+// implementation of signature,  hidden from user
+ constructor (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+ if(alwaysFalse()){
+ super([0],[0]); // plausible super for Line3D 
+ }
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = isAttribute(a)?[]:[a,];
+   attrs = isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = isAttribute(b)?[a,]:[a,b,];
+   attrs = isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = isAttribute(g)? g:{};
+ }
+   return TSX._jsxView3d().create('segment3d', params, defaultAttributes(attrs))
+ }
 }
+
+ // addClassesforElementsInJSXBoard('Translate', 'Transform')
+ // add2('Translate', 'Transform')
 
  export class Translate extends Transform {
+ // add3('Translate', 'Transform')
+  // constuctor Single
+
+
+ /** Create a Transform object with Translate properties. */
+ constructor (dx:number|Function, dy:number|Function, attributes: TranslateAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because Transform does not have a signature array
+ return _jsxBoard().create('transform', [dx,dy], {type:'translate'})
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Rotate', 'Transform')
+ // add2('Rotate', 'Transform')
 
  export class Rotate extends Transform {
+ // add3('Rotate', 'Transform')
+  // constuctor Single
+
+
+ /** Create a Transform object with Rotate properties. */
+ constructor (angle:number|Function, around:Point|pointAddr, attributes: RotateAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because Transform does not have a signature array
+ return _jsxBoard().create('Transform', [angle,around], {type:'rotate'})
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Scale', 'Transform')
+ // add2('Scale', 'Transform')
 
  export class Scale extends Transform {
+ // add3('Scale', 'Transform')
+  // constuctor Single
+
+
+ /** Create a Transform object with Scale properties.  Scaling is relative to [0,0]. */
+ constructor (xMultiplier:number|Function, yMultiplier:number|Function, attributes: ScaleAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because Transform does not have a signature array
+ return _jsxBoard().create('transform', [xMultiplier,yMultiplier], {type:'scale'})
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Translate3D', 'Transform3D')
+ // add2('Translate3D', 'Transform3D')
 
  export class Translate3D extends Transform3D {
+ // add3('Translate3D', 'Transform3D')
+  // constuctor Single
+
+
+ /** Create a Transform3D object with Translate properties. */
+ constructor (dx:number|Function, dy:number|Function, dz:number|Function, attributes: Translate3DAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because Transform3D does not have a signature array
+ return _jsxView3d().create('transform3d', [dx,dy,dz], {type:'translate'})
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('Rotate3D', 'Transform3D')
+ // add2('Rotate3D', 'Transform3D')
 
  export class Rotate3D extends Transform3D {
+ // add3('Rotate3D', 'Transform3D')
+  // constuctor Single
+
+
+ /** Create a Transform3D object with Rotate properties around the normal vector N. */
+ constructor (angle:number|Function, n:number[], attributes: Rotate3DAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because Transform3D does not have a signature array
+ return _jsxView3d().create('transform3d', [angle,n], {type:'rotate'})
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('RotateX3D', 'Transform3D')
+ // add2('RotateX3D', 'Transform3D')
 
  export class RotateX3D extends Transform3D {
+ // add3('RotateX3D', 'Transform3D')
+  // constuctor Single
+
+
+ /** Create a Transform3D object with Rotate properties around the X axis. */
+ constructor (angle:number|Function, attributes: RotateX3DAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because Transform3D does not have a signature array
+ return _jsxView3d().create('transform3d', [angle], {type:'rotateX'})
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('RotateY3D', 'Transform3D')
+ // add2('RotateY3D', 'Transform3D')
 
  export class RotateY3D extends Transform3D {
+ // add3('RotateY3D', 'Transform3D')
+  // constuctor Single
+
+
+ /** Create a Transform3D object with Rotate properties around the Y axis. */
+ constructor (angle:number|Function, attributes: RotateY3DAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because Transform3D does not have a signature array
+ return _jsxView3d().create('transform3d', [angle], {type:'rotateY'})
 }
+
+}
+
+ // addClassesforElementsInJSXBoard('RotateZ3D', 'Transform3D')
+ // add2('RotateZ3D', 'Transform3D')
 
  export class RotateZ3D extends Transform3D {
+ // add3('RotateZ3D', 'Transform3D')
+  // constuctor Single
+
+
+ /** Create a Transform3D object with Rotate properties around the Z axis. */
+ constructor (angle:number|Function, attributes: RotateZ3DAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because Transform3D does not have a signature array
+ return _jsxView3d().create('transform3d', [angle], {type:'rotateZ'})
 }
 
+}
+
+ // addClassesforElementsInJSXBoard('Scale3D', 'Transform3D')
+ // add2('Scale3D', 'Transform3D')
+
  export class Scale3D extends Transform3D {
-}}
+ // add3('Scale3D', 'Transform3D')
+  // constuctor Single
+
+
+ /** Create a Transform object with Scale properties.  Scaling is relative to [0,0,0]. */
+ constructor (xMultiplier:number|Function, yMultiplier:number|Function, zMultiplier:number|Function, attributes: Scale3DAttributes ={} ) {
+ if(alwaysFalse()) {super()}  // missing super because Transform3D does not have a signature array
+ return _jsxView3d().create('transform3d', [xMultiplier,yMultiplier,zMultiplier], {type:'scale'})
+}
+
+}
+}
