@@ -9,7 +9,7 @@ import { LIB_VERSION } from './version';
 
 import { Editor } from "./editor";
 import { OnClickSay } from "./onClickSay"
-import { TSX } from './tsxgraph'
+import { TSXBoard } from './tsxgraph'
 import { talk_to_moodle } from './moodle'
 import { dragElement } from './split'
 import { HostMsg } from './writeMoodleLog';
@@ -161,7 +161,8 @@ export class Main {
                 TSXGraph: (canvas: string): Object => {
                     // console.log('mathcodeAPI initBoard', canvas);
 
-                    return TSX.initBoard(canvas, { keepAspectRatio: true })
+                    let TSX = new TSXBoard(canvas, { keepAspectRatio: true })
+                    return TSX;
                 },
 
 

@@ -30,9 +30,6 @@ import lib_es2020_bigint from "./extraLibs/lib.es2020.bigint.d.ts.txt"
 import lib_es2021_string from "./extraLibs/lib.es2021.string.d.ts.txt"
 import lib_es2022_array from "./extraLibs/lib.es2022.array.d.ts.txt"
 import lib_es2023_array from "./extraLibs/lib.es2023.array.d.ts.txt"
-
-// import babylonjs from "./extraLibs/babylonjs.d.ts.txt"
-
 import lib_es2099 from "./extraLibs/lib.es2099.d.ts.txt"
 
 // import lib_jsx_tiny from "./extraLibs/jsx_tiny.d.ts.txt"
@@ -43,11 +40,9 @@ import mathcode from "./extraLibs/mathcode.d.ts.txt"
 
 // import matter from "./extraLibs/matter.d.ts.txt"
 
-// import { RuntimeAnimation } from "babylonjs/Animations/runtimeAnimation";
 // import { Observable } from "./observer";
 
 // let x = JXG         // just to make sure webpack loads them
-// let y = BABYLON
 
 
 
@@ -130,9 +125,12 @@ export class Editor {
         this.hiddenDecl = hiddenDecl
         this.visibleCode = visibleCode
 
+        // console.log(`import { TSXBoard } from './dist.${LIB_VERSION}/tsxgraph.js';`);
 
-        // monaco.languages.typescript.typescriptDefaults.addExtraLib(`import { TXG } from './dist.${LIB_VERSION}/tsxgraph.js'; let TSX = TXG.TXGraph.initBoard('jxgbox');`)
-        monaco.languages.typescript.typescriptDefaults.addExtraLib(`TSX.initBoard('jxgbox');`)
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(`let TSX:TSXBoard;`)
+        // monaco.languages.typescript.typescriptDefaults.addExtraLib(`import { TSXBoard } from './dist.${LIB_VERSION}/tsxgraph.js'; let TSX = new TSXBoard('jxgbox');`)
+        // monaco.languages.typescript.typescriptDefaults.addExtraLib(`import { TSXBoard } from './dist.${LIB_VERSION}/tsxgraph.js'; let TSX = new TSXBoard('jxgbox');`)
+        // monaco.languages.typescript.typescriptDefaults.addExtraLib(`let TSX = new TSXBoard('jxgbox');`)
 
 
         monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
@@ -140,6 +138,7 @@ export class Editor {
             inlineSourceMap: true,
             inlineSources: true,
             experimentalDecorators: true,
+            moduleResolution: 2, // NodeJs,    https://microsoft.github.io/monaco-editor/typedoc/enums/languages.typescript.ModuleResolutionKind.html
 
             // noLib: true,
             lib: ["es5, es6, es2020, es2015.core, es2015.iterable, dom.iterable"],    // for some reason, dom.iterable is required for destructuring    [x,y] = [1,2]
@@ -420,8 +419,8 @@ export class Editor {
             if (!this.plotWindow) {
                 this.injectScript('jxgframe', this.injectableScript(this.hiddenCode, this.editorCode, false))
             } else
-
-                html = this.generateSourceCode(this.hiddenCode, this.editorCode, jsDelivr)
+                // whole new webpage
+                html = this.generateSourceCode(this.hiddenCode, this.editorCode, false)
 
             /********** alternative to document write
                             document.write=function(s){
@@ -449,8 +448,8 @@ export class Editor {
 
         let html = ''
 
-        html += this.HTMLBoilerPlate(jsDelivr);
-        html += '<script type="module" defer>'
+        html += this.HTMLBoilerPlate(jsDelivr);  // leaves an injectable script open
+        // html += '<script type="module" defer>'
         html += this.injectableScript(hiddenCode, editorCode, jsDelivr)
         html += '</script>';
 
@@ -484,11 +483,11 @@ export class Editor {
             // html += `\n<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.js"></script>`
             // html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.css" />`;
 
-            html += `\n<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/jsxgraphcore.js"></script>`;
-            html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/jsxgraph.css" />`;
+            html += `\n<script type="text/javascript" charset="UTF-8" src="/TSXGraph/playground/dist.${LIB_VERSION}/jsxgraphcore.js"></script>`;
+            html += `\n<link rel="stylesheet" type="text/css" href="/TSXGraph/playground/dist.${LIB_VERSION}/jsxgraph.css" />`;
 
-            html += `<link rel="stylesheet" href="dist.${LIB_VERSION}/katex.min.css">`;
-            html += `<script defer src="dist.${LIB_VERSION}/katex.min.js"></script>`;
+            html += `<link rel="stylesheet" href="/TSXGraph/playground/dist.${LIB_VERSION}/katex.min.css">`;
+            html += `<script defer src="/TSXGraph/playground/dist.${LIB_VERSION}/katex.min.js"></script>`;
 
         }
 
@@ -525,11 +524,11 @@ export class Editor {
                     };
                     </script>`;
 
-        if (jsDelivr) {  // for downloading a working web page - everything from jsdelivr
-            html += "<script src='https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js'></script>";
-        } else {
-            html += `<script defer src='dist.${LIB_VERSION}/webfontloader.min.js'></script>`;
-        }
+        // if (jsDelivr) {  // for downloading a working web page - everything from jsdelivr
+        //     html += "<script src='https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js'></script>";
+        // } else {
+        //     html += `<script defer src='/TSXGraph/playground/dist.${LIB_VERSION}/webfontloader.min.js'></script>`;
+        // }
 
         if (gameBoy)
             html +=
@@ -572,8 +571,7 @@ export class Editor {
       <!--/div-->
 
 
-
-        <script>
+       <script type="module" defer>
 
             let btn_A = (e) => dispatchEvent(new KeyboardEvent("keydown", {
                 key: "A",
@@ -627,7 +625,7 @@ export class Editor {
             document.getElementById('btn_Lf').addEventListener("click", btn_Lf);
             document.getElementById('btn_Rt').addEventListener("click", btn_Rt);
 
-        </script>`;
+        `;
 
 
         return html;
@@ -637,17 +635,20 @@ export class Editor {
     injectableScript(hiddenCode: string, editorCode: string, jsDelivr: Boolean) {
 
         let html = '';
+        jsDelivr = false;   // tbtb
 
         if (jsDelivr) {  // web version load tsxgraph.js from jsdelivr
-            html += "\r\n" + `import { TSX } from 'https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@${LIB_VERSION}.0/lib/tsxgraph.js';`
+            html += "\r\n" + `import {TSXBoard}  from 'https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@${LIB_VERSION}.0/lib/tsxgraph.js';`
         } else {
-            html += "\r\n" + `import { TSX } from "./dist.${LIB_VERSION}/tsxgraph.js";`
+            html += `\nimport {TSXBoard} from '/TSXGraph/playground//dist.${LIB_VERSION}/tsxgraph.js'`;
         }
-        html += "\r\n" + this.hiddenCode   // before try/catch
+
+        html += "\nlet TSX = new TSXBoard('jxgbox');"
+
+        html += "\n" + this.hiddenCode   // before try/catch
 
         html += "\r\n try {"
 
-        html += "\r\n TSX.initBoard('jxgbox')";
         html += "\r\n" + editorCode
 
         html += "\r\n }"
