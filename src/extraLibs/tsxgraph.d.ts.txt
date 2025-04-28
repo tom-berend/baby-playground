@@ -1,8 +1,8 @@
 type NumberFunction = Number | Function;
 /** A 'point' has a position in space.  The only characteristic that distinguishes one point from another is its position. */
- type pointAddr = NumberFunction[] | [number, number] | [number, Function] | [Function, number] | [Function | Function];
- type pointAddr3D = NumberFunction[];
-interface ShaderInterface {
+type pointAddr = NumberFunction[] | [number, number] | [number, Function] | [Function, number] | [Function | Function];
+type pointAddr3D = NumberFunction[];
+ interface ShaderInterface {
     enabled: Boolean;
     type: 'angle' | 'zIndex';
     hue: number;
@@ -10,26 +10,26 @@ interface ShaderInterface {
     minlightness: number;
     maxLightness: number;
 }
-interface MoveToOptions {
+ interface MoveToOptions {
     callback?: Function;
     effect?: "==" | "<>" | "--" | "<" | ">";
     repeat?: number;
 }
-interface SelectionAttributes {
+ interface SelectionAttributes {
     enabled?: Boolean;
     name?: string;
     needShift?: Boolean;
     needCtrl?: Boolean;
     fillColor?: string;
 }
-interface ScreenShotAttributes {
+ interface ScreenShotAttributes {
     scale?: number;
     type?: string;
     symbol?: '\u2318' | '\u22b9' | '\u26f6';
     css?: string;
     cssButton?: string;
 }
-interface pointerControls {
+ interface pointerControls {
     /**  specifies whether pointer navigation is allowed by elevation. */
     enabled?: Boolean;
     /** Number indicating how many passes the range of the el_slider makes when the cursor crosses the entire board once in the horizontal direction.*/
@@ -41,7 +41,7 @@ interface pointerControls {
     /** Should an additional key be pressed? ('none', 'shift' or 'ctrl') */
     key?: 'none' | 'shift' | 'ctrl';
 }
-interface keyboardControls {
+ interface keyboardControls {
     /** specifies whether the keyboard (arrow keys) can be used to navigate the board.*/
     enabled?: Boolean;
     /** Size of the step per keystroke. */
@@ -49,12 +49,12 @@ interface keyboardControls {
     /** Should an additional key be pressed? ('none', 'shift' or 'ctrl') */
     key?: 'none' | 'shift' | 'ctrl';
 }
-interface sliderControls {
+ interface sliderControls {
     min?: number;
     max?: number;
     start?: number;
 }
-interface screenControls {
+ interface screenControls {
     /** an object */
     pointer?: pointerControls;
     /** an object */
@@ -73,11 +73,22 @@ interface screenControls {
     /** ignore  ?? see Alfred comment in https://github.com/jsxgraph/jsxgraph/pull/737#event-16103541603 */
     ignore?: Boolean;
 }
-interface DisplayPoint {
+ interface DisplayPoint {
     size?: Number;
     face?: 'cross' | 'plus' | 'minus' | 'divide' | 'diamond' | 'triangledown' | 'triangleleft' | 'triangleright' | 'triangleup' | 'square' | 'circle';
 }
-interface ZoomAttributes {
+ interface VertexAttributes {
+    visible?: Boolean;
+}
+ interface PanAttributes {
+    /** allow panning */
+    enabled?: Boolean;
+    /** panning is done with two fingers on touch devices */
+    needTwoFingers?: Boolean;
+    /** mouse panning needs pressing of the shift key */
+    needShift?: Boolean;
+}
+ interface ZoomAttributes {
     /** turns off zooming completely, if set to false. */
     enabled?: Boolean;
     /** horizontal zoom factor (multiplied to JXG.Board#zoomX) */
@@ -103,21 +114,7 @@ interface ZoomAttributes {
     /**  Sensitivity (in degrees) for recognizing horizontal or vertical pinch-to-zoom gestures.  default: 7 */
     pinchSensitivity?: number;
 }
-/**
-*  Constant: user coordinates relative to the coordinates system defined by the bounding box.
-*/
- declare const COORDS_BY_USER = 1;
-/**
-*  Constant: screen coordinates in pixel relative to the upper left corner of the div element.
-*/
- declare const COORDS_BY_SCREEN = 2;
- declare class IntervalArithmetic {
-}
- declare class PolyMonomial {
-}
- declare class PolyPolynomial {
-}
- declare class Symbolic {
+ interface JSXMathAttributes {
 }
 /** Initialize a new board. The first parameter 'html' should be the ID of a <DIV> in your web page.\n\n
  * ```js
@@ -128,7 +125,7 @@ import { TXG } from "../src/tsxgraph.js";
 const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
 ```
 */
- type spaceIcon = 'icons/alien-1.png' | 'icons/alien-2.png' | 'icons/alien-3.png' | 'icons/alien-4.png' | 'icons/alien-5.png' | 'icons/alien-abduction.png' | 'icons/alien-ship-2.png' | 'icons/alien-ship-beam.png' | 'icons/alien-ship.png' | 'icons/asteroid-2.png' | 'icons/asteroid.png' | 'icons/astronaut-helmet.png' | 'icons/atom.png' | 'icons/atronaut.png' | 'icons/bb-8.png' | 'icons/big-dipper.png' | 'icons/black-hole.png' | 'icons/brain-slug.png' | 'icons/cassiopeia.png' | 'icons/chewbacca.png' | 'icons/comet.png' | 'icons/cylon-raider.png' | 'icons/darth-vader.png' | 'icons/death-star.png' | 'icons/earth.png' | 'icons/falling-asteroid.png' | 'icons/falling-space-capsule.png' | 'icons/falling-star.png' | 'icons/flag.png' | 'icons/fly\ icon\ licence.png' | 'icons/flyicon.png' | 'icons/galaxy.png' | 'icons/intl-space-station.png' | 'icons/jupiter.png' | 'icons/landing-space-capsule.png' | 'icons/laser-gun.png' | 'icons/mars.png' | 'icons/millennium-falcon.png' | 'icons/mission-control.png' | 'icons/moon-full-almost.png' | 'icons/moon-full-moon.png' | 'icons/moon-last-quarter.png' | 'icons/moon-new-moon.png' | 'icons/moon-waning-cresent.png' | 'icons/moon-waning-gibbous.png' | 'icons/morty.png' | 'icons/neptune.png' | 'icons/pluto.png' | 'icons/princess-leia.png' | 'icons/rick.png' | 'icons/ring-ship.png' | 'icons/rocket-launch.png' | 'icons/rocket.png' | 'icons/satellite.png' | 'icons/saturn.png' | 'icons/solar-system.png' | 'icons/space-capsule.png' | 'icons/space-cockpit.png' | 'icons/space-invader.png' | 'icons/space-observatory.png' | 'icons/space-rocket.png' | 'icons/space-rover-1.png' | 'icons/space-rover-2.png' | 'icons/space-satellite-dish.png' | 'icons/space-ship_1.png' | 'icons/space-ship_2.png' | 'icons/space-ship_3.png' | 'icons/space-ship.png' | 'icons/space-shuttle-launch.png' | 'icons/space-shuttle.png' | 'icons/sputnick-1.png' | 'icons/sputnick-2.png' | 'icons/star.png' | 'icons/stars.png' | 'icons/stormtrooper.png' | 'icons/sun.png' | 'icons/telescope.png' | 'icons/uranus.png' | 'icons/venus.png' | 'icons/moon-dreamy.png';
+type spaceIcon = 'icons/alien-1.png' | 'icons/alien-2.png' | 'icons/alien-3.png' | 'icons/alien-4.png' | 'icons/alien-5.png' | 'icons/alien-abduction.png' | 'icons/alien-ship-2.png' | 'icons/alien-ship-beam.png' | 'icons/alien-ship.png' | 'icons/asteroid-2.png' | 'icons/asteroid.png' | 'icons/astronaut-helmet.png' | 'icons/atom.png' | 'icons/atronaut.png' | 'icons/bb-8.png' | 'icons/big-dipper.png' | 'icons/black-hole.png' | 'icons/brain-slug.png' | 'icons/cassiopeia.png' | 'icons/chewbacca.png' | 'icons/comet.png' | 'icons/cylon-raider.png' | 'icons/darth-vader.png' | 'icons/death-star.png' | 'icons/earth.png' | 'icons/falling-asteroid.png' | 'icons/falling-space-capsule.png' | 'icons/falling-star.png' | 'icons/flag.png' | 'icons/fly\ icon\ licence.png' | 'icons/flyicon.png' | 'icons/galaxy.png' | 'icons/intl-space-station.png' | 'icons/jupiter.png' | 'icons/landing-space-capsule.png' | 'icons/laser-gun.png' | 'icons/mars.png' | 'icons/millennium-falcon.png' | 'icons/mission-control.png' | 'icons/moon-full-almost.png' | 'icons/moon-full-moon.png' | 'icons/moon-last-quarter.png' | 'icons/moon-new-moon.png' | 'icons/moon-waning-cresent.png' | 'icons/moon-waning-gibbous.png' | 'icons/morty.png' | 'icons/neptune.png' | 'icons/pluto.png' | 'icons/princess-leia.png' | 'icons/rick.png' | 'icons/ring-ship.png' | 'icons/rocket-launch.png' | 'icons/rocket.png' | 'icons/satellite.png' | 'icons/saturn.png' | 'icons/solar-system.png' | 'icons/space-capsule.png' | 'icons/space-cockpit.png' | 'icons/space-invader.png' | 'icons/space-observatory.png' | 'icons/space-rocket.png' | 'icons/space-rover-1.png' | 'icons/space-rover-2.png' | 'icons/space-satellite-dish.png' | 'icons/space-ship_1.png' | 'icons/space-ship_2.png' | 'icons/space-ship_3.png' | 'icons/space-ship.png' | 'icons/space-shuttle-launch.png' | 'icons/space-shuttle.png' | 'icons/sputnick-1.png' | 'icons/sputnick-2.png' | 'icons/star.png' | 'icons/stars.png' | 'icons/stormtrooper.png' | 'icons/sun.png' | 'icons/telescope.png' | 'icons/uranus.png' | 'icons/venus.png' | 'icons/moon-dreamy.png';
  interface GeometryElementAttributes {
     /** If true, the infobox is shown on mouse/pen over for all points which have set their attribute showInfobox to `inherit`. */
     showInfobox?: Boolean;
@@ -2139,8 +2136,7 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
     Numerics: Object;
     Statistics: Object;
 }
- declare let JsxMath: MathIface;
-/** This class wraps the JSX library and the constructor is equivalent to the `initBoard()` method.
+/** This wraps the JSX library and the constructor is equivalent to the `initBoard()` method.
 
  * ```js
 
@@ -2158,14 +2154,34 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
     private defaultAttrs;
     /** expiriment - can we get a static function ? */
     static staticFunction(): void;
+    /** Store a reference to every board in this central list. */
+    static boards(): any;
+    /** Constant: screen coordinates in pixel relative to the upper left corner of the div element. */
+    static COORDS_BY_SCREEN(): any;
+    /** Constant: user coordinates relative to the coordinates system defined by the bounding box. */
+    static COORDS_BY_USER(): any;
+    /** Associative array that keeps track of all constructable elements registered via JXG.registerElement. */
+    static elements(): any;
+    /** The FileReader object bundles the file input capabilities of JSXGraph. */
+    static FileReader(): any;
+    /** Constant: the small gray version indicator in the top left corner of every JSXGraph board (if showCopyright is not set to false on board creation). */
+    static licenseText(): any;
+    /** Default color palette. */
+    static palette(): any;
+    /** Bang Wong color palette, optimized for various type of color blindness. */
+    static paletteWong(): any;
+    /** Store the available file readers in this structure. */
+    static readers(): any;
+    /** Holds all possible properties and the according validators for geometry elements. */
+    static Validator(): any;
+    /** Constant: the currently used JSXGraph version. */
+    get version(): any;
     constructor(canvas?: string, attributes?: Object);
     /** test for empty object {} */
     isEmptyObject(obj: Object): Boolean;
     defaultAttributes(attrs?: Object): Object;
     isAttribute(last: any): Boolean;
     Print(...args: any[]): void;
-    /** Version of JSXGraph.  */
-    version(): String;
     /** Set the bounding box of the board.  Returns the board.
 
     ```js
@@ -2466,27 +2482,27 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
     /** Sets camera view to the given values. */
     setView(az: number, el: number, r?: number): any;
     /** Create a point. If any parent elements are functions or the attribute 'fixed' is true then point will be constrained.
-
+               
    *```js
    TSX.point([3,2],{strokeColor:'blue',strokeWidth:5,strokeOpacity:.5})
    TSX.point([3,3]),{fixed:true, showInfobox:true}
    TSX.point([()=>p1.X()+2,()=>p1.Y()+2]) // 2 up 2 right from p1
    TSX.point([1,2,2])  // three axis definition - [z,x,y]
-
+               
    *```
-
+               
     also create points with Intersection, Midpoint, TransformPoint, Circumcenter, Glider, TransformPoint, and others. */
     Point(position: pointAddr, attributes?: PointAttributes): Point;
     /** Line has two signatures.
     *```
    *```
     #1  Create a line defined by two points (or point addresses)
-
+   
    *```js
    TSX.line([3,2],[3,3],{strokeColor:'blue',strokeWidth:5,strokeOpacity:.5})
    let P1 = TSX.point([3,2])
    TSX.line(p1,[3,3])
-
+   
    *```
     */
     Line(p1: Point | pointAddr, p2: Point | pointAddr, attributes?: LineAttributes): Line;
@@ -2494,10 +2510,10 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
     *```
    *```
     #2 Create a line for the equation a*x+b*y+c*z = 0',
-
+   
    *```js
    TSX.line(2,3,1)   // create a line for the equation a*x+b*y+c*z = 0
-
+   
    *```
     */
     Line(A: number | Function, B: number | Function, C: number | Function, attributes?: LineAttributes): Line;
@@ -2509,7 +2525,7 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
                        The given point is called the center, and the given distance is called the radius.
                        A circle can be constructed by providing a center, a normal vector (either homogenous or cartesian),
                        and a radius (given as a number or function).
-
+                       
    *```js
    let a = TSX.point3D([-3, 0, 0])
    let circle = TSX.circle3D(a, [1, 1, 1], 2, { strokeWidth: 5, strokeColor: 'blue' })
@@ -2548,15 +2564,15 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
                    A collection of space icons is provided, press CTRL+I to show the list.
                    The second parameter sets the lower left point of the image.
                    The optional third parameter sets the size multiplier of the image, default is [1,1].
-
+                   
    If you want to move the image, just tie the image to a point, maybe at the center of the image.
                     For more flexibility, see TSX.Rotate() and TSX.Translate()
-
+                   
    *```js
                TSX.image('icons/earth.png', [0, 0],[2,2])
                let p1 = TSX.point([3, 2], { opacity: .1 })
                TSX.image('icons/moon-full-moon.png', [()=>p1.X(),()=>p1.Y()])
-
+                   
    *``` */
     Image(url: string | spaceIcon, lowerLeft: pointAddr, widthHeight?: [number, number], attributes?: ImageAttributes): Image;
     Implicitcurve(f: Function | String, attributes?: ImplicitcurveAttributes): Implicitcurve;
@@ -2586,12 +2602,12 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
     /** A polygon is a sequence of points connected by lines, with the last point connecting back to the first one. The points are given by a list of Point3D objects or a list of coordinate arrays. Each two consecutive points of the list define a line. */
     Polygon3D(vertices: Point3D[] | pointAddr3D[] | Function, attributes?: Polygon3DAttributes): Polygon3D;
     /** Display a message
-
+                                   
    *```js
    TSX.text([3,2],[3,3], {fontSize:20, strokeColor:'blue'})
    TSX.text([0, 4], () => 'BD ' + B.distance(D).toFixed(2))
    TSX.text([-4, 2], '\pm\sqrt{a^2 + b^2}', { useKatex: true })
-
+                                   
    *``` */
     Text(position: Point | pointAddr, label: string | Function, attributes?: TextAttributes): Text;
     Text3D(position: Point3D | number[] | Function, text: string | Function, attributes?: Text3DAttributes): Text3D;
@@ -2604,22 +2620,22 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
     Angle(line1: Line | [Point | pointAddr, Point | pointAddr], line2: Line | [Point | pointAddr, Point | pointAddr], direction1: [number, number], direction2: [number, number], attributes?: AngleAttributes): Angle;
     Angle(line1: Line | [Point | pointAddr, Point | pointAddr], line2: Line | [Point | pointAddr, Point | pointAddr], dirPlusMinus1: number, dirPlusMinus2: number, attributes?: AngleAttributes): Angle;
     /** Create a circular Arc defined by three points (because a circle can be defined by three points - see circumcircle).
-
+                               
    *```js
                                let arc = TSX.arc([-8,5],[-4,5],[-9,9]])
-
+                               
    *```
-
+                               
     To create an arc with origin, startpoint, and angle, look at MajorArc/MinorArc. */
     Arc(origin: Point | pointAddr, from: Point | pointAddr, to: Point | pointAddr, attributes?: ArcAttributes): Arc;
     /** Arrow defined by two points (like a Segment) with arrow at P2
-
+                               
    *```js
-
+                               
     let arrow = TSX.arrow([-8,5],[-4,5])
-
+                               
    *```
-
+                               
     */
     Arrow(p1: Point | pointAddr, p2: Point | pointAddr, attributes?: ArrowAttributes): Arrow;
     Parallel(line: Line | [Point, Point], point: Point | pointAddr, attributes?: ParallelAttributes): Parallel;
@@ -2629,24 +2645,24 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
     /** Create an Axis with two points (like a Line) */
     Axis(p1: Point | pointAddr, p2: Point | pointAddr, attributes?: AxisAttributes): Axis;
     /** A cubic bezier curve.  The input is 3k + 1 points; those at positions k mod 3 = 0 (eg: 0, 3, 6 are the data points, the two points between each data points are the control points.
-
+                   
    *```js
        let points: Point[] = []
        points.push(point([-2, -1], { size: 4, color: 'blue', name: '0' }))
-
+   
        points.push(point([-2, -2.5], { name: '1' }))
        points.push(point([-1, -2.5], { name: '2' }))
-
+   
        points.push(TSX.point([2, -2], { size: 4, color: 'blue', name: '3' }))
-
+   
        let curve = TSX.bezierCurve(points, { strokeColor: 'orange', strokeWidth: 5, fixed: false }); // Draggable curve
-
+   
        // 'BezierCurve()' is just a shorthand for the following two lines:
        // let bz = TSX.NumericsMath.bezier(points)
        // let curve = TSX.curve(bz[0], bz[1])
-
+                   
    *```
-
+   
                     */
     BezierCurve(points: Point[], attributes?: BezierCurveAttributes): BezierCurve;
     /** Bisect an Angle defined with three points A,B,C, and divides the angle ABC into two equal sized parts. */
@@ -2720,7 +2736,7 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
     FX(u,v), FY(u,v), FZ(u,v) are functions returning a number for [x,y,z],
    - rangeU is the array containing lower and upper bound for the range of parameter u,
    - rangeV is the array containing lower and upper bound for the range of parameter v.
-
+   
    rangeU and rangeV may also be functions returning an array of length two. */
     ParametricSurface3D(FX: (u: number, v: number) => number, FY: (u: number, v: number) => number, FZ: (u: number, v: number) => number, rangeU: number[] | (() => number[]), rangeV: number[] | (() => number[]), attributes?: ParametricSurface3DAttributes): ParametricSurface3D;
     /** A 3D parametric surface visualizes a map (u, v) → [X(u, v), Y(u, v), Z(u, v)].
@@ -2729,7 +2745,7 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
     F(u,v) is a function returning a number array [x,y,z],
    - rangeU is the array containing lower and upper bound for the range of parameter u,
    - rangeV is the array containing lower and upper bound for the range of parameter v.
-
+   
    rangeU and rangeV may also be functions returning an array of length two. */
     ParametricSurface3D(F: (u: number, v: number) => number[], rangeU: number[] | (() => number[]), rangeV: number[] | (() => number[]), attributes?: ParametricSurface3DAttributes): ParametricSurface3D;
     /** Functiongraph visualizes a map x → f(x).  It is a wrapper for element Curve. The graph is drawn for x in the interval [a,b] default -10 to 10.
@@ -2755,13 +2771,13 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
     Intersection(element1: Line | Circle | Curve | Polygon | PolygonalChain, element2: Line | Circle | Curve | Polygon | PolygonalChain, i?: number | Function, attributes?: IntersectionAttributes): Intersection;
     Intersection(element1: Line | Circle | Curve | Polygon | PolygonalChain, element2: Line | Circle | Curve | Polygon | PolygonalChain, attributes?: IntersectionAttributes): Intersection;
     /** Creates a Legend for a Chart Element
-
+                                   
    *```js
    * let labels = ['a','b','c']
    * let colors = ['red','green','blue']
    * let legend = TSX.legend([2,2],labels,colors)
    *```
-
+                                   
     */
     Legend(lowerLeft: pointAddr, labels: string[], colors: string[], attributes?: LegendAttributes): Legend;
     Locus(point: Point, attributes?: LocusAttributes): Locus;
@@ -2820,12 +2836,12 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
        [0, -1, -rho], [0, +1, -rho], [0, -1, rho], [0, +1, rho],[1, rho, 0], [-1, rho, 0],
        [1, -rho, 0], [-1, -rho, 0],[-rho, 0, 1], [-rho, 0, -1], [rho, 0, 1], [rho, 0, -1]
    ];
-
+   
    let faceArray = [  // each triangular face connects three vertex points
        [4, 1, 11], [11, 1, 0], [6, 11, 0], [0, 1, 9],[11, 10, 4], [9, 1, 5],
        [8, 9, 5], [5, 3, 8],[6, 10, 11], [2, 3, 10], [2, 10, 6], [8, 3, 2],
        [3, 4, 10], [7, 8, 2], [9, 8, 7], [0, 9, 7],[4, 3, 5], [5, 1, 4], [0, 7, 6], [7, 2, 6]];
-
+   
        let ico = TSX.polyhedron3D(vertexList, faceArray, {
        fillColorArray: [],
        fillOpacity: 1,
@@ -2848,14 +2864,14 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
     ReflexAngle(point1: Point, point2: Point, point3: Point, attributes?: ReflexAngleAttributes): ReflexAngle;
     RegularPolygon(P1: Point | pointAddr, P2: Point | pointAddr, nVertices: number, attributes?: RegularPolygonAttributes): RegularPolygon;
     /** Visualize the Riemann sum which is an approximation of an integral by a finite sum. It is realized as a special curve. The returned element has the method Value() which returns the sum of the areas of the bars.
-
+   
                            In case of type 'simpson' and 'trapezoidal', the horizontal line approximating the function value is replaced by a parabola or a secant. IN case of 'simpson', the parabola is approximated visually by a polygonal chain of fixed step width. */
     Riemannsum(funct: Function | number[], nBars: Function | number, type?: 'left' | 'right' | 'middle' | 'lower' | 'upper' | 'random' | 'simpson' | 'trapezoidal', leftBorder?: number | Function, rightBorder?: number | Function, attributes?: RiemannsumAttributes): Riemannsum;
     Semicircle(P1: Point | pointAddr, P2: Point | pointAddr, attributes?: SemicircleAttributes): Semicircle;
     /** An input widget for choosing values from a given range of numbers.  Parameters are startpoint, endpoint,
                    and an array with [minimum, initialValue, maximum].  Query the value with slider.Value().  Set the slider either by
                    dragging the control or clicking on the line (you can disable clicking with {moveOnUp:false}
-
+           
    *```js
             let s = TSX.slider([1, 2], [3, 2], [1, 5, 10])           //  query with s.Value()
             let s = TSX.slider([1, 2], [3, 2], [1, 5, 10],{snapWidth:1})     //  only values 1,2,3...
@@ -2867,7 +2883,7 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
                label: {fontSize: 16, strokeColor: 'orange'},
                suffixLabel: ' x=',         // really a prefix
                postLabel: ' meters'        // this is a suffix
-
+           
    *``` */
     Slider(StartPoint: Point | pointAddr, EndPoint: Point | pointAddr, minimum_initial_maximum: [number, number, number], attributes?: SliderAttributes): Slider;
     Slopefield(func: Function, xData: NumberFunction[], yData: NumberFunction[], attributes?: SlopefieldAttributes): Slopefield;
@@ -2963,6 +2979,6 @@ interface VisitAttributes {
     effect?: "==" | "<>" | "<" | ">";
     repeat?: number;
 }
-/** Initialize a board other than jxgbox */
- declare function initBoard(canvas?: string, attributes?: BoardAttributes): Object;
  {};
+
+

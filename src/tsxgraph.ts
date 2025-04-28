@@ -21,14 +21,14 @@
         //    DEALINGS IN THE SOFTWARE.
         //
         /////////////////////////////////////////////////////////////////////////////
-        //   Generated on April 27, 2025, 2:02 pm
+        //   Generated on April 28, 2025, 10:28 am
 
      // match JSXGraph definition for JXG_Point3D, etc
         type NumberFunction = Number | Function
 
         /** A 'point' has a position in space.  The only characteristic that distinguishes one point from another is its position. */
-        export type pointAddr = NumberFunction[] | [number, number] | [number, Function] | [Function, number] | [Function | Function] // allow tuples or arrays
-        export type pointAddr3D =  NumberFunction[] // | [number | Function, number | Function, number | Function]  // either tuple or array
+        type pointAddr = NumberFunction[] | [number, number] | [number, Function] | [Function, number] | [Function | Function] // allow tuples or arrays
+        type pointAddr3D =  NumberFunction[] // | [number | Function, number | Function, number | Function]  // either tuple or array
         let defaultAttrs: Object = {
     keepAspectRatio: true,
     name: '', showinfobox: false,
@@ -48,7 +48,7 @@ type matAny = arrayNumber2[]
 
 
 
-interface ShaderInterface {
+export interface ShaderInterface {
     enabled: Boolean,
     type: 'angle' | 'zIndex',
     hue: number,
@@ -57,14 +57,14 @@ interface ShaderInterface {
     maxLightness: number,
 }
 
-interface MoveToOptions {
+export interface MoveToOptions {
     callback?: Function,
     effect?: "==" | "<>" | "--" | "<" | ">",
     repeat?: number
 }
 
 
-interface SelectionAttributes {
+export interface SelectionAttributes {
     enabled?: Boolean,
     name?: string,
     needShift?: Boolean,  // mouse selection needs pressing of the shift key
@@ -72,7 +72,7 @@ interface SelectionAttributes {
     fillColor?: string,
 }
 
-interface ScreenShotAttributes {
+export interface ScreenShotAttributes {
     scale?: number,
     type?: string,
     symbol?: '\u2318' | '\u22b9' | '\u26f6',
@@ -83,7 +83,7 @@ interface ScreenShotAttributes {
 
 ///////////////////////////////////////////
 ///////  stuff for View3D elevation controls
-interface pointerControls {
+export interface pointerControls {
     /**  specifies whether pointer navigation is allowed by elevation. */
     enabled?: Boolean,
     /** Number indicating how many passes the range of the el_slider makes when the cursor crosses the entire board once in the horizontal direction.*/
@@ -95,7 +95,7 @@ interface pointerControls {
     /** Should an additional key be pressed? ('none', 'shift' or 'ctrl') */
     key?: 'none' | 'shift' | 'ctrl'
 }
-interface keyboardControls {
+export interface keyboardControls {
     /** specifies whether the keyboard (arrow keys) can be used to navigate the board.*/
     enabled?: Boolean
     /** Size of the step per keystroke. */
@@ -103,13 +103,13 @@ interface keyboardControls {
     /** Should an additional key be pressed? ('none', 'shift' or 'ctrl') */
     key?: 'none' | 'shift' | 'ctrl'
 }
-interface sliderControls {
+export interface sliderControls {
     min?: number, // Minimum value.
     max?: number,  //Maximum value.
     start?: number, //Start value.
 }
 
-interface screenControls {
+export interface screenControls {
     /** an object */
     pointer?: pointerControls,
     /** an object */
@@ -134,17 +134,17 @@ export interface AriaAttributes {
     ignore?: Boolean
 }
 
-interface DisplayPoint {
+export interface DisplayPoint {
     size?: Number
     face?: 'cross' | 'plus' | 'minus' | 'divide' | 'diamond' | 'triangledown' | 'triangleleft' | 'triangleright' | 'triangleup' | 'square' | 'circle'
 
 }
 
-interface VertexAttributes {
+export interface VertexAttributes {
     visible?: Boolean
 }
 
-interface PanAttributes {
+export interface PanAttributes {
     /** allow panning */
     enabled?: Boolean
     /** panning is done with two fingers on touch devices */
@@ -153,7 +153,7 @@ interface PanAttributes {
     needShift?: Boolean
 }
 
-interface ZoomAttributes {
+export interface ZoomAttributes {
     /** turns off zooming completely, if set to false. */
     enabled?: Boolean,
     /** horizontal zoom factor (multiplied to JXG.Board#zoomX) */
@@ -185,27 +185,27 @@ interface ZoomAttributes {
 /**
 *  Constant: user coordinates relative to the coordinates system defined by the bounding box.
 */
-export const COORDS_BY_USER = 0x0001
+ const COORDS_BY_USER = 0x0001
 /**
 *  Constant: screen coordinates in pixel relative to the upper left corner of the div element.
 */
-export const COORDS_BY_SCREEN = 0x0002
+ const COORDS_BY_SCREEN = 0x0002
 
 
-interface JSXMathAttributes {
+export interface JSXMathAttributes {
 }
 
 
 
 
 ///// some math classes by hand
-export class IntervalArithmetic {
+ class IntervalArithmetic {
 }
-export class PolyMonomial {
+ class PolyMonomial {
 }
-export class PolyPolynomial {
+ class PolyPolynomial {
 }
-export class Symbolic {
+ class Symbolic {
 }
 
 
@@ -218,13 +218,13 @@ export class Symbolic {
 //////////
 //////////        /** use this to create mixins in Typescript.  Each mixin is a traditional ES class,
 //////////         *  For example, to add classes Jumpable and Duckable to class Sprite, you add
-//////////         * an interface which merges the expected mixins using the same name as your base, and
+//////////         * an export interface which merges the expected mixins using the same name as your base, and
 //////////         * then apply the mixins at runtime.
 //////////        ```js
 //////////        class Jumpable {  jump() {}  }
 //////////        class Duckable {  duck() {}  }
 //////////        class Sprite { x = 0; y = 0; }   // base class
-//////////        interface Sprite extends Jumpable, Duckable {}
+//////////        export interface Sprite extends Jumpable, Duckable {}
 //////////        TXG.TSXGraph.applyMixins(Sprite, [Jumpable, Duckable]);
 //////////
 //////////        let s = new Sprite()  // now includes methods from mixins
@@ -262,7 +262,7 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
 
 
 
-export type spaceIcon =
+ type spaceIcon =
     'icons/alien-1.png' |
     'icons/alien-2.png' |
     'icons/alien-3.png' |
@@ -3229,7 +3229,7 @@ Instead of one value you can provide two values as an array [x, y] here. These a
  Statistics: Object
 }
 
- export let JsxMath: MathIface = {Matrix :{
+ let JsxMath: MathIface = {Matrix :{
  // Matrix
  crossProduct(v1:number[],v2:number[])  { return (window as any).JXG.Math.crossProduct(v1,v2) }, 
  frustum(left:number,right:number,top:number,bottom:number,near:number,far:number)  { return (window as any).JXG.Math.frustum(left,right,top,bottom,near,far) }, 
@@ -3348,7 +3348,7 @@ Statistics :{
 
 
 
-/** This class wraps the JSX library and the constructor is equivalent to the `initBoard()` method.
+/** This wraps the JSX library and the constructor is equivalent to the `initBoard()` method.
 
  * ```js
 
@@ -3378,13 +3378,87 @@ export class TSXBoard {
 
 
 
+
+
     /** expiriment - can we get a static function ? */
 
-    static staticFunction(){
+    static staticFunction() {
 
         alert('static function')
 
     }
+
+    /** Store a reference to every board in this central list. */
+
+    static boards() { return (window as any).JXG.boards }
+
+    /** Constant: screen coordinates in pixel relative to the upper left corner of the div element. */
+
+    static COORDS_BY_SCREEN() { return (window as any).JXG.COORDS_BY_SCREEN }
+
+    /** Constant: user coordinates relative to the coordinates system defined by the bounding box. */
+
+    static COORDS_BY_USER() { return (window as any).JXG.COORDS_BY_USER }
+
+    /** Associative array that keeps track of all constructable elements registered via JXG.registerElement. */
+
+    static elements() { return (window as any).JXG.elements }
+
+    /** The FileReader object bundles the file input capabilities of JSXGraph. */
+
+    static FileReader() { return (window as any).JXG.FileReader }
+
+    // /** Internet Explorer version. */
+
+    // static ieVersion(){return (window as any).JXG.}
+
+    // /** A document/window environment is available. */
+
+    // static isBrowser(){return (window as any).JXG.isBrowser()}
+
+    /** Constant: the small gray version indicator in the top left corner of every JSXGraph board (if showCopyright is not set to false on board creation). */
+
+    static licenseText() { return (window as any).JXG.licenseText }
+
+    /** Default color palette. */
+
+    static palette() { return (window as any).JXG.palette }
+
+    /** Bang Wong color palette, optimized for various type of color blindness. */
+
+    static paletteWong() { return (window as any).JXG.paletteWong }
+
+    /** Store the available file readers in this structure. */
+
+    static readers() { return (window as any).JXG.readers }
+
+    /** Holds all possible properties and the according validators for geometry elements. */
+
+    static Validator() { return (window as any).JXG.Validator }
+
+
+
+
+
+    // static version() { return (window as any).JXG.version }
+
+
+
+
+
+    /** Constant: the currently used JSXGraph version. */
+
+    get version() {
+
+        return (window as any).JXG.version
+
+    }
+
+
+
+
+
+
 
 
 
@@ -3687,20 +3761,6 @@ export class TSXBoard {
     }
 
 
-
-
-
-    // JXG methods that we pass through
-
-
-
-    /** Version of JSXGraph.  */
-
-    version(): String {
-
-        return (window as any).JXG.version;
-
-    }
 
 
 
@@ -6576,34 +6636,6 @@ let  curve = TSX.stepfunction([0,1,2,3,4,5], [1,3,0,2,2,1]);
 
 
 
-//       // this is a hack, it pollutes the namespace.  But we can't
-//       // run the playground without it.   Fix it if we merge with JSXGraph.
-//       if (typeof (window as any).TSXGlobal === "undefined")       // only create if it doesn't exist
-//           (window as any).TSXGlobal = new TSXBoard({}, {});           // object to store 'board' and 'view3D' objects
-//
-//
-//       // and some simple methods to retrieve them
-//       /** PRIVATE - retrieves the current JSXGraph Board object. */
-//       export function _jsxBoard() {
-//           return (window as any).TSXGlobal.jBoard;
-//       }
-//       /** PRIVATE - retrieves the current JSXGraph View3d object. */
-//       export function _jsxView3d() {
-//           return (window as any).TSXGlobal.jView3d;
-//       }
-//
-//       function alwaysFalse(): Boolean {
-//           return (Math.random() < 0)  // always false, hoping JS doesn't optimize at compile time
-//       }
-//
-//       //////////////////////////////////////////////////////////////
-//       //////////////////////////////////////////////////////////////
-//       //////////////////////////////////////////////////////////////
-
-
-
-
-
 
 // mesh.visible allows 'inherit' but can't do that here because typescript knows that Curve.visible does NOT allow it.
 interface MeshAttributes extends CurveAttributes {
@@ -6620,7 +6652,7 @@ interface VisitAttributes{
 
 
 /** Initialize a board other than jxgbox */
-export function initBoard(canvas: string='', attributes?: BoardAttributes): Object {   // a JSXGraph board object
+function initBoard(canvas: string='', attributes?: BoardAttributes): Object {   // a JSXGraph board object
         return (window as any).TSXGlobal.jInitBoard(canvas,attributes);
     }
 

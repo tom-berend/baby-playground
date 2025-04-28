@@ -127,11 +127,6 @@ export class Editor {
 
         // console.log(`import { TSXBoard } from './dist.${LIB_VERSION}/tsxgraph.js';`);
 
-        monaco.languages.typescript.typescriptDefaults.addExtraLib(`let TSX:TSXBoard;`)
-        // monaco.languages.typescript.typescriptDefaults.addExtraLib(`import { TSXBoard } from './dist.${LIB_VERSION}/tsxgraph.js'; let TSX = new TSXBoard('jxgbox');`)
-        // monaco.languages.typescript.typescriptDefaults.addExtraLib(`import { TSXBoard } from './dist.${LIB_VERSION}/tsxgraph.js'; let TSX = new TSXBoard('jxgbox');`)
-        // monaco.languages.typescript.typescriptDefaults.addExtraLib(`let TSX = new TSXBoard('jxgbox');`)
-
 
         monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
             allowNonTsExtensions: true,
@@ -224,6 +219,11 @@ export class Editor {
         // this stuff has to go into the EVAL, since it doesn't see otherwise
 
         // let TSX = XGraph.freeBoard(undefined)  // just to make sure webpack keeps it
+
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(`let TSX:TSXBoard;`)
+        // monaco.languages.typescript.typescriptDefaults.addExtraLib(`import { TSXBoard } from './dist.${LIB_VERSION}/tsxgraph.js'; let TSX:TSXBoard;`)
+        // monaco.languages.typescript.typescriptDefaults.addExtraLib(`import { TSXBoard } from './dist.${LIB_VERSION}/tsxgraph.js'; let TSX = new TSXBoard('jxgbox');`)
+        // monaco.languages.typescript.typescriptDefaults.addExtraLib(`let TSX = new TSXBoard('jxgbox');`)
 
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(this.hiddenDecl)

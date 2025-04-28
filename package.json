@@ -6,7 +6,7 @@
         "comment01": "====",
         "comment02": "npm watch is at localhost/baby...., NOT at :8080",
         "comment03": "prebuild creates an importable version number",
-        "prebuild": "node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts  && cp ../../jsxgraph/distrib/jsxgraphcore.js lib",
+        "prebuild": "node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts  && cp ../../jsxgraph/distrib/jsxgraphcore.js lib && node cleanFile.js",
         "build": "npm run prebuild && rm -rf dist.2.0.0/ && tsc --noEmit && webpack --config webpack.player.dev.js && npm run copylib2d && npm run copy2moodle && npm run copy2playground",
         "buildproduction": "npm run prebuild && rm -rf dist.2.0.0/ && tsc --noEmit && webpack --config webpack.player.prod.js && npm run copylib2d && npm run copy2moodle && npm run copy2playground && npm run copy2wrapper",
         "copylib2d": "cp -R lib/*.* dist.2.0.0 && cp -R lib/fonts dist.2.0.0 && cp -R lib/bootstrap dist.2.0.0 && cp -R src/tsxgraph.* dist.2.0.0",

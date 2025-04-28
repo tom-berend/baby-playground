@@ -1,8 +1,8 @@
 type NumberFunction = Number | Function;
 /** A 'point' has a position in space.  The only characteristic that distinguishes one point from another is its position. */
-export type pointAddr = NumberFunction[] | [number, number] | [number, Function] | [Function, number] | [Function | Function];
-export type pointAddr3D = NumberFunction[];
-interface ShaderInterface {
+type pointAddr = NumberFunction[] | [number, number] | [number, Function] | [Function, number] | [Function | Function];
+type pointAddr3D = NumberFunction[];
+export interface ShaderInterface {
     enabled: Boolean;
     type: 'angle' | 'zIndex';
     hue: number;
@@ -10,26 +10,26 @@ interface ShaderInterface {
     minlightness: number;
     maxLightness: number;
 }
-interface MoveToOptions {
+export interface MoveToOptions {
     callback?: Function;
     effect?: "==" | "<>" | "--" | "<" | ">";
     repeat?: number;
 }
-interface SelectionAttributes {
+export interface SelectionAttributes {
     enabled?: Boolean;
     name?: string;
     needShift?: Boolean;
     needCtrl?: Boolean;
     fillColor?: string;
 }
-interface ScreenShotAttributes {
+export interface ScreenShotAttributes {
     scale?: number;
     type?: string;
     symbol?: '\u2318' | '\u22b9' | '\u26f6';
     css?: string;
     cssButton?: string;
 }
-interface pointerControls {
+export interface pointerControls {
     /**  specifies whether pointer navigation is allowed by elevation. */
     enabled?: Boolean;
     /** Number indicating how many passes the range of the el_slider makes when the cursor crosses the entire board once in the horizontal direction.*/
@@ -41,7 +41,7 @@ interface pointerControls {
     /** Should an additional key be pressed? ('none', 'shift' or 'ctrl') */
     key?: 'none' | 'shift' | 'ctrl';
 }
-interface keyboardControls {
+export interface keyboardControls {
     /** specifies whether the keyboard (arrow keys) can be used to navigate the board.*/
     enabled?: Boolean;
     /** Size of the step per keystroke. */
@@ -49,12 +49,12 @@ interface keyboardControls {
     /** Should an additional key be pressed? ('none', 'shift' or 'ctrl') */
     key?: 'none' | 'shift' | 'ctrl';
 }
-interface sliderControls {
+export interface sliderControls {
     min?: number;
     max?: number;
     start?: number;
 }
-interface screenControls {
+export interface screenControls {
     /** an object */
     pointer?: pointerControls;
     /** an object */
@@ -73,11 +73,22 @@ export interface AriaAttributes {
     /** ignore  ?? see Alfred comment in https://github.com/jsxgraph/jsxgraph/pull/737#event-16103541603 */
     ignore?: Boolean;
 }
-interface DisplayPoint {
+export interface DisplayPoint {
     size?: Number;
     face?: 'cross' | 'plus' | 'minus' | 'divide' | 'diamond' | 'triangledown' | 'triangleleft' | 'triangleright' | 'triangleup' | 'square' | 'circle';
 }
-interface ZoomAttributes {
+export interface VertexAttributes {
+    visible?: Boolean;
+}
+export interface PanAttributes {
+    /** allow panning */
+    enabled?: Boolean;
+    /** panning is done with two fingers on touch devices */
+    needTwoFingers?: Boolean;
+    /** mouse panning needs pressing of the shift key */
+    needShift?: Boolean;
+}
+export interface ZoomAttributes {
     /** turns off zooming completely, if set to false. */
     enabled?: Boolean;
     /** horizontal zoom factor (multiplied to JXG.Board#zoomX) */
@@ -103,21 +114,7 @@ interface ZoomAttributes {
     /**  Sensitivity (in degrees) for recognizing horizontal or vertical pinch-to-zoom gestures.  default: 7 */
     pinchSensitivity?: number;
 }
-/**
-*  Constant: user coordinates relative to the coordinates system defined by the bounding box.
-*/
-export declare const COORDS_BY_USER = 1;
-/**
-*  Constant: screen coordinates in pixel relative to the upper left corner of the div element.
-*/
-export declare const COORDS_BY_SCREEN = 2;
-export declare class IntervalArithmetic {
-}
-export declare class PolyMonomial {
-}
-export declare class PolyPolynomial {
-}
-export declare class Symbolic {
+export interface JSXMathAttributes {
 }
 /** Initialize a new board. The first parameter 'html' should be the ID of a <DIV> in your web page.\n\n
  * ```js
@@ -128,7 +125,7 @@ import { TXG } from "../src/tsxgraph.js";
 const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
 ```
 */
-export type spaceIcon = 'icons/alien-1.png' | 'icons/alien-2.png' | 'icons/alien-3.png' | 'icons/alien-4.png' | 'icons/alien-5.png' | 'icons/alien-abduction.png' | 'icons/alien-ship-2.png' | 'icons/alien-ship-beam.png' | 'icons/alien-ship.png' | 'icons/asteroid-2.png' | 'icons/asteroid.png' | 'icons/astronaut-helmet.png' | 'icons/atom.png' | 'icons/atronaut.png' | 'icons/bb-8.png' | 'icons/big-dipper.png' | 'icons/black-hole.png' | 'icons/brain-slug.png' | 'icons/cassiopeia.png' | 'icons/chewbacca.png' | 'icons/comet.png' | 'icons/cylon-raider.png' | 'icons/darth-vader.png' | 'icons/death-star.png' | 'icons/earth.png' | 'icons/falling-asteroid.png' | 'icons/falling-space-capsule.png' | 'icons/falling-star.png' | 'icons/flag.png' | 'icons/fly\ icon\ licence.png' | 'icons/flyicon.png' | 'icons/galaxy.png' | 'icons/intl-space-station.png' | 'icons/jupiter.png' | 'icons/landing-space-capsule.png' | 'icons/laser-gun.png' | 'icons/mars.png' | 'icons/millennium-falcon.png' | 'icons/mission-control.png' | 'icons/moon-full-almost.png' | 'icons/moon-full-moon.png' | 'icons/moon-last-quarter.png' | 'icons/moon-new-moon.png' | 'icons/moon-waning-cresent.png' | 'icons/moon-waning-gibbous.png' | 'icons/morty.png' | 'icons/neptune.png' | 'icons/pluto.png' | 'icons/princess-leia.png' | 'icons/rick.png' | 'icons/ring-ship.png' | 'icons/rocket-launch.png' | 'icons/rocket.png' | 'icons/satellite.png' | 'icons/saturn.png' | 'icons/solar-system.png' | 'icons/space-capsule.png' | 'icons/space-cockpit.png' | 'icons/space-invader.png' | 'icons/space-observatory.png' | 'icons/space-rocket.png' | 'icons/space-rover-1.png' | 'icons/space-rover-2.png' | 'icons/space-satellite-dish.png' | 'icons/space-ship_1.png' | 'icons/space-ship_2.png' | 'icons/space-ship_3.png' | 'icons/space-ship.png' | 'icons/space-shuttle-launch.png' | 'icons/space-shuttle.png' | 'icons/sputnick-1.png' | 'icons/sputnick-2.png' | 'icons/star.png' | 'icons/stars.png' | 'icons/stormtrooper.png' | 'icons/sun.png' | 'icons/telescope.png' | 'icons/uranus.png' | 'icons/venus.png' | 'icons/moon-dreamy.png';
+type spaceIcon = 'icons/alien-1.png' | 'icons/alien-2.png' | 'icons/alien-3.png' | 'icons/alien-4.png' | 'icons/alien-5.png' | 'icons/alien-abduction.png' | 'icons/alien-ship-2.png' | 'icons/alien-ship-beam.png' | 'icons/alien-ship.png' | 'icons/asteroid-2.png' | 'icons/asteroid.png' | 'icons/astronaut-helmet.png' | 'icons/atom.png' | 'icons/atronaut.png' | 'icons/bb-8.png' | 'icons/big-dipper.png' | 'icons/black-hole.png' | 'icons/brain-slug.png' | 'icons/cassiopeia.png' | 'icons/chewbacca.png' | 'icons/comet.png' | 'icons/cylon-raider.png' | 'icons/darth-vader.png' | 'icons/death-star.png' | 'icons/earth.png' | 'icons/falling-asteroid.png' | 'icons/falling-space-capsule.png' | 'icons/falling-star.png' | 'icons/flag.png' | 'icons/fly\ icon\ licence.png' | 'icons/flyicon.png' | 'icons/galaxy.png' | 'icons/intl-space-station.png' | 'icons/jupiter.png' | 'icons/landing-space-capsule.png' | 'icons/laser-gun.png' | 'icons/mars.png' | 'icons/millennium-falcon.png' | 'icons/mission-control.png' | 'icons/moon-full-almost.png' | 'icons/moon-full-moon.png' | 'icons/moon-last-quarter.png' | 'icons/moon-new-moon.png' | 'icons/moon-waning-cresent.png' | 'icons/moon-waning-gibbous.png' | 'icons/morty.png' | 'icons/neptune.png' | 'icons/pluto.png' | 'icons/princess-leia.png' | 'icons/rick.png' | 'icons/ring-ship.png' | 'icons/rocket-launch.png' | 'icons/rocket.png' | 'icons/satellite.png' | 'icons/saturn.png' | 'icons/solar-system.png' | 'icons/space-capsule.png' | 'icons/space-cockpit.png' | 'icons/space-invader.png' | 'icons/space-observatory.png' | 'icons/space-rocket.png' | 'icons/space-rover-1.png' | 'icons/space-rover-2.png' | 'icons/space-satellite-dish.png' | 'icons/space-ship_1.png' | 'icons/space-ship_2.png' | 'icons/space-ship_3.png' | 'icons/space-ship.png' | 'icons/space-shuttle-launch.png' | 'icons/space-shuttle.png' | 'icons/sputnick-1.png' | 'icons/sputnick-2.png' | 'icons/star.png' | 'icons/stars.png' | 'icons/stormtrooper.png' | 'icons/sun.png' | 'icons/telescope.png' | 'icons/uranus.png' | 'icons/venus.png' | 'icons/moon-dreamy.png';
 export interface GeometryElementAttributes {
     /** If true, the infobox is shown on mouse/pen over for all points which have set their attribute showInfobox to `inherit`. */
     showInfobox?: Boolean;
@@ -2139,8 +2136,7 @@ export interface MathIface {
     Numerics: Object;
     Statistics: Object;
 }
-export declare let JsxMath: MathIface;
-/** This class wraps the JSX library and the constructor is equivalent to the `initBoard()` method.
+/** This wraps the JSX library and the constructor is equivalent to the `initBoard()` method.
 
  * ```js
 
@@ -2158,14 +2154,34 @@ export declare class TSXBoard {
     private defaultAttrs;
     /** expiriment - can we get a static function ? */
     static staticFunction(): void;
+    /** Store a reference to every board in this central list. */
+    static boards(): any;
+    /** Constant: screen coordinates in pixel relative to the upper left corner of the div element. */
+    static COORDS_BY_SCREEN(): any;
+    /** Constant: user coordinates relative to the coordinates system defined by the bounding box. */
+    static COORDS_BY_USER(): any;
+    /** Associative array that keeps track of all constructable elements registered via JXG.registerElement. */
+    static elements(): any;
+    /** The FileReader object bundles the file input capabilities of JSXGraph. */
+    static FileReader(): any;
+    /** Constant: the small gray version indicator in the top left corner of every JSXGraph board (if showCopyright is not set to false on board creation). */
+    static licenseText(): any;
+    /** Default color palette. */
+    static palette(): any;
+    /** Bang Wong color palette, optimized for various type of color blindness. */
+    static paletteWong(): any;
+    /** Store the available file readers in this structure. */
+    static readers(): any;
+    /** Holds all possible properties and the according validators for geometry elements. */
+    static Validator(): any;
+    /** Constant: the currently used JSXGraph version. */
+    get version(): any;
     constructor(canvas?: string, attributes?: Object);
     /** test for empty object {} */
     isEmptyObject(obj: Object): Boolean;
     defaultAttributes(attrs?: Object): Object;
     isAttribute(last: any): Boolean;
     Print(...args: any[]): void;
-    /** Version of JSXGraph.  */
-    version(): String;
     /** Set the bounding box of the board.  Returns the board.
 
     ```js
@@ -2963,6 +2979,4 @@ interface VisitAttributes {
     effect?: "==" | "<>" | "<" | ">";
     repeat?: number;
 }
-/** Initialize a board other than jxgbox */
-export declare function initBoard(canvas?: string, attributes?: BoardAttributes): Object;
 export {};
