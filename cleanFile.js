@@ -5,7 +5,7 @@ const readline = require('readline');
 
 let output = ''
 
-const inFilePath = 'src/extraLibs/tsxgraph.d.ts.txt'
+const inFilePath = 'src/extraLibs/tsxgraph.d.ts'
 const outFilePath = 'src/extraLibs/tsxgraph.d.ts.txt'
 
 let lineNo = 0

@@ -277,7 +277,7 @@ export class Editor {
         // console.log('%ccopyToEditor', 'color:red;', 'hiddencode:', hidden, 'hiddendecl', decls)
         this.hiddenCode = hidden
         this.hiddenDecl = decls
-        console.log('copyToEditor:', hidden, decls)
+        // console.log('copyToEditor:', hidden, decls)
         this.editor.setValue(code)
     }
 
@@ -295,9 +295,9 @@ export class Editor {
     }
 
 
-    async transpile(hiddenCode: string, popup: boolean) {
+    async transpile(hiddenCode: string, jsDelivr: boolean, popup: boolean, gameboy: boolean) {
 
-        console.log(`transpile(popup: ${popup})\n`)
+        console.log(`transpile(popup: ${popup},jsDelivr: ${jsDelivr}) \n`)
 
 
         // const args = names.map((key) => scope[key]);
@@ -323,7 +323,7 @@ export class Editor {
             });
             if (errorString.length > 0) {
                 // alert('errors coming')
-                alert(errorString)    //
+                alert(errorString)    //npm
                 console.log(errors);
                 return '';
             }
@@ -344,7 +344,7 @@ export class Editor {
 
             // TODO, get correct ID and textbook
             // writeMoodleLog({'datacode': 'LOG_EditorRun', id:0, textbook:'', data05: sourceCode})
-            this.runEditorCode(this.editorCode, popup)     // and run the whole mess
+            this.runEditorCode(this.editorCode, popup, true, jsDelivr, gameboy)     // and run the whole mess
 
         }
         return;
@@ -352,7 +352,7 @@ export class Editor {
 
 
     /** this creates a TEXT webpage for download. */
-    async createWebPage(hiddenCode: string) {
+    async createWebPage(hiddenCode: string, gameboy: boolean) {
 
         // const args = names.map((key) => scope[key]);
         const model = this.editor.getModel();
@@ -368,7 +368,7 @@ export class Editor {
 
             this.editorCode = output.outputFiles[0].text as string;
 
-            let html = this.generateSourceCode(hiddenCode, this.editorCode, true) // html web version    // ALWAYS jsDelivr
+            let html = this.generateSourceCode(hiddenCode, this.editorCode, true, gameboy) // html web version    // ALWAYS jsDelivr
 
             const downloadSource = new Blob([html], { type: "text/plain" });
 
@@ -389,51 +389,56 @@ export class Editor {
 
 
     /** the 'RUN' button in th playground.  Create  */
-    runEditorCode(tsCode64: string, popup: boolean, tabIndex0: boolean = true, jsDelivr: boolean = true,) {
+    runEditorCode(tsCode64: string, popup: boolean, tabIndex0: boolean = true, jsDelivr: boolean = true, gameboy: boolean = false) {
 
         // this is a mess
 
         popup = false;
-        console.log(`runeditorcode(popup:${popup})`)
+        // console.log(`runeditorcode(popup:${popup},gameboy:${gameboy})`)
         // console.log('code', code)
 
         let pop = popup ? 'popup=true,' : ''
         pop += ', noopener'     // for security
 
         let target = pop ? '_blank' : 'jxgbox'
-        let html: string
 
         // if the window is open, we must first close (Chrome's new security)
         // TODO: if window is open, substitute the innerHTML.  \
-        if (popup && this.plotWindow !== null && !this.plotWindow.closed) {
-            // console.log('plotwindow exists, closing');
-            console.log('pipup && plotwindow exists, injecting');
-            this.injectScript('jxgframe', this.injectableScript(this.hiddenCode, this.editorCode, false))
-        } else {
+        // if (popup && this.plotWindow !== null && !this.plotWindow.closed) {
+        //     // console.log('plotwindow exists, closing');
+        //     console.log('pipup && plotwindow exists, injecting');
+        //     this.injectScript('jxgframe', this.injectableScript(this.hiddenCode, this.editorCode, false))
 
-            if (this.plotWindow !== null && !this.plotWindow.closed) {
-                this.plotWindow.close();
-            }
-            // reopen
-            this.plotWindow = window.open(target, target, `${pop}left=100,top=100,width=320,height=320`);
-            if (!this.plotWindow) {
-                this.injectScript('jxgframe', this.injectableScript(this.hiddenCode, this.editorCode, false))
-            } else
-                // whole new webpage
-                html = this.generateSourceCode(this.hiddenCode, this.editorCode, false)
+        // } else {
 
-            /********** alternative to document write
-                            document.write=function(s){
-                                var scripts = document.getElementsByTagName('script');
-                                var lastScript = scripts[scripts.length-1];
-                                lastScript.insertAdjacentHTML("beforebegin", s);
-                            }
-            */
 
-            // this.plotWindow.document.open();    // creates a page with <html><head><body>, but nothing else
-            this.plotWindow.document.write(html);
-            this.plotWindow.document.close();
-        }
+
+
+        // console.log('writing whole new webpage')
+        try {
+            // if (this.plotWindow !== null && !this.plotWindow.closed) {
+            this.plotWindow.close();
+            // }
+        } catch { }
+
+        // hope window is gone  not popup (ie: playground-style new window)
+        this.plotWindow = window.open('', '_blank', `${pop}left=100,top=100,width=320,height=320`);
+        // if (!this.plotWindow) {
+        let html = this.generateSourceCode(this.hiddenCode, this.editorCode, jsDelivr, gameboy)
+
+        /********** alternative to document write
+                        document.write=function(s){
+                            var scripts = document.getElementsByTagName('script');
+                            var lastScript = scripts[scripts.length-1];
+                            lastScript.insertAdjacentHTML("beforebegin", s);
+                        }
+        */
+
+        // this.plotWindow.document.open();    // creates a page with <html><head><body>, but nothing else
+        this.plotWindow.document.write(html);
+        this.plotWindow.document.close();
+        // }
+        // }
     }
 
 
@@ -441,53 +446,59 @@ export class Editor {
     /** pull together the source code for a TEXt webpage for download  It is used in the
      * playground to download a page.
     */
-    generateSourceCode(hiddenCode: string, editorCode: string, jsDelivr: boolean = true): string {
+    generateSourceCode(hiddenCode: string, editorCode: string, jsDelivr: boolean, gameboy: boolean): string {
 
         let hostname = location.hostname;
-        console.log('hostname', hostname)
+        // console.log('hostname', hostname)
 
         let html = ''
 
-        html += this.HTMLBoilerPlate(jsDelivr);  // leaves an injectable script open
-        // html += '<script type="module" defer>'
+        html += this.HTMLBoilerPlate(jsDelivr, gameboy);  // leaves an injectable script open
+        html += '<script type="module">'
+
+        if (gameboy) {
+            html += this.gameBoyScript();  // leaves an injectable script open
+        }
         html += this.injectableScript(hiddenCode, editorCode, jsDelivr)
+
         html += '</script>';
 
         html += '</body>';
-        html += '</head>';
         html += '</html>';
         return html
     }
 
 
 
-    HTMLBoilerPlate(jsDelivr: boolean): string {
+    HTMLBoilerPlate(jsDelivr: boolean, gameBoy: boolean): string {
+
+        // console.log(`HTMLBoilerPlate(jsDelivr:${jsDelivr},gameboy:${gameBoy})`)
+
         let html = '<!DOCTYPE html>';
         html += '<head>';
 
-        jsDelivr = false;   // TBTB
-        let gameBoy = true;
+        // jsDelivr = false;   // TBTB
 
 
         if (jsDelivr) {  // for downloading a working web page - everything from jsdelivr
             // html += `\n<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.js"></script>`
             // html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.css" />`;
 
-            html += `\n<script defer type="text/javascript" charset="UTF-8" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>`
+            html += `\n<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>`
             html += `\n<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />`;
 
             html += `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" integrity="sha384-zh0CIslj+VczCZtlzBcjt5ppRcsAmDnRem7ESsYwWwg3m/OaJ2l4x7YBZl9Kxxib" crossorigin="anonymous">`;
-            html += `<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" integrity="sha384-Rma6DA2IPUwhNxmrB/7S3Tno0YY7sFu9WSYMCuulLhIqYSGZ2gKCJWIqhBWqMQfh" crossorigin="anonymous"></script>`;
+            html += `<script src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" integrity="sha384-Rma6DA2IPUwhNxmrB/7S3Tno0YY7sFu9WSYMCuulLhIqYSGZ2gKCJWIqhBWqMQfh" crossorigin="anonymous"></script>`;
 
         } else {
             // html += `\n<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.js"></script>`
             // html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.css" />`;
 
-            html += `\n<script type="text/javascript" charset="UTF-8" src="/TSXGraph/playground/dist.${LIB_VERSION}/jsxgraphcore.js"></script>`;
-            html += `\n<link rel="stylesheet" type="text/css" href="/TSXGraph/playground/dist.${LIB_VERSION}/jsxgraph.css" />`;
+            html += `\n<script type="text/javascript" src="dist.${LIB_VERSION}/jsxgraphcore.js"></script>`;
+            html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/jsxgraph.css" />`;
 
-            html += `<link rel="stylesheet" href="/TSXGraph/playground/dist.${LIB_VERSION}/katex.min.css">`;
-            html += `<script defer src="/TSXGraph/playground/dist.${LIB_VERSION}/katex.min.js"></script>`;
+            html += `<link rel="stylesheet" href="dist.${LIB_VERSION}/katex.min.css">`;
+            html += `<script src="dist.${LIB_VERSION}/katex.min.js"></script>`;
 
         }
 
@@ -530,14 +541,14 @@ export class Editor {
         //     html += `<script defer src='/TSXGraph/playground/dist.${LIB_VERSION}/webfontloader.min.js'></script>`;
         // }
 
-        if (gameBoy)
+        if (gameBoy)  // opens two divs
             html +=
                 `<div style='width:1000px;max-width:100%;height:1170px;max-height:100%'>
-                 <div style='border:solid 2px black; border-radius: 10px;padding:10px;background-color: rgb(178, 214, 246);width:100%;height:100%;'>
-           `;
+                 <div style='border:solid 2px black; border-radius: 10px;padding:10px;background-color: rgb(178, 214, 246);width:100%;height:100%;'>`;
+
         html += `<div id="jxgbox" class="jxgbox" style="aspect-ratio: 1; width: 100%; max-width:1000px; max-height: calc(100vh - 20px);" tabindex= '0'></div>`;
 
-        if (gameBoy)
+        if (gameBoy)  // closes the two divs
             html +=
                 `<div>
                <div class="wrapper">
@@ -568,12 +579,20 @@ export class Editor {
                 </div><!-- end of second wrapper-->
             </div>
          </div>
-      <!--/div-->
+
+        `;
+
+        return html;
+    }
+
+    gameBoyScript(): string {
+
+        let html = '';
 
 
-       <script type="module" defer>
+        html +=
 
-            let btn_A = (e) => dispatchEvent(new KeyboardEvent("keydown", {
+            `let btn_A = (e) => dispatchEvent(new KeyboardEvent("keydown", {
                 key: "A",
                 keyCode: 65,
                 code: "KeyA"
@@ -627,7 +646,6 @@ export class Editor {
 
         `;
 
-
         return html;
     }
 
@@ -635,13 +653,40 @@ export class Editor {
     injectableScript(hiddenCode: string, editorCode: string, jsDelivr: Boolean) {
 
         let html = '';
-        jsDelivr = false;   // tbtb
+        // jsDelivr = false;   // tbtb
 
         if (jsDelivr) {  // web version load tsxgraph.js from jsdelivr
-            html += "\r\n" + `import {TSXBoard}  from 'https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@${LIB_VERSION}.0/lib/tsxgraph.js';`
+            html += "\n" + `import {TSXBoard, JsxMath}  from 'https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@${LIB_VERSION}/lib/tsxgraph.js';`
+            // html += `\nimport {GeometryElement, Board, Point, Line, GeometryElement3D, View3D, Chart, Circle, Circle3D,
+            // Complex, Composition, Coords, Curve, Curve3D, Dump, ForeignObject, Group, Image, Implicitcurve,
+            // IntersectionCircle3D, IntersectionLine3D, Line3D, Plane3D, Point3D, Polygon, Polygon3D, Text, Text3D, Ticks,
+            // Sector, Vectorfield, Angle, Arc, Arrow, Parallel, Arrowparallel, Axis, BezierCurve, Bisector,
+            // Bisectorlines, Button, Cardinalspline, Checkbox, Circumcenter, Circumcircle, CircumcircleArc, CircumcircleSector, Comb, Conic,
+            // CurveDifference, CurveIntersection, CurveUnion, Derivative, Ellipse, ParametricSurface3D, Face3D, Functiongraph, Functiongraph3D, Glider,
+            // Glider3D, Grid, Hatch, Hyperbola, Incenter, Incircle, Inequality, Input, Integral, Intersection,
+            // Label, Legend, Locus, MajorArc, MajorSector, Measurement, Mesh3D, Midpoint, MinorArc, MinorSector,
+            // Mirrorelement, Mirrorpoint, NonReflexAngle, Normal, Orthogonalprojection, OtherIntersection, Parabola, Parallelpoint, Segment, Parallelogram,
+            // Perpendicular, PerpendicularPoint, PerpendicularSegment, PolarLine, PolePoint, PolygonalChain, Polyhedron3D, RadicalAxis, Reflection, ReflexAngle,
+            // RegularPolygon, Riemannsum, Semicircle, Slider, Slopefield, Slopetriangle, Smartlabel, Sphere3D, Spline, Stepfunction,
+            // Tangent, TangentTo, Tapemeasure, Tracecurve, Transform, Transform3D, TransformPoint, TransformPoint3D, Segment3D, Translate,
+            // Rotate, Scale, Translate3D, Rotate3D, RotateX3D, RotateY3D, RotateZ3D, Scale3D} from 'https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@${LIB_VERSION}/lib/tsxgraph.js'`;
         } else {
-            html += `\nimport {TSXBoard} from '/TSXGraph/playground//dist.${LIB_VERSION}/tsxgraph.js'`;
+            html += `\nimport {TSXBoard,JsxMath} from './dist.${LIB_VERSION}/tsxgraph.js'`;
+            // html += `\nimport {GeometryElement, Board, Point, Line, GeometryElement3D, View3D, Chart, Circle, Circle3D,
+            // Complex, Composition, Coords, Curve, Curve3D, Dump, ForeignObject, Group, Image, Implicitcurve,
+            // IntersectionCircle3D, IntersectionLine3D, Line3D, Plane3D, Point3D, Polygon, Polygon3D, Text, Text3D, Ticks,
+            // Sector, Vectorfield, Angle, Arc, Arrow, Parallel, Arrowparallel, Axis, BezierCurve, Bisector,
+            // Bisectorlines, Button, Cardinalspline, Checkbox, Circumcenter, Circumcircle, CircumcircleArc, CircumcircleSector, Comb, Conic,
+            // CurveDifference, CurveIntersection, CurveUnion, Derivative, Ellipse, ParametricSurface3D, Face3D, Functiongraph, Functiongraph3D, Glider,
+            // Glider3D, Grid, Hatch, Hyperbola, Incenter, Incircle, Inequality, Input, Integral, Intersection,
+            // Label, Legend, Locus, MajorArc, MajorSector, Measurement, Mesh3D, Midpoint, MinorArc, MinorSector,
+            // Mirrorelement, Mirrorpoint, NonReflexAngle, Normal, Orthogonalprojection, OtherIntersection, Parabola, Parallelpoint, Segment, Parallelogram,
+            // Perpendicular, PerpendicularPoint, PerpendicularSegment, PolarLine, PolePoint, PolygonalChain, Polyhedron3D, RadicalAxis, Reflection, ReflexAngle,
+            // RegularPolygon, Riemannsum, Semicircle, Slider, Slopefield, Slopetriangle, Smartlabel, Sphere3D, Spline, Stepfunction,
+            // Tangent, TangentTo, Tapemeasure, Tracecurve, Transform, Transform3D, TransformPoint, TransformPoint3D, Segment3D, Translate,
+            // Rotate, Scale, Translate3D, Rotate3D, RotateX3D, RotateY3D, RotateZ3D, Scale3D} from './dist.${LIB_VERSION}/tsxgraph.js'`;
         }
+
 
         html += "\nlet TSX = new TSXBoard('jxgbox');"
 
@@ -651,10 +696,11 @@ export class Editor {
 
         html += "\r\n" + editorCode
 
-        html += "\r\n }"
-        html += "\r\n catch(error) {"
-        html += "\r\n    alert(error);"
-        html += "\r\n }"
+        html += "\n }"
+        html += "\n catch(error) {"
+        html += "\n    alert(error);"
+        html += "\n    console.log(error)"
+        html += "\n }"
 
         return html;
     }

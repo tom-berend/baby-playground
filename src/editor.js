@@ -11,14 +11,14 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
+var __importStar = (this && this.__importStar) || function(mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
     if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
+var __importDefault = (this && this.__importDefault) || function(mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -243,7 +243,7 @@ class Editor {
     transpileLog(hiddenCode) {
         // console.log('transpile()\n', hiddenCode)
     }
-    async transpile(hiddenCode, popup) {
+    async transpile(hiddenCode, popup: boolean, gameboy: boolean) {
         console.log(`transpile(popup: ${popup})\n`);
         // const args = names.map((key) => scope[key]);
         const model = this.editor.getModel();
@@ -284,7 +284,7 @@ class Editor {
         return;
     }
 
-    
+
     async createWebPage(hiddenCode) {
         // const args = names.map((key) => scope[key]);
         const model = this.editor.getModel();

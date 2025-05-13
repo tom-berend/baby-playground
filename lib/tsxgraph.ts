@@ -21,7 +21,7 @@
         //    DEALINGS IN THE SOFTWARE.
         //
         /////////////////////////////////////////////////////////////////////////////
-        //   Generated on April 28, 2025, 10:28 am
+        //   Generated on May 12, 2025, 9:13 pm
 
      // match JSXGraph definition for JXG_Point3D, etc
         type NumberFunction = Number | Function
@@ -33,7 +33,7 @@
     keepAspectRatio: true,
     name: '', showinfobox: false,
     pan: { enabled: false },
-    resize: { enabled: false },
+    resize: { enabled: false }
 }
 
 
@@ -185,28 +185,28 @@ export interface ZoomAttributes {
 /**
 *  Constant: user coordinates relative to the coordinates system defined by the bounding box.
 */
- const COORDS_BY_USER = 0x0001
+const COORDS_BY_USER = 0x0001
 /**
 *  Constant: screen coordinates in pixel relative to the upper left corner of the div element.
 */
- const COORDS_BY_SCREEN = 0x0002
+const COORDS_BY_SCREEN = 0x0002
 
 
-export interface JSXMathAttributes {
-}
+// export interface JSXMathAttributes {
+// }
 
 
 
 
-///// some math classes by hand
- class IntervalArithmetic {
-}
- class PolyMonomial {
-}
- class PolyPolynomial {
-}
- class Symbolic {
-}
+// ///// some math classes by hand
+//  class IntervalArithmetic {
+// }
+//  class PolyMonomial {
+// }
+//  class PolyPolynomial {
+// }
+//  class Symbolic {
+// }
 
 
 
@@ -262,7 +262,7 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
 
 
 
- type spaceIcon =
+export type SpaceIcon =
     'icons/alien-1.png' |
     'icons/alien-2.png' |
     'icons/alien-3.png' |
@@ -485,6 +485,8 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
  /** missing description */
  addTicks(): String; 
  /** missing description */
+ addTransform(element:GeometryElement,transforms:any|any[]): GeometryElement; 
+ /** missing description */
  animate(): GeometryElement; 
  /** missing description */
  bounds(): number[]; 
@@ -517,9 +519,9 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
  /** missing description */
  hideElement(): GeometryElement; 
  /** missing description */
- labelColor(): currentBoard; 
+ labelColor(): Board; 
  /** missing description */
- noHighlight(): currentBoard; 
+ noHighlight(): Board; 
  /** missing description */
  remove(): Object; 
  /** missing description */
@@ -654,14 +656,38 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
  export interface PointAttributes extends GeometryElementAttributes {
  /** If the distance of the point to one of its attractors is less than this number the point will be a glider on this attracting element. If set to zero nothing happens. */
   attractorDistance?: number
+ /** List of attractor elements. If the distance of the point is less than attractorDistance the point is made to glider of this element. */
+  attractors?: Element[]
+ /** Unit for attractorDistance and snatchDistance, used for magnetized points and for snapToPoints. Possible values are 'screen' and 'user'. */
+  attractorUnit?: String
  /** If set to true, the point will only snap to (possibly invisibly) grid points when within Point#attractorDistance of such a grid point.The coordinates of the grid points are either integer multiples of snapSizeX and snapSizeY (given in user coordinates, not pixels) or are the intersection points of the major ticks of the boards default axes in case that snapSizeX, snapSizeY are negative. */
   attractToGrid?: Boolean
+ /** List of elements which are ignored by snapToPoints. */
+  ignoredSnapToPoints?: Element[]
+ /** Truncating rule for the digits in the infobox.'auto': done automatically by JXG.autoDigits() 'none': no truncation number: truncate after ”number digits” with JXG.toFixed() */
+  infoboxDigits?: String| number
  /** If true, the infobox is shown on mouse/pen over, if false not. If the value is 'inherit', the value of JXG.currentBoard#showInfobox is taken. */
   showInfobox?: Boolean
+ /** There are different point styles which differ in appearance. */
+  face?: 'o'|'line'|'point'|'cross'| 'plus' | 'minus' | 'divide'| 'diamond'| 'triangledown' | 'triangleleft' | 'triangleright'| 'triangleup' | 'square' |'circle' | string
+ /** Size of a point, either in pixel or user coordinates. Means radius resp. half the width of a point (depending on the face). */
+  size?: number|Function
+ /** Unit for size. Possible values are 'screen' and 'user. */
+  sizeUnit?: String
+ /** Defines together with Point#snapSizeY the grid the point snaps on to. It is given in user coordinates, not in pixels. The point will only snap on integer multiples to snapSizeX in x and snapSizeY in y direction. If this value is equal to or less than 0, it will use the grid displayed by the major ticks of the default ticks of the default x axes of the currentBoard. */
+  snapSizeX?: number
+ /** Defines together with Point#snapSizeX the grid the point snaps on to. It is given in user coordinates, not in pixels. The point will only snap on integer multiples to snapSizeX in x and snapSizeY in y direction. If this value is equal to or less than 0, it will use the grid displayed by the major ticks of the default ticks of the default y axes of the currentBoard. */
+  snapSizeY?: number
  /** If set to true, the point will snap to a grid of integer multiples of Point#snapSizeX and Point#snapSizeY (in user coordinates).The coordinates of the grid points are either integer multiples of snapSizeX and snapSizeY (given in user coordinates, not pixels) or are the intersection points of the major ticks of the boards default axes in case that snapSizeX, snapSizeY are negative. */
   snapToGrid?: Boolean
+ /** If set to true, the point will snap to the nearest point in distance of Point#attractorDistance. */
+  snapToPoints?: Boolean
+ /** If the distance of the point to one of its attractors is at least this number the point will be released from being a glider on the attracting element. If set to zero nothing happens. */
+  snatchDistance?: number
  /** This attribute was used to determined the point layout. It was derived from GEONExT and was replaced by Point#face and Point#size. */
   style?: number
+ /** If true, the point size changes on zoom events. */
+  zoom?: Boolean
 }
  
 
@@ -682,6 +708,8 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
  Dist(toPoint:Point|pointAddr): number; 
  /** missing description */
  face(style:'cross'|'circle'|'square'|'plus'|'minus'|'diamond'): Boolean; 
+ /** missing description */
+ isOn(el:GeometryElement,tol:number): Boolean; 
  /** missing description */
  update(): number[]; 
  /** missing description */
@@ -915,17 +943,6 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
  stopAzimuth(): any; 
  }
 
- export interface currentBoardAttributes  {
-}
- 
-
- export interface currentBoard  {    // fields and methods
-
- //// fields 
-
- //// methods 
- }
-
  export interface ChartAttributes extends GeometryElementAttributes {
  /** Select type of chart. */
  chartStyle?: `bar`|`line`
@@ -1089,7 +1106,7 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
 
  //// fields 
  /** missing description */
- currentBoard: currentBoard; 
+ currentBoard: Board; 
  /** missing description */
  emitter: boolean; 
  /** missing description */
@@ -1179,21 +1196,31 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
  Z(): number; 
  }
 
- export interface Curve3DAttributes extends CurveAttributes {
+ export interface Curve3DAttributes extends GeometryElement3DAttributes {
 }
  
 
- export interface Curve3D extends Curve {   // fields and methods
+ export interface Curve3D extends GeometryElement3D {   // fields and methods
 
  //// fields 
 
  //// methods 
  /** missing description */
- X(): number; 
+ addTransform(other:ParametricSurface3D,transforms:Transform3D[]): Curve3D; 
  /** missing description */
- Y(): number; 
+ updateTransform(): void; 
  /** missing description */
- Z(): number; 
+ evalF(u:number): void; 
+ /** missing description */
+ F(u:number): void; 
+ /** missing description */
+ updateCoords(): void; 
+ /** missing description */
+ X(u:number): number; 
+ /** missing description */
+ Y(u:number): number; 
+ /** missing description */
+ Z(u:number): number; 
  }
 
  export interface DumpAttributes  {
@@ -3017,9 +3044,9 @@ Instead of one value you can provide two values as an array [x, y] here. These a
  /** Attributes for the tape measure label. */
   label?: LabelAttributes
  /** Attributes for first helper point defining the tape measure position. */
-  point1?: LineAttributes
+  point1?: PointAttributes
  /** Attributes for second helper point defining the tape measure position. */
-  point2?: LineAttributes
+  point2?: PointAttributes
  /** The precision of the tape measure value displayed in the optional text. Replaced by the attribute digits */
   precision?: number
  /** Text rotation in degrees. */
@@ -3219,18 +3246,10 @@ Instead of one value you can provide two values as an array [x, y] here. These a
 
 /** A wrapper for the various math routines provided by JSXGraph.  For example:
             ```js
-            TSX.JsxMath.Matrix.crossProduct(a,b)
+            let cross = JsxMath.Matrix.crossProduct(a,b)
             ```
         */
-        export interface MathIface {
- Matrix: Object
- Geometry: Object
- Numerics: Object
- Statistics: Object
-}
-
- let JsxMath: MathIface = {Matrix :{
- // Matrix
+ export let JsxMath = {Matrix :{
  crossProduct(v1:number[],v2:number[])  { return (window as any).JXG.Math.crossProduct(v1,v2) }, 
  frustum(left:number,right:number,top:number,bottom:number,near:number,far:number)  { return (window as any).JXG.Math.frustum(left,right,top,bottom,near,far) }, 
  identity(m:number,n:number)  { return (window as any).JXG.Math.identity(m,n) }, 
@@ -3244,7 +3263,6 @@ Instead of one value you can provide two values as an array [x, y] here. These a
  vector(n:number,init:number)  { return (window as any).JXG.Math.vector(n,init) }, 
 },
 Geometry :{
- // Geometry
  affineDistance()  { return (window as any).JXG.Math.affineDistance() }, 
  affineRatio()  { return (window as any).JXG.Math.affineRatio() }, 
  angle()  { return (window as any).JXG.Math.angle() }, 
@@ -3300,13 +3318,11 @@ Geometry :{
  windingNumber()  { return (window as any).JXG.Math.windingNumber() }, 
 },
 Numerics :{
- // Numerics
  bezier(points:Point[])  { return (window as any).JXG.Math.bezier(points) }, 
  bspline(points:Point[],order:number)  { return (window as any).JXG.Math.bspline(points,order) }, 
  CardinalSpline(points:Point[],tau:number|Function)  { return (window as any).JXG.Math.CardinalSpline(points,tau) }, 
 },
 Statistics :{
- // Statistics
  randomNormal(mean:number,stdDev:number)  { return (window as any).JXG.Math.Statistics.randomNormal(mean,stdDev) }, 
  randomUniform(a:number,b:number)  { return (window as any).JXG.Math.Statistics.randomUniform(a,b) }, 
  randomExponential(lambda:number)  { return (window as any).JXG.Math.Statistics.randomExponential(lambda) }, 
@@ -3380,75 +3396,57 @@ export class TSXBoard {
 
 
 
-    /** expiriment - can we get a static function ? */
-
-    static staticFunction() {
-
-        alert('static function')
-
-    }
-
     /** Store a reference to every board in this central list. */
 
-    static boards() { return (window as any).JXG.boards }
+    static get boards() { return (window as any).JXG.boards }
 
     /** Constant: screen coordinates in pixel relative to the upper left corner of the div element. */
 
-    static COORDS_BY_SCREEN() { return (window as any).JXG.COORDS_BY_SCREEN }
+    static get COORDS_BY_SCREEN() { return (window as any).JXG.COORDS_BY_SCREEN }
 
     /** Constant: user coordinates relative to the coordinates system defined by the bounding box. */
 
-    static COORDS_BY_USER() { return (window as any).JXG.COORDS_BY_USER }
+    static get COORDS_BY_USER() { return (window as any).JXG.COORDS_BY_USER }
 
     /** Associative array that keeps track of all constructable elements registered via JXG.registerElement. */
 
-    static elements() { return (window as any).JXG.elements }
+    static get elements() { return (window as any).JXG.elements }
 
     /** The FileReader object bundles the file input capabilities of JSXGraph. */
 
-    static FileReader() { return (window as any).JXG.FileReader }
+    static get FileReader() { return (window as any).JXG.FileReader }
 
-    // /** Internet Explorer version. */
+    /** Internet Explorer version. */
 
-    // static ieVersion(){return (window as any).JXG.}
+    static get ieVersion() { return (window as any).JXG.ieVersion}
 
-    // /** A document/window environment is available. */
+    /** A document/window environment is available. */
 
-    // static isBrowser(){return (window as any).JXG.isBrowser()}
+    static get isBrowser() { return (window as any).JXG.isBrowser() }
 
     /** Constant: the small gray version indicator in the top left corner of every JSXGraph board (if showCopyright is not set to false on board creation). */
 
-    static licenseText() { return (window as any).JXG.licenseText }
+    static get licenseText() { return (window as any).JXG.licenseText }
 
     /** Default color palette. */
 
-    static palette() { return (window as any).JXG.palette }
+    static get palette() { return (window as any).JXG.palette }
 
     /** Bang Wong color palette, optimized for various type of color blindness. */
 
-    static paletteWong() { return (window as any).JXG.paletteWong }
+    static get paletteWong() { return (window as any).JXG.paletteWong }
 
     /** Store the available file readers in this structure. */
 
-    static readers() { return (window as any).JXG.readers }
+    static get readers() { return (window as any).JXG.readers }
 
     /** Holds all possible properties and the according validators for geometry elements. */
 
-    static Validator() { return (window as any).JXG.Validator }
-
-
-
-
-
-    // static version() { return (window as any).JXG.version }
-
-
-
-
+    static get Validator() { return (window as any).JXG.Validator }
 
     /** Constant: the currently used JSXGraph version. */
 
-    get version() {
+    static get version() {
 
         return (window as any).JXG.version
 
@@ -4756,8 +4754,6 @@ export class TSXBoard {
 
     setView(az: number, el: number, r?: number) {
 
-        console.log('setview from function 527')
-
         return (this._jView3d as any).setView(az, el, r)
 
     }
@@ -4851,7 +4847,6 @@ TSX.line(2,3,1)   // create a line for the equation a*x+b*y+c*z = 0
  }
 
  // Missing signaature array for View3D
- // Missing signaature array for currentBoard
 
 
  /** create a chart */
@@ -5025,32 +5020,49 @@ TSX.foreignObject(
  /** Array of Points */
  Group (pointArray:Point[]|Polygon, attributes: GroupAttributes ={} ):Group {
  if (Array.isArray(pointArray))
-                    return (this._jBoard as any).create('polygon3d', pointArray/*.flat()*/, this.defaultAttributes(attributes))
+                    return (this._jBoard as any).create('group', pointArray, this.defaultAttributes(attributes))
                 else
-                    return (this._jBoard as any).create('polygon3d', [pointArray], this.defaultAttributes(attributes))
+                    return (this._jBoard as any).create('group', [pointArray], this.defaultAttributes(attributes))
                 
 }
 
 
-
- /** Display an image.  The first element is the location URL of the image.
-                A collection of space icons is provided, press CTRL+I to show the list.
-                The second parameter sets the lower left point of the image.
-                The optional third parameter sets the size multiplier of the image, default is [1,1].
-                
-If you want to move the image, just tie the image to a point, maybe at the center of the image.
-                 For more flexibility, see TSX.Rotate() and TSX.Translate()
-                
-*```js
-            TSX.image('icons/earth.png', [0, 0],[2,2])
-            let p1 = TSX.point([3, 2], { opacity: .1 })
-            TSX.image('icons/moon-full-moon.png', [()=>p1.X(),()=>p1.Y()])
-                
-*``` */
- Image (url:string|spaceIcon, lowerLeft:pointAddr, widthHeight:[number,number]=[1,1], attributes: ImageAttributes ={} ):Image {
-   return (this._jBoard as any).create('image', [url,lowerLeft,widthHeight,], this.defaultAttributes(attributes))  as Image
-}
-
+ Image( url:SpaceIcon,lowerLeft:pointAddr,widthHeight:[number,number],attributes?:ImageAttributes) : Image
+ Image( url:string,lowerLeft:pointAddr,widthHeight:[number,number],attributes?:ImageAttributes) : Image
+// implementation of signature,  hidden from user
+ Image (a?:any, b?:any, c?:any, d?:any,e?:any,f?:any,g?:any,h?:any,i?:any) {
+   let params:any[] = []
+   let attrs = {}
+ if(arguments.length == 1) {
+   params = this.isAttribute(a)?[]:[a,];
+   attrs = this.isAttribute(a)? a:{};
+ }
+ if(arguments.length == 2) {
+   params = this.isAttribute(b)?[a,]:[a,b,];
+   attrs = this.isAttribute(b)? b:{};
+ }
+ if(arguments.length == 3) {
+   params = this.isAttribute(c)?[a,b,]:[a,b,c,];
+   attrs = this.isAttribute(c)? c:{};
+ }
+ if(arguments.length == 4) {
+   params = this.isAttribute(d)?[a,b,c,]:[a,b,c,d,];
+   attrs = this.isAttribute(d)? d:{};
+ }
+ if(arguments.length == 5) {
+   params = this.isAttribute(e)?[a,b,c,d,]:[a,b,c,d,e,];
+   attrs = this.isAttribute(e)? e:{};
+ }
+ if(arguments.length == 6) {
+   params = this.isAttribute(f)?[a,b,c,d,e,]:[a,b,c,d,e,f,];
+   attrs = this.isAttribute(f)? f:{};
+ }
+ if(arguments.length == 7) {
+   params = this.isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
+   attrs = this.isAttribute(g)? g:{};
+ }
+   return (this._jBoard as any).create('image', params, this.defaultAttributes(attrs))
+ }
 
  Implicitcurve( f:Function|String,attributes?:ImplicitcurveAttributes) : Implicitcurve
  Implicitcurve( f:Function|String,dfx:Function|String,dfy:Function|String,attributes?:ImplicitcurveAttributes) : Implicitcurve
@@ -5227,10 +5239,10 @@ If you want to move the image, just tie the image to a point, maybe at the cente
 
  /** Array of Points */
  Polygon (vertices:Point[]|pointAddr[]|Function, attributes: PolygonAttributes ={} ):Polygon {
- if (typeof vertices === 'function')
+   if (typeof vertices === 'function')
                               return (this._jBoard as any).create('polygon', [vertices], this.defaultAttributes(attributes))
                            else
-                              return (this._jBoard as any).create('polygon', vertices/*.flat()*/, this.defaultAttributes(attributes))
+                              return (this._jBoard as any).create('polygon', vertices, this.defaultAttributes(attributes))
                   
 }
 
@@ -5239,9 +5251,9 @@ If you want to move the image, just tie the image to a point, maybe at the cente
  /** A polygon is a sequence of points connected by lines, with the last point connecting back to the first one. The points are given by a list of Point3D objects or a list of coordinate arrays. Each two consecutive points of the list define a line. */
  Polygon3D (vertices:Point3D[]|pointAddr3D[]|Function, attributes: Polygon3DAttributes ={} ):Polygon3D {
  if (typeof vertices === 'function')
-                            return (this._jBoard as any).create('polygon3d', [vertices], this.defaultAttributes(attributes))
+                            return (this._jView3d as any).create('polygon3d', [vertices], this.defaultAttributes(attributes))
                          else
-                            return (this._jBoard as any).create('polygon3d', vertices/*.flat()*/, this.defaultAttributes(attributes))
+                            return (this._jView3d as any).create('polygon3d', vertices, this.defaultAttributes(attributes))
                         
 }
 
@@ -5295,7 +5307,7 @@ TSX.text([-4, 2], '\pm\sqrt{a^2 + b^2}', { useKatex: true })
    params = this.isAttribute(g)?[a,b,c,d,e,f,]:[a,b,c,d,e,f,g,];
    attrs = this.isAttribute(g)? g:{};
  }
- return (this._jView3d as any).create('text3d',[params]/*.flat()*/,this.defaultAttributes(attrs))
+   return (this._jView3d as any).create('text3d', params, this.defaultAttributes(attrs))
  }
 
 

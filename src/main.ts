@@ -60,7 +60,7 @@ export class Main {
     hiddenCode = ''      // prefix to code from the editor
     hiddenDecl = ''      // TS decl for hidden code
     initVisibleCode = ''        // initial code
-
+    gameboy = false       // show gameboy frame
 
     editorDiv: HTMLDivElement
     static editor: Editor
@@ -74,7 +74,8 @@ export class Main {
     command: HTMLButtonElement
     // fullscreen: HTMLButtonElement
 
-    template = "TSX.point([0,4],{name:'A'})         // try running this... "
+    template = `let center = TSX.Point([0,0],{name:'A'})         // try running this...
+    TSX.Circle(center,2)`;
 
     static onClickSay: OnClickSay      // we'll put an instance here
 
@@ -129,8 +130,8 @@ export class Main {
             (window as any).MathcodeAPI = {
                 version: '1.1',
 
-                // DOM: new DOMclass(),   // exposes the DOM utilities
 
+                // used by playground
                 loader: (courseInfo: string, moodleID: number) => {
                     console.log('%cMathcodeAPI.loader successful', 'background-color:red;color:white;')
                     // console.log('courseInfo(raw): ', courseInfo, 'moodleID', moodleID)
@@ -245,9 +246,9 @@ export class Main {
                 },
 
 
-                saveFileExplorer: (s: string) => {
-                    this.editor.createWebPage(main.hiddenCode)  // asnyc
-                },
+                // saveFileExplorer: (s: string) => {
+                //     this.editor.createWebPage(main.hiddenCode, )  // asnyc
+                // },
 
 
                 // //////// these functions are for the file explorer
@@ -335,6 +336,7 @@ export class Main {
 
 
                 // this combines 'hiddencode' and 'copyToEditor' for the playground
+                // used by playground
                 setupEditorWithCode: (hidden64: string, decl64: string, visible64: string) => {
 
                     let b = Buffer.from(visible64, 'base64')
@@ -345,7 +347,7 @@ export class Main {
                     main.hiddenDecl = b.toString()
 
 
-                    main.setupMonacoEditor(main.hiddenCode, main.hiddenDecl,true, main.initVisibleCode) // popup true for playground
+                    main.setupMonacoEditor(main.hiddenCode, main.hiddenDecl, true, main.initVisibleCode) // popup true for playground
                     // Main.editor.editor.setValue(main.initVisibleCode)
 
                     //TODO:  write the hidden and visible code AFTER initialization
@@ -374,6 +376,7 @@ export class Main {
 
 
 
+                // used by playground
                 share(paragraph: string, textbook: string, shareKey: string) {   // convert from TS to JS first !!
                     console.log('in new share')
 
@@ -400,9 +403,39 @@ export class Main {
 
 
 
-                //// these are the buttons on the Editor
-                runEditor(stepUniq: string, textbook: string, shareKey: string = '') {
+                // used by playground
+                async runPlayground(popup: string = '1', gameboy: string = '0', jsDelivr:string='1') {
+                    console.log(`run Playground(popup='${popup}' gameBoy='${gameboy}' jsDelivr='${jsDelivr}')` )
+                    let jxgDiv = document.getElementById('jxgbox')
+                    // console.log('removing with method 1')
+                    if (jxgDiv) {  // might not exist if this is the first run
+                        while (jxgDiv.lastElementChild) {
+                            // console.log('removing', jxgDiv.lastElementChild)
+                            jxgDiv.removeChild(jxgDiv.lastElementChild);
+                        }
+                    }
+                    // this.fullscreen.disabled = false;
+
+                    try {
+
+                        // before we do anything else, we WIPE OUT any previous
+                        // content of <div id='jxgbox'>
+                        // if someone wants a canvas, they add their own
+
+                        // const fn = await this.editor.transpile(this.game.scope);
+                        //this.editorDiv.hidden = true;
+                        Main.editor.transpile(main.hiddenCode, jsDelivr=='1' , popup == '1', gameboy == '1')  // also runs
+
+                    } catch (e) {   // transpile error.  show it in an alert
+                        alert(e);
+                        this.resetButtons();
+                    }
+                },
+
+
+                runEditor(stepUniq: string, textbook: string, shareKey: string = '', gameframe: string = '0') {
                     console.log(`runEditor(${stepUniq},${textbook})`)
+
 
                     // write log with a callback, this is an async function
 
@@ -422,7 +455,7 @@ export class Main {
 
                     try {
                         // Main.editor.transpileLog(main.hiddenCode)  // also runs
-                        Main.editor.transpile(main.hiddenCode,false)
+                        Main.editor.transpile(main.hiddenCode, false, false, false)
 
                         // writeMoodleLog({ 'datacode': 'SHARE', 'id': main.moodleID, 'textbook': textbook, 'paragraph': '0', 'data05': main.hiddenCode })
 
@@ -440,11 +473,14 @@ export class Main {
 
                     writeMoodleLog({ 'datacode': 'Log_RunIcon', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: tsCode })
                     // Main.editor.transpile(tsCode);
-                    Main.editor.runEditorCode(tsCode,false)     // and run the whole mess - NOT A POPUP
+                    Main.editor.runEditorCode(tsCode, false)     // and run the whole mess - NOT A POPUP
 
 
                 },
 
+                download(gameboy: string = '0') {
+                    Main.editor.createWebPage(main.hiddenCode, gameboy == '1')  // asnyc
+                },
 
                 //// these are the buttons on the Editor
                 stopEditor() {
@@ -597,7 +633,7 @@ export class Main {
 
 
 
-    setupMonacoEditor(hiddenCode: string, hiddenDecl: string,popup:boolean, visibleCode = '') {
+    setupMonacoEditor(hiddenCode: string, hiddenDecl: string, popup: boolean, visibleCode = '') {
         // monaco.editor.createModel(lib_baby, 'typescript', monaco.Uri.parse(babyUri));
 
         this.editorDiv = document.getElementById("editor") as HTMLDivElement
@@ -609,7 +645,6 @@ export class Main {
             // console.log('%cSTARTING EDITOR', 'background-color:blue;color:white;', 'editorDiv', this.editorDiv, 'template', this.template, 'hiddenCode', hiddenCode, 'hiddenDecl', hiddenDecl)
 
 
-            // this.game = undefined //new GameLauncher(800, 600);
             this.download = document.getElementById("download") as HTMLButtonElement;
             this.upload = document.getElementById("upload") as HTMLButtonElement;
             this.files = document.getElementById("files") as HTMLButtonElement;
@@ -621,20 +656,19 @@ export class Main {
 
 
             if (this.download)
-                this.download.onclick = () => Main.editor.createWebPage(main.hiddenCode)  // asnyc
+                this.download.onclick = () => Main.editor.createWebPage(main.hiddenCode, this.gameboy)  // asnyc
+
             // / Main.editor.download("game.ts");
             if (this.upload)
                 this.upload.onclick = () => Main.editor.upload();
             if (this.files)
                 this.files.onclick = () => (window as any).MathcodeAPI.refreshFileExplorer(1);
 
+
+
+            /**** moved to runeditor()
             if (this.run) {
                 this.run.onclick = async () => {
-                    // console.log('clicked RUN #2')
-                    // this.run.disabled = false;  // was true
-                    // this.stop.disabled = false;
-                    // this.pause.disabled = false;
-                    // this.command.disabled = false;
                     let jxgDiv = document.getElementById('jxgbox')
                     // console.log('removing with method 1')
                     while (jxgDiv.lastElementChild) {
@@ -652,7 +686,7 @@ export class Main {
 
                         // const fn = await this.editor.transpile(this.game.scope);
                         //this.editorDiv.hidden = true;
-                        Main.editor.transpile(main.hiddenCode,popup)  // also runs
+                        Main.editor.transpile(main.hiddenCode, popup)  // also runs
 
                     } catch (e) {   // transpile error.  show it in an alert
                         alert(e);
@@ -660,6 +694,7 @@ export class Main {
                     }
                 };
             }
+*/
 
 
             // this.command.onclick = () => {

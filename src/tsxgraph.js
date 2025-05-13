@@ -19,12 +19,12 @@
 //    DEALINGS IN THE SOFTWARE.
 //
 /////////////////////////////////////////////////////////////////////////////
-//   Generated on April 28, 2025, 10:28 am
+//   Generated on May 12, 2025, 9:13 pm
 let defaultAttrs = {
     keepAspectRatio: true,
     name: '', showinfobox: false,
     pan: { enabled: false },
-    resize: { enabled: false },
+    resize: { enabled: false }
 };
 /**
 *  Constant: user coordinates relative to the coordinates system defined by the bounding box.
@@ -34,17 +34,12 @@ const COORDS_BY_USER = 0x0001;
 *  Constant: screen coordinates in pixel relative to the upper left corner of the div element.
 */
 const COORDS_BY_SCREEN = 0x0002;
-///// some math classes by hand
-class IntervalArithmetic {
-}
-class PolyMonomial {
-}
-class PolyPolynomial {
-}
-class Symbolic {
-}
-let JsxMath = { Matrix: {
-        // Matrix
+/** A wrapper for the various math routines provided by JSXGraph.  For example:
+            ```js
+            let cross = JsxMath.Matrix.crossProduct(a,b)
+            ```
+        */
+export let JsxMath = { Matrix: {
         crossProduct(v1, v2) { return window.JXG.Math.crossProduct(v1, v2); },
         frustum(left, right, top, bottom, near, far) { return window.JXG.Math.frustum(left, right, top, bottom, near, far); },
         identity(m, n) { return window.JXG.Math.identity(m, n); },
@@ -58,7 +53,6 @@ let JsxMath = { Matrix: {
         vector(n, init) { return window.JXG.Math.vector(n, init); },
     },
     Geometry: {
-        // Geometry
         affineDistance() { return window.JXG.Math.affineDistance(); },
         affineRatio() { return window.JXG.Math.affineRatio(); },
         angle() { return window.JXG.Math.angle(); },
@@ -114,13 +108,11 @@ let JsxMath = { Matrix: {
         windingNumber() { return window.JXG.Math.windingNumber(); },
     },
     Numerics: {
-        // Numerics
         bezier(points) { return window.JXG.Math.bezier(points); },
         bspline(points, order) { return window.JXG.Math.bspline(points, order); },
         CardinalSpline(points, tau) { return window.JXG.Math.CardinalSpline(points, tau); },
     },
     Statistics: {
-        // Statistics
         randomNormal(mean, stdDev) { return window.JXG.Math.Statistics.randomNormal(mean, stdDev); },
         randomUniform(a, b) { return window.JXG.Math.Statistics.randomUniform(a, b); },
         randomExponential(lambda) { return window.JXG.Math.Statistics.randomExponential(lambda); },
@@ -158,37 +150,32 @@ export class TSXBoard {
     currentCanvas = '';
     boardList = new Map(); // will be keyed array of boards  { 'jxgbox': jBoard, 'jxgbox2': jBoard2 }
     defaultAttrs = {};
-    /** expiriment - can we get a static function ? */
-    static staticFunction() {
-        alert('static function');
-    }
     /** Store a reference to every board in this central list. */
-    static boards() { return window.JXG.boards; }
+    static get boards() { return window.JXG.boards; }
     /** Constant: screen coordinates in pixel relative to the upper left corner of the div element. */
-    static COORDS_BY_SCREEN() { return window.JXG.COORDS_BY_SCREEN; }
+    static get COORDS_BY_SCREEN() { return window.JXG.COORDS_BY_SCREEN; }
     /** Constant: user coordinates relative to the coordinates system defined by the bounding box. */
-    static COORDS_BY_USER() { return window.JXG.COORDS_BY_USER; }
+    static get COORDS_BY_USER() { return window.JXG.COORDS_BY_USER; }
     /** Associative array that keeps track of all constructable elements registered via JXG.registerElement. */
-    static elements() { return window.JXG.elements; }
+    static get elements() { return window.JXG.elements; }
     /** The FileReader object bundles the file input capabilities of JSXGraph. */
-    static FileReader() { return window.JXG.FileReader; }
-    // /** Internet Explorer version. */
-    // static ieVersion(){return (window as any).JXG.}
-    // /** A document/window environment is available. */
-    // static isBrowser(){return (window as any).JXG.isBrowser()}
+    static get FileReader() { return window.JXG.FileReader; }
+    /** Internet Explorer version. */
+    static get ieVersion() { return window.JXG.ieVersion; }
+    /** A document/window environment is available. */
+    static get isBrowser() { return window.JXG.isBrowser(); }
     /** Constant: the small gray version indicator in the top left corner of every JSXGraph board (if showCopyright is not set to false on board creation). */
-    static licenseText() { return window.JXG.licenseText; }
+    static get licenseText() { return window.JXG.licenseText; }
     /** Default color palette. */
-    static palette() { return window.JXG.palette; }
+    static get palette() { return window.JXG.palette; }
     /** Bang Wong color palette, optimized for various type of color blindness. */
-    static paletteWong() { return window.JXG.paletteWong; }
+    static get paletteWong() { return window.JXG.paletteWong; }
     /** Store the available file readers in this structure. */
-    static readers() { return window.JXG.readers; }
+    static get readers() { return window.JXG.readers; }
     /** Holds all possible properties and the according validators for geometry elements. */
-    static Validator() { return window.JXG.Validator; }
-    // static version() { return (window as any).JXG.version }
+    static get Validator() { return window.JXG.Validator; }
     /** Constant: the currently used JSXGraph version. */
-    get version() {
+    static get version() {
         return window.JXG.version;
     }
     // this is the code for InitBoard, which is created in the wrapper.
@@ -668,7 +655,6 @@ export class TSXBoard {
     /** Sets camera view to the given values. */
     /** Sets camera view to the given values. */
     setView(az, el, r) {
-        console.log('setview from function 527');
         return this._jView3d.setView(az, el, r);
     }
     /** Create a point. If any parent elements are functions or the attribute 'fixed' is true then point will be constrained.
@@ -724,7 +710,6 @@ export class TSXBoard {
             return this._jBoard.create('line', [a, b], this.defaultAttributes(c));
     }
     // Missing signaature array for View3D
-    // Missing signaature array for currentBoard
     /** create a chart */
     Chart(f, attributes = {}) {
         return this._jBoard.create('chart', [f,], this.defaultAttributes(attributes));
@@ -862,26 +847,43 @@ export class TSXBoard {
     /** Array of Points */
     Group(pointArray, attributes = {}) {
         if (Array.isArray(pointArray))
-            return this._jBoard.create('polygon3d', pointArray /*.flat()*/, this.defaultAttributes(attributes));
+            return this._jBoard.create('group', pointArray, this.defaultAttributes(attributes));
         else
-            return this._jBoard.create('polygon3d', [pointArray], this.defaultAttributes(attributes));
+            return this._jBoard.create('group', [pointArray], this.defaultAttributes(attributes));
     }
-    /** Display an image.  The first element is the location URL of the image.
-                   A collection of space icons is provided, press CTRL+I to show the list.
-                   The second parameter sets the lower left point of the image.
-                   The optional third parameter sets the size multiplier of the image, default is [1,1].
-                   
-   If you want to move the image, just tie the image to a point, maybe at the center of the image.
-                    For more flexibility, see TSX.Rotate() and TSX.Translate()
-                   
-   *```js
-               TSX.image('icons/earth.png', [0, 0],[2,2])
-               let p1 = TSX.point([3, 2], { opacity: .1 })
-               TSX.image('icons/moon-full-moon.png', [()=>p1.X(),()=>p1.Y()])
-                   
-   *``` */
-    Image(url, lowerLeft, widthHeight = [1, 1], attributes = {}) {
-        return this._jBoard.create('image', [url, lowerLeft, widthHeight,], this.defaultAttributes(attributes));
+    // implementation of signature,  hidden from user
+    Image(a, b, c, d, e, f, g, h, i) {
+        let params = [];
+        let attrs = {};
+        if (arguments.length == 1) {
+            params = this.isAttribute(a) ? [] : [a,];
+            attrs = this.isAttribute(a) ? a : {};
+        }
+        if (arguments.length == 2) {
+            params = this.isAttribute(b) ? [a,] : [a, b,];
+            attrs = this.isAttribute(b) ? b : {};
+        }
+        if (arguments.length == 3) {
+            params = this.isAttribute(c) ? [a, b,] : [a, b, c,];
+            attrs = this.isAttribute(c) ? c : {};
+        }
+        if (arguments.length == 4) {
+            params = this.isAttribute(d) ? [a, b, c,] : [a, b, c, d,];
+            attrs = this.isAttribute(d) ? d : {};
+        }
+        if (arguments.length == 5) {
+            params = this.isAttribute(e) ? [a, b, c, d,] : [a, b, c, d, e,];
+            attrs = this.isAttribute(e) ? e : {};
+        }
+        if (arguments.length == 6) {
+            params = this.isAttribute(f) ? [a, b, c, d, e,] : [a, b, c, d, e, f,];
+            attrs = this.isAttribute(f) ? f : {};
+        }
+        if (arguments.length == 7) {
+            params = this.isAttribute(g) ? [a, b, c, d, e, f,] : [a, b, c, d, e, f, g,];
+            attrs = this.isAttribute(g) ? g : {};
+        }
+        return this._jBoard.create('image', params, this.defaultAttributes(attrs));
     }
     // implementation of signature,  hidden from user
     Implicitcurve(a, b, c, d, e, f, g, h, i) {
@@ -1032,14 +1034,14 @@ export class TSXBoard {
         if (typeof vertices === 'function')
             return this._jBoard.create('polygon', [vertices], this.defaultAttributes(attributes));
         else
-            return this._jBoard.create('polygon', vertices /*.flat()*/, this.defaultAttributes(attributes));
+            return this._jBoard.create('polygon', vertices, this.defaultAttributes(attributes));
     }
     /** A polygon is a sequence of points connected by lines, with the last point connecting back to the first one. The points are given by a list of Point3D objects or a list of coordinate arrays. Each two consecutive points of the list define a line. */
     Polygon3D(vertices, attributes = {}) {
         if (typeof vertices === 'function')
-            return this._jBoard.create('polygon3d', [vertices], this.defaultAttributes(attributes));
+            return this._jView3d.create('polygon3d', [vertices], this.defaultAttributes(attributes));
         else
-            return this._jBoard.create('polygon3d', vertices /*.flat()*/, this.defaultAttributes(attributes));
+            return this._jView3d.create('polygon3d', vertices, this.defaultAttributes(attributes));
     }
     /** Display a message
                                    
@@ -1085,7 +1087,7 @@ export class TSXBoard {
             params = this.isAttribute(g) ? [a, b, c, d, e, f,] : [a, b, c, d, e, f, g,];
             attrs = this.isAttribute(g) ? g : {};
         }
-        return this._jView3d.create('text3d', [params] /*.flat()*/, this.defaultAttributes(attrs));
+        return this._jView3d.create('text3d', params, this.defaultAttributes(attrs));
     }
     /** Ticks are used as distance markers on a line or curve. They are mainly used for axis elements and slider elements.  */
     Ticks(line, attributes = {}) {
