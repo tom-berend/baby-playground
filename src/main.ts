@@ -74,8 +74,7 @@ export class Main {
     command: HTMLButtonElement
     // fullscreen: HTMLButtonElement
 
-    template = `let center = TSX.Point([0,0],{name:'A'})         // try running this...
-    TSX.Circle(center,2)`;
+    template = `let center = TSX.Point([0,0],{name:'A'})         // try running this...  \nTSX.Circle(center,2)`;
 
     static onClickSay: OnClickSay      // we'll put an instance here
 

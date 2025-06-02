@@ -657,34 +657,8 @@ export class Editor {
 
         if (jsDelivr) {  // web version load tsxgraph.js from jsdelivr
             html += "\n" + `import {TSXBoard, JsxMath}  from 'https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@${LIB_VERSION}/lib/tsxgraph.js';`
-            // html += `\nimport {GeometryElement, Board, Point, Line, GeometryElement3D, View3D, Chart, Circle, Circle3D,
-            // Complex, Composition, Coords, Curve, Curve3D, Dump, ForeignObject, Group, Image, Implicitcurve,
-            // IntersectionCircle3D, IntersectionLine3D, Line3D, Plane3D, Point3D, Polygon, Polygon3D, Text, Text3D, Ticks,
-            // Sector, Vectorfield, Angle, Arc, Arrow, Parallel, Arrowparallel, Axis, BezierCurve, Bisector,
-            // Bisectorlines, Button, Cardinalspline, Checkbox, Circumcenter, Circumcircle, CircumcircleArc, CircumcircleSector, Comb, Conic,
-            // CurveDifference, CurveIntersection, CurveUnion, Derivative, Ellipse, ParametricSurface3D, Face3D, Functiongraph, Functiongraph3D, Glider,
-            // Glider3D, Grid, Hatch, Hyperbola, Incenter, Incircle, Inequality, Input, Integral, Intersection,
-            // Label, Legend, Locus, MajorArc, MajorSector, Measurement, Mesh3D, Midpoint, MinorArc, MinorSector,
-            // Mirrorelement, Mirrorpoint, NonReflexAngle, Normal, Orthogonalprojection, OtherIntersection, Parabola, Parallelpoint, Segment, Parallelogram,
-            // Perpendicular, PerpendicularPoint, PerpendicularSegment, PolarLine, PolePoint, PolygonalChain, Polyhedron3D, RadicalAxis, Reflection, ReflexAngle,
-            // RegularPolygon, Riemannsum, Semicircle, Slider, Slopefield, Slopetriangle, Smartlabel, Sphere3D, Spline, Stepfunction,
-            // Tangent, TangentTo, Tapemeasure, Tracecurve, Transform, Transform3D, TransformPoint, TransformPoint3D, Segment3D, Translate,
-            // Rotate, Scale, Translate3D, Rotate3D, RotateX3D, RotateY3D, RotateZ3D, Scale3D} from 'https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@${LIB_VERSION}/lib/tsxgraph.js'`;
         } else {
             html += `\nimport {TSXBoard,JsxMath} from './dist.${LIB_VERSION}/tsxgraph.js'`;
-            // html += `\nimport {GeometryElement, Board, Point, Line, GeometryElement3D, View3D, Chart, Circle, Circle3D,
-            // Complex, Composition, Coords, Curve, Curve3D, Dump, ForeignObject, Group, Image, Implicitcurve,
-            // IntersectionCircle3D, IntersectionLine3D, Line3D, Plane3D, Point3D, Polygon, Polygon3D, Text, Text3D, Ticks,
-            // Sector, Vectorfield, Angle, Arc, Arrow, Parallel, Arrowparallel, Axis, BezierCurve, Bisector,
-            // Bisectorlines, Button, Cardinalspline, Checkbox, Circumcenter, Circumcircle, CircumcircleArc, CircumcircleSector, Comb, Conic,
-            // CurveDifference, CurveIntersection, CurveUnion, Derivative, Ellipse, ParametricSurface3D, Face3D, Functiongraph, Functiongraph3D, Glider,
-            // Glider3D, Grid, Hatch, Hyperbola, Incenter, Incircle, Inequality, Input, Integral, Intersection,
-            // Label, Legend, Locus, MajorArc, MajorSector, Measurement, Mesh3D, Midpoint, MinorArc, MinorSector,
-            // Mirrorelement, Mirrorpoint, NonReflexAngle, Normal, Orthogonalprojection, OtherIntersection, Parabola, Parallelpoint, Segment, Parallelogram,
-            // Perpendicular, PerpendicularPoint, PerpendicularSegment, PolarLine, PolePoint, PolygonalChain, Polyhedron3D, RadicalAxis, Reflection, ReflexAngle,
-            // RegularPolygon, Riemannsum, Semicircle, Slider, Slopefield, Slopetriangle, Smartlabel, Sphere3D, Spline, Stepfunction,
-            // Tangent, TangentTo, Tapemeasure, Tracecurve, Transform, Transform3D, TransformPoint, TransformPoint3D, Segment3D, Translate,
-            // Rotate, Scale, Translate3D, Rotate3D, RotateX3D, RotateY3D, RotateZ3D, Scale3D} from './dist.${LIB_VERSION}/tsxgraph.js'`;
         }
 
 
