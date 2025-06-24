@@ -5,7 +5,6 @@ import { LIB_VERSION } from './version';
 import { Buffer } from "buffer";
 import { DOM } from "./DOM"
 
-
 import * as monaco from "monaco-editor";
 
 import lib_es5 from "./extraLibs/lib.es5.d.ts.txt";
@@ -297,7 +296,7 @@ export class Editor {
 
     async transpile(hiddenCode: string, jsDelivr: boolean, popup: boolean, gameboy: boolean) {
 
-        console.log(`transpile(popup: ${popup},jsDelivr: ${jsDelivr}) \n`)
+        // console.log(`transpile(popup: ${popup},jsDelivr: ${jsDelivr}) \n`)
 
 
         // const args = names.map((key) => scope[key]);
@@ -422,7 +421,7 @@ export class Editor {
         } catch { }
 
         // hope window is gone  not popup (ie: playground-style new window)
-        this.plotWindow = window.open('', '_blank', `${pop}left=100,top=100,width=320,height=320`);
+        this.plotWindow = window.open('', '_blank', `${pop}left=100,top=100,width=700,height=700`);
         // if (!this.plotWindow) {
         let html = this.generateSourceCode(this.hiddenCode, this.editorCode, jsDelivr, gameboy)
 
@@ -654,11 +653,28 @@ export class Editor {
 
         let html = '';
         // jsDelivr = false;   // tbtb
+//https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@2.0.8/lib/tsxgraph.js';`
 
         if (jsDelivr) {  // web version load tsxgraph.js from jsdelivr
             html += "\n" + `import {TSXBoard, JsxMath}  from 'https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@${LIB_VERSION}/lib/tsxgraph.js';`
         } else {
             html += `\nimport {TSXBoard,JsxMath} from './dist.${LIB_VERSION}/tsxgraph.js'`;
+            // html += `\n import {Button} from './dist.${LIB_VERSION}/tsxgraph.js'`;
+    // CoordsElement, GeometryElement, Board, Point, Line, GeometryElement3D, View3D, Chart, Circle,
+    // Circle3D, Complex, Composition, Coords, Curve, Curve3D, Dump, ForeignObject, Group, Image,
+    // ImplicitCurve, IntersectionCircle3D, IntersectionLine3D, Line3D, Plane3D, Point3D, Polygon, Polygon3D, Text, Text3D,
+    // Ticks, Sector, Vectorfield, Angle, Arc, Arrow, Parallel, ArrowParallel, Axis, BezierCurve,
+    // Bisector, Bisectorlines, Button, Cardinalspline, Checkbox, Circumcenter, Circumcircle, CircumcircleArc, CircumcircleSector, Comb,
+    // Conic, CurveDifference, CurveIntersection, CurveUnion, Derivative, Ellipse, ParametricSurface3D, Face3D, Functiongraph, Functiongraph3D,
+    // Glider, Glider3D, Grid, Hatch, Hyperbola, Incenter, Incircle, Inequality, Input, Integral,
+    // Intersection, Label, Legend, Locus, MajorArc, MajorSector, Measurement, Mesh3D, Midpoint, MinorArc,
+    // MinorSector, MirrorElement, MirrorPoint, NonReflexAngle, Normal, Orthogonalprojection, OtherIntersection, Parabola, Parallelpoint, Segment,
+    // Parallelogram, Perpendicular, PerpendicularPoint, PerpendicularSegment, PolarLine, PolePoint, PolygonalChain, Polyhedron3D, RadicalAxis, Reflection,
+    // ReflexAngle, RegularPolygon, Riemannsum, Semicircle, Slider, Slopefield, Slopetriangle, Smartlabel, Sphere3D, Spline,
+    // Stepfunction, Tangent, TangentTo, Tapemeasure, Tracecurve, Transformation, Transform3D, TransformPoint, TransformPoint3D, Segment3D,
+    // Translate, Rotate, Scale, Translate3D, Rotate3D, RotateX3D, RotateY3D, RotateZ3D, Scale3D
+    // }
+
         }
 
 

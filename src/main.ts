@@ -404,7 +404,7 @@ export class Main {
 
                 // used by playground
                 async runPlayground(popup: string = '1', gameboy: string = '0', jsDelivr:string='1') {
-                    console.log(`run Playground(popup='${popup}' gameBoy='${gameboy}' jsDelivr='${jsDelivr}')` )
+                    // console.log(`run Playground(popup='${popup}' gameBoy='${gameboy}' jsDelivr='${jsDelivr}')` )
                     let jxgDiv = document.getElementById('jxgbox')
                     // console.log('removing with method 1')
                     if (jxgDiv) {  // might not exist if this is the first run

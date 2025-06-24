@@ -128,6 +128,7 @@ export class OnClickSay {
     //         2 : UK English Female
 
     speakResponse(text: string, voiceN: number) {
+        // console.log(`speakResponse(${text})`)
         let wasRunning = this.synthRunning
         speechSynthesis.cancel() // if it errors, this clears out the error.
         // not running now
@@ -136,9 +137,16 @@ export class OnClickSay {
             this.synthRunning = true // try to prevent a second speaker from starting
             // split the line on colon, exclaim, question, dash, rejoin on period, and finally split on period
             // BUT NOT COMMA, it makes the text disjointed
+            text = text.replaceAll('.', '. ') // bad things happen if period (pause) not followd by spaces
+
+
+            //////////// this version fixed a bug.  But sometime in 2024 that bug disappeared
+            /*
             let sentences = text.split(':').join('.').split('!').join('.').split('?').join('.').split(' - ').join('\n').split('.')
+            // console.log('sentences', sentences)
             // i think i could have split with regex, but
             for (let i = 0; i < sentences.length; i++) {
+                console.log('loop on i', i)
 
                 // sentence broken on punctuations frequently short enough
                 let toSay = this.sayit(voiceN)  // also sets voice as a side effect, bleech
@@ -159,6 +167,14 @@ export class OnClickSay {
                     }
                 }, 14000);
             }
+            */
+
+            //////////  this version simply outputs the string.
+            let toSay = this.sayit(voiceN)  // also sets voice as a side effect, bleech
+            toSay.text = text
+            speechSynthesis.speak(toSay)
+
+
             this.synthRunning = false
         }
     }

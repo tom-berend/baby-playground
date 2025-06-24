@@ -1,23 +1,23 @@
 {
     "private": true,
-    "version": "2.0.7",
+    "version": "2.0.9",
     "scripts": {
         "comment00": "==== SERCH AND REPLACE VERSION !!!",
         "comment01": "====",
         "comment02": "npm watch is at localhost/baby...., NOT at :8080",
         "comment03": "prebuild creates an importable version number",
         "prebuild": "node -p \"'export const LIB_VERSION = ' + JSON.stringify(require('./package.json').version) + ';'\" > src/version.ts  && cp ../../jsxgraph/distrib/jsxgraphcore.js lib && node cleanFile.js",
-        "build": "npm run prebuild && rm -rf dist.2.0.7/ && tsc --noEmit && webpack --config webpack.player.dev.js && npm run copylib2d && npm run copy2moodle && npm run copy2playground",
-        "buildproduction": "npm run prebuild && rm -rf dist.2.0.7/ && tsc --noEmit && webpack --config webpack.player.prod.js && npm run copylib2d && npm run copy2moodle && npm run copy2playground && npm run copy2wrapper",
-        "copylib2d": "cp -R lib/*.* dist.2.0.7 && cp -R lib/fonts dist.2.0.7 && cp -R lib/bootstrap dist.2.0.7 && cp -R src/tsxgraph.* dist.2.0.7",
-        "copy2playground": "mkdir -p ../../TSXGraph/playground/dist.2.0.7 && cp -R dist.2.0.7/* ../../TSXGraph/playground/dist.2.0.7 && cp -R lib/* ../../TSXGraph/playground/dist.2.0.7",
-        "copy2moodle": "mkdir -p ../../moodle45/mod/mathcode/dist.2.0.7 && cp -R dist.2.0.7/* ../../moodle45/mod/mathcode/dist.2.0.7 && cp -R lib/* ../../moodle45/mod/mathcode/dist.2.0.7",
-        "copy2wrapper": "cp dist.2.0.7/tsxgraph.* ../../jsxgraph-wrapper-typescript/lib",
+        "build": "npm run prebuild && rm -rf dist.2.0.9/ && tsc --noEmit && webpack --config webpack.player.dev.js && npm run copylib2d && npm run copy2moodle && npm run copy2playground",
+        "buildproduction": "npm run prebuild && rm -rf dist.2.0.9/ && tsc --noEmit && webpack --config webpack.player.prod.js && npm run copylib2d && npm run copy2moodle && npm run copy2playground && npm run copy2wrapper",
+        "copylib2d": "cp -R lib/*.* dist.2.0.9 && cp -R lib/fonts dist.2.0.9 && cp -R lib/bootstrap dist.2.0.9 && cp -R src/tsxgraph.* dist.2.0.9",
+        "copy2playground": "mkdir -p ../../TSXGraph/playground/dist.2.0.9 && cp -R dist.2.0.9/* ../../TSXGraph/playground/dist.2.0.9 && cp -R lib/* ../../TSXGraph/playground/dist.2.0.9",
+        "copy2moodle": "mkdir -p ../../moodle45/mod/mathcode/dist.2.0.9 && cp -R dist.2.0.9/* ../../moodle45/mod/mathcode/dist.2.0.9 && cp -R lib/* ../../moodle45/mod/mathcode/dist.2.0.9",
+        "copy2wrapper": "cp dist.2.0.9/tsxgraph.* ../../jsxgraph-wrapper-typescript/lib",
         "watch": "webpack --watch --config webpack.player.config.js",
         "comment04": "==== run the editor",
-        "buildeditor": "rm -rf dist.2.0.7_editor && webpack --config webpack.editor.config.js && npm run copyeditor",
+        "buildeditor": "rm -rf dist.2.0.9_editor && webpack --config webpack.editor.config.js && npm run copyeditor",
         "watcheditor": "webpack --watch --config webpack.editor.config.js",
-        "copyeditor": "cp src_editor/runtime/index.php dist.2.0.7_editor/index.php  && cp src_editor/runtime/3d.css dist.2.0.7_editor && cp -R assets dist.2.0.7_editor/assets"
+        "copyeditor": "cp src_editor/runtime/index.php dist.2.0.9_editor/index.php  && cp src_editor/runtime/3d.css dist.2.0.9_editor && cp -R assets dist.2.0.9_editor/assets"
     },
     "dependencies": {
         "@types/jsdom": "^21.1.7",
