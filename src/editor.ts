@@ -134,7 +134,9 @@ export class Editor {
             experimentalDecorators: true,
             moduleResolution: 2, // NodeJs,    https://microsoft.github.io/monaco-editor/typedoc/enums/languages.typescript.ModuleResolutionKind.html
 
-            // noLib: true,
+            noLib: true,    // brings in variables like 'origin'.  what damage does this do?
+
+
             lib: ["es5, es6, es2020, es2015.core, es2015.iterable, dom.iterable"],    // for some reason, dom.iterable is required for destructuring    [x,y] = [1,2]
 
             sourceMap: true,
@@ -287,14 +289,8 @@ export class Editor {
 
 
 
-    transpileLog(hiddenCode: string) {
-
-        // console.log('transpile()\n', hiddenCode)
-
-    }
-
-
-    async transpile(hiddenCode: string, jsDelivr: boolean, popup: boolean, gameboy: boolean) {
+    /** returns valid JS code or throws error */
+    async transpile(hiddenCode: string, jsDelivr: boolean, popup: boolean, gameboy: boolean): Promise<string> {
 
         // console.log(`transpile(popup: ${popup},jsDelivr: ${jsDelivr}) \n`)
 
@@ -340,13 +336,15 @@ export class Editor {
             this.editorCode = output.outputFiles[0].text as string;
             source64 = Buffer.from(sourceCode, 'utf8').toString('base64');
 
+            return this.editorCode
 
             // TODO, get correct ID and textbook
             // writeMoodleLog({'datacode': 'LOG_EditorRun', id:0, textbook:'', data05: sourceCode})
-            this.runEditorCode(this.editorCode, popup, true, jsDelivr, gameboy)     // and run the whole mess
+            // this.runEditorCode(this.editorCode, popup, true, jsDelivr, gameboy)     // and run the whole mess
 
         }
-        return;
+        throw new Error('invalid typescript');
+        return '';
     }
 
 
@@ -403,41 +401,43 @@ export class Editor {
 
         // if the window is open, we must first close (Chrome's new security)
         // TODO: if window is open, substitute the innerHTML.  \
-        // if (popup && this.plotWindow !== null && !this.plotWindow.closed) {
-        //     // console.log('plotwindow exists, closing');
-        //     console.log('pipup && plotwindow exists, injecting');
-        //     this.injectScript('jxgframe', this.injectableScript(this.hiddenCode, this.editorCode, false))
+        if (popup && this.plotWindow !== null && !this.plotWindow.closed) {
+            // console.log('plotwindow exists, closing');
+            // console.log('popup && plotwindow exists, injecting');
+            // console.log('injectableScript', this.injectableScript(this.hiddenCode, this.editorCode, false))
 
-        // } else {
+            this.injectScript('jxgframe', this.injectableScript(this.hiddenCode, this.editorCode, false))
+
+        } else {
 
 
 
 
-        // console.log('writing whole new webpage')
-        try {
-            // if (this.plotWindow !== null && !this.plotWindow.closed) {
-            this.plotWindow.close();
+            // console.log('writing whole new webpage')
+            try {
+                // if (this.plotWindow !== null && !this.plotWindow.closed) {
+                this.plotWindow.close();
+                // }
+            } catch { }
+
+            // hope window is gone  not popup (ie: playground-style new window)
+            this.plotWindow = window.open('', '_blank', `${pop}left=100,top=100,width=700,height=700`);
+            // if (!this.plotWindow) {
+            let html = this.generateSourceCode(this.hiddenCode, this.editorCode, jsDelivr, gameboy)
+
+            /********** alternative to document write
+                            document.write=function(s){
+                                var scripts = document.getElementsByTagName('script');
+                                var lastScript = scripts[scripts.length-1];
+                                lastScript.insertAdjacentHTML("beforebegin", s);
+                            }
+            */
+
+            // this.plotWindow.document.open();    // creates a page with <html><head><body>, but nothing else
+            this.plotWindow.document.write(html);
+            this.plotWindow.document.close();
             // }
-        } catch { }
-
-        // hope window is gone  not popup (ie: playground-style new window)
-        this.plotWindow = window.open('', '_blank', `${pop}left=100,top=100,width=700,height=700`);
-        // if (!this.plotWindow) {
-        let html = this.generateSourceCode(this.hiddenCode, this.editorCode, jsDelivr, gameboy)
-
-        /********** alternative to document write
-                        document.write=function(s){
-                            var scripts = document.getElementsByTagName('script');
-                            var lastScript = scripts[scripts.length-1];
-                            lastScript.insertAdjacentHTML("beforebegin", s);
-                        }
-        */
-
-        // this.plotWindow.document.open();    // creates a page with <html><head><body>, but nothing else
-        this.plotWindow.document.write(html);
-        this.plotWindow.document.close();
-        // }
-        // }
+        }
     }
 
 
@@ -464,6 +464,8 @@ export class Editor {
 
         html += '</body>';
         html += '</html>';
+
+        // console.log('generateSourceCode', html)
         return html
     }
 
@@ -652,31 +654,8 @@ export class Editor {
     injectableScript(hiddenCode: string, editorCode: string, jsDelivr: Boolean) {
 
         let html = '';
-        // jsDelivr = false;   // tbtb
-//https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@2.0.8/lib/tsxgraph.js';`
 
-        if (jsDelivr) {  // web version load tsxgraph.js from jsdelivr
-            html += "\n" + `import {TSXBoard, JsxMath}  from 'https://cdn.jsdelivr.net/gh/tom-berend/jsxgraph-wrapper-typescript@${LIB_VERSION}/lib/tsxgraph.js';`
-        } else {
-            html += `\nimport {TSXBoard,JsxMath} from './dist.${LIB_VERSION}/tsxgraph.js'`;
-            // html += `\n import {Button} from './dist.${LIB_VERSION}/tsxgraph.js'`;
-    // CoordsElement, GeometryElement, Board, Point, Line, GeometryElement3D, View3D, Chart, Circle,
-    // Circle3D, Complex, Composition, Coords, Curve, Curve3D, Dump, ForeignObject, Group, Image,
-    // ImplicitCurve, IntersectionCircle3D, IntersectionLine3D, Line3D, Plane3D, Point3D, Polygon, Polygon3D, Text, Text3D,
-    // Ticks, Sector, Vectorfield, Angle, Arc, Arrow, Parallel, ArrowParallel, Axis, BezierCurve,
-    // Bisector, Bisectorlines, Button, Cardinalspline, Checkbox, Circumcenter, Circumcircle, CircumcircleArc, CircumcircleSector, Comb,
-    // Conic, CurveDifference, CurveIntersection, CurveUnion, Derivative, Ellipse, ParametricSurface3D, Face3D, Functiongraph, Functiongraph3D,
-    // Glider, Glider3D, Grid, Hatch, Hyperbola, Incenter, Incircle, Inequality, Input, Integral,
-    // Intersection, Label, Legend, Locus, MajorArc, MajorSector, Measurement, Mesh3D, Midpoint, MinorArc,
-    // MinorSector, MirrorElement, MirrorPoint, NonReflexAngle, Normal, Orthogonalprojection, OtherIntersection, Parabola, Parallelpoint, Segment,
-    // Parallelogram, Perpendicular, PerpendicularPoint, PerpendicularSegment, PolarLine, PolePoint, PolygonalChain, Polyhedron3D, RadicalAxis, Reflection,
-    // ReflexAngle, RegularPolygon, Riemannsum, Semicircle, Slider, Slopefield, Slopetriangle, Smartlabel, Sphere3D, Spline,
-    // Stepfunction, Tangent, TangentTo, Tapemeasure, Tracecurve, Transformation, Transform3D, TransformPoint, TransformPoint3D, Segment3D,
-    // Translate, Rotate, Scale, Translate3D, Rotate3D, RotateX3D, RotateY3D, RotateZ3D, Scale3D
-    // }
-
-        }
-
+        html += "import {TSXBoard } from 'https://cdn.jsdelivr.net/npm/jsxgraph-wrapper-typescript@2.0.8/lib/tsxgraph.js';"
 
         html += "\nlet TSX = new TSXBoard('jxgbox');"
 
@@ -692,25 +671,134 @@ export class Editor {
         html += "\n    console.log(error)"
         html += "\n }"
 
+        // console.log('injectable', html);
         return html;
     }
 
+    iframeRef(frameRef: HTMLIFrameElement) {
+        return frameRef.contentWindow ?? frameRef.contentWindow.document ?? frameRef.contentDocument
+    }
 
-    injectScript(parentID: string, injectable: string) {
 
-        let parent = document.getElementById(parentID);
-        let scriptElement: HTMLScriptElement
 
-        if (parent === null) {
-            console.error(`tag ${parentID} not found`)
-        } else {
-            scriptElement = document.createElement("script");
-            scriptElement.type = "module";
+
+    // https://stackoverflow.com/questions/10418644/how-do-i-create-an-iframe-element-and-set-the-html-of-it-dynamically
+
+
+    /** inject a prepared script into a <script>.  script already has module load, error trap, etc */
+    injectScript(divID: string, injectable: string) {
+
+        // console.log(`injectScript(divID: ${divID}, injectable: ${injectable})`)
+
+        const html = `<html>
+                            <body>
+                                <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+                                <!--script type="text/javascript" src="/dist.${LIB_VERSION}/jsxgraphcore.js"></script-->
+                                <div id='jxgbox' style="width:600px;height:600px;"> </div>
+                                <script type='module'>
+                                    // import {TSXBoard } from 'https://cdn.jsdelivr.net/npm/jsxgraph-wrapper-typescript@2.0.8/lib/tsxgraph.js'
+                                    ${injectable}
+                                </script>
+
+                            </body>
+                        </html>`;
+
+
+
+        let divElement = document.getElementById(divID)
+        console.assert(divElement, `did not find element with ID: '${divID}' `)
+
+        // delete all children of the div
+        while (divElement.firstChild) {
+            // console.log('removing', divElement.lastChild)
+            divElement.removeChild(divElement.lastChild);
         }
 
-        let scriptText = document.createTextNode(injectable);
-        scriptElement.appendChild(scriptText);
+        // this version uses an iframe.  probably more secure, but it means
+        // we must fetch from JSDelivr every time we run.
+        // maybe it doesn't matter
+        // TODO: revisit and rethink.   maybe we can keep the iframe and just change the script
 
-        parent.replaceChildren(scriptElement);
+
+        const iframe = document.createElement('iframe');
+        const blob = new Blob([html], { type: 'text/html' });
+        iframe.style = "height:100%;min-height:200px;width:100%;min-width:200px;"
+        iframe.src = window.URL.createObjectURL(blob);
+
+        divElement.appendChild(iframe);
+
+
+
+        //     let iFrameElement = document.getElementById(iFrameID) as HTMLIFrameElement;
+
+
+        //     // let divElement:HTMLDivElement
+        //     // let scriptElement: HTMLScriptElement
+
+        //     if (iFrameElement === null) {
+        //         console.error(`tag ${iFrameID} not found`)
+        //     } else {
+        //         console.log('allBodyTags', allBodyTags)
+
+        //         let bodyElement: HTMLBodyElement
+
+        //         if (allBodyTags.length == 0) {
+        //             bodyElement = document.createElement('body')
+        //             console.log('creating new body element')
+        //         } else {
+        //             bodyElement = allBodyTags[0]
+        //             console.log('taking the first body tag', bodyElement)
+        //         }
+
+
+        //         //    // create a new body
+        //         //     let bodyElement = document.createElement('body')
+
+        //         // now add stuff to the new body.
+
+        //         //<script type="text/javascript" src="dist.${LIB_VERSION}/jsxgraphcore.js"></script>`;
+        //         let jsxScript = document.createElement('script')
+        //         jsxScript.type = "text/javascript:"
+        //         jsxScript.src = `dist.${LIB_VERSION}/jsxgraphcore.js`
+        //         bodyElement.appendChild(jsxScript)
+
+        //         // add a new 'jxgbox' div
+        //         let divElement = document.createElement('div')
+        //         divElement.id = 'jxgbox'
+        //         bodyElement.appendChild(divElement)
+
+        //         // add a new script node
+        //         let scriptElement = document.createElement("script");
+        //         scriptElement.type = "module";
+        //         scriptElement.innerHTML = injectable;
+        //         bodyElement.appendChild(scriptElement)
+
+
+        //         // delete all children of the iFrame
+        //         while (iFrameElement.firstChild) {
+        //             console.log('removing', iFrameElement.lastChild)
+        //             iFrameElement.removeChild(iFrameElement.lastChild);
+        //         }
+
+
+        //         // finally attach the body element
+        //         iFrameElement.appendChild(bodyElement)
+        //     }
     }
 }
+
+
+/*
+// https://stackoverflow.com/questions/39863264/is-it-possible-to-dynamically-replace-the-script-section-of-an-html-page
+reinsertScripts = function() {
+  var script = document.querySelector("#reinsert");
+  var parent = script.parentNode;
+  var nscript = document.createElement("script");
+  nscript.contentEditable = true;           // maybe IMPORTANT ??  just make it user editable
+  nscript.id = "reinsert";
+  nscript.innerHTML = script.innerHTML;
+  parent.removeChild(script);
+
+  parent.appendChild(nscript);
+}
+*/

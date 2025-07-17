@@ -318,7 +318,7 @@ class Main {
                 },
                 // almost the same as runEditor but code is sent
                 runInCanvas(paragraph, textbook, code) {
-                    console.log(`runInCanvas(${paragraph})`);
+                    // console.log(`runInCanvas(${paragraph})`);
                     let tsCode = window.atob(code);
                     // console.log('runInCanvas', tsCode)
                     writeMoodleLog({ 'datacode': 'Log_RunIcon', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: tsCode });

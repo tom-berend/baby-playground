@@ -30,6 +30,7 @@ import { HostMsg } from './writeMoodleLog';
 // import { Observable } from './observer';
 // import { mindmap, testMindMap } from './mindmap';
 import { Buffer } from "buffer";
+import { editor } from 'monaco-editor';
 
 // import { XMLHttpRequest } from 'xmlhttprequest-ts'
 
@@ -360,19 +361,6 @@ export class Main {
                     // console.log('visible code', main.initVisibleCode)
                 },
 
-                copyToEditor(paragraph: string, textbook: string, code: string) {
-
-                    // console.log('copytoEditor code:', code);
-
-                    let codeString = window.atob(code)
-                    writeMoodleLog({ 'datacode': 'Log_CopyToEditor', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: code })
-
-                    // // refresh the editor before we copy, clearing any old hidden stuff
-
-                    Main.editor.editor.setValue(codeString)
-                    // console.log('copyToEditor', codeString)
-                },
-
 
 
                 // used by playground
@@ -403,313 +391,394 @@ export class Main {
 
 
                 // used by playground
-                async runPlayground(popup: string = '1', gameboy: string = '0', jsDelivr:string='1') {
-                    // console.log(`run Playground(popup='${popup}' gameBoy='${gameboy}' jsDelivr='${jsDelivr}')` )
-                    let jxgDiv = document.getElementById('jxgbox')
-                    // console.log('removing with method 1')
-                    if (jxgDiv) {  // might not exist if this is the first run
-                        while (jxgDiv.lastElementChild) {
-                            // console.log('removing', jxgDiv.lastElementChild)
-                            jxgDiv.removeChild(jxgDiv.lastElementChild);
-                        }
+                async runPlayground(popup: string = '1', gameboy: string = '0', jsDelivr: string = '1') {
+                    // console.log(`run Playground(popup='${popup}' gameBoy='${gameboy}' jsDelivr='${jsDelivr}')`)
+
+                    // convert from TS to JS
+                    let result = await Main.editor.transpile(Main.editor.hiddenCode, false, false, false);
+
+
+                    // hope window is gone  not popup (ie: playground-style new window)
+                    let pop = popup ? 'popup=true,' : ''
+                    pop += ', noopener'     // for security
+
+                    /********************** */
+
+                    let popUpWindow = () => {
+                        this.plotWindow = window.open('', '_blank', `${pop}left=100,top=100,width=700,height=700`);
+                        console.assert(this.plotWindow, 'could not open plotwindow')
+
+                        let html = Main.editor.generateSourceCode(this.hiddenCode, result, jsDelivr == '1', gameboy == '1')
+
+                        /********** alternative to document write
+                                        document.write=function(s){
+                                            var scripts = document.getElementsByTagName('script');
+                                            var lastScript = scripts[scripts.length-1];
+                                            lastScript.insertAdjacentHTML("beforebegin", s);
+                                        }
+                        */
+
+                        // this.plotWindow.document.open();    // creates a page with <html><head><body>, but nothing else
+                        this.plotWindow.document.write(html);
+                        this.plotWindow.document.close();
                     }
-                    // this.fullscreen.disabled = false;
 
-                    try {
 
-                        // before we do anything else, we WIPE OUT any previous
-                        // content of <div id='jxgbox'>
-                        // if someone wants a canvas, they add their own
 
-                        // const fn = await this.editor.transpile(this.game.scope);
-                        //this.editorDiv.hidden = true;
-                        Main.editor.transpile(main.hiddenCode, jsDelivr=='1' , popup == '1', gameboy == '1')  // also runs
+                    // if the jsxgraph window is open, try to close it before re-writing
+                    if (this.plotWindow) {
+                        this.plotWindow.close()
 
-                    } catch (e) {   // transpile error.  show it in an alert
-                        alert(e);
-                        this.resetButtons();
+                        // wait for the window to close, then pop upthe replacement window
+                        let timer = setInterval(() => {
+                            if (this.plotWindow.closed) {
+                                clearInterval(timer);
+                                popUpWindow()
+                            }
+                        }, 100);
+
+                    }else{
+                        // no existing window, just pop it up right away
+                        popUpWindow()
                     }
                 },
 
+                /*
 
-                runEditor(stepUniq: string, textbook: string, shareKey: string = '', gameframe: string = '0') {
-                    console.log(`runEditor(${stepUniq},${textbook})`)
+                                    // let jxgbox = document.getElementById('jxgbox')
+                                    // // console.log('removing with method 1')
+                                    // if (jxgbox) {  // might not exist if this is the first run
+                                    //     while (jxgbox.firstChild) {
+                                    //         console.log('removing', jxgbox.lastChild)
+                                    //         jxgbox.removeChild(jxgbox.lastChild);
+                                    //     }
+                                    // } else{
+                                    //     console.error('did not find jxgbox')
+                                    // }
+                                    // // this.fullscreen.disabled = false;
+
+                                    // //<script type="text/javascript" src="dist.${LIB_VERSION}/jsxgraphcore.js"></script>`;
+                                    // let jsxScript = document.createElement('script')
+                                    // jsxScript.type = "text/javascript:"
+                                    // jsxScript.src = `dist.${LIB_VERSION}/jsxgraphcore.js`
+                                    // jxgbox.appendChild(jsxScript)
 
 
-                    // write log with a callback, this is an async function
+                                    try {
 
-                    let blob = new Blob([Main.editor.editor.getValue()], { type: "text/plain" })
-                    let reader = new FileReader();
-                    reader.readAsText(blob);
-                    reader.onloadend = function() {
-                        let result = reader.result
-                        if (typeof result == 'string') {    // because might be ArrayBuffer
-                            let codebase64 = Buffer.from(result, 'utf8').toString('base64');
-                            let hiddencodebase64 = Buffer.from(Main.editor.hiddenCode, 'utf8').toString('base64');
-                            let hiddendeclbase64 = Buffer.from(Main.editor.hiddenDecl, 'utf8').toString('base64');
-                            writeMoodleLog({ 'datacode': 'LOG_RunCode', 'id': main.moodleID, 'textbook': textbook, 'data01': stepUniq, 'data02': shareKey, 'data05': codebase64, 'data06': hiddencodebase64, 'data07': hiddendeclbase64 })
-                        }
-                    }
+                                        // before we do anything else, we WIPE OUT any previous
+                                        // content of <div id='jxgbox'>
+                                        // if someone wants a canvas, they add their own
+
+                                        // const fn = await this.editor.transpile(this.game.scope);
+                                        //this.editorDiv.hidden = true;
+
+                                        let jsCode = `let TSX = new TSXBoard('jxgbox'); \n`;
+                                        jsCode += await Main.editor.transpile(main.hiddenCode, jsDelivr == '1', popup == '1', gameboy == '1')  // also runs
+
+                                        console.log('transpile', jsCode)
+
+                                        // // add a new script
+                                        // jsCode = `import { TSXBoard, JsxMath } from '/TSXGraph/playground//dist.${LIB_VERSION}/tsxgraph.js';
+                                        //             \n let TSX = new TSXBoard('jxgbox');
+                                        //             \n` + jsCode
+                                        // let scriptElement = document.createElement("script");
+                                        // scriptElement.type = "module";
+                                        // scriptElement.innerHTML = jsCode;
+                                        // jxgbox.appendChild(scriptElement)
+
+                                        Main.editor.injectScript('jxgbox',jsCode);
+
+                                    } catch (e) {   // transpile error.  show it in an alert
+                                        alert(e);            // this.runEditorCode(this.editorCode, popup, true, jsDelivr, gameboy)     // and run the whole mess
+
+                                        this.resetButtons();
+                                    }
+                                },
+                */
+
+                /*
+                                // used by mathcode for RUN button below editor
+                                async runEditor(stepUniq: string, textbook: string, shareKey: string = '', gameframe: string = '0') {
+                                    console.log(`runEditor(${stepUniq},${textbook})`)
+
+                                    // write log with a callback, this is an async function
+
+                                    let blob = new Blob([Main.editor.editor.getValue()], { type: "text/plain" })
+                                    let reader = new FileReader();
+                                    reader.readAsText(blob);
+                                    reader.onloadend = function() {
+                                        let result = reader.result
+                                        if (typeof result == 'string') {    // because might be ArrayBuffer
+                                            let codebase64 = Buffer.from(result, 'utf8').toString('base64');
+                                            let hiddencodebase64 = Buffer.from(Main.editor.hiddenCode, 'utf8').toString('base64');
+                                            let hiddendeclbase64 = Buffer.from(Main.editor.hiddenDecl, 'utf8').toString('base64');
+                                            writeMoodleLog({ 'datacode': 'LOG_RunCode', 'id': main.moodleID, 'textbook': textbook, 'data01': stepUniq, 'data02': shareKey, 'data05': codebase64, 'data06': hiddencodebase64, 'data07': hiddendeclbase64 })
+
+                                            // get something started, fix later
+                                            let injectable = Main.editor.injectableScript(Main.editor.hiddenCode, result, false)
+                                            Main.editor.injectScript('jxgframe', injectable)
+                                        }
+                                    }
+                                },
+                */
+
+                // used by mathcode for RUN button below editor
+                async runEditor(stepUniq: string, textbook: string, shareKey: string = '', gameframe: string = '0') {
+                        // console.log(`runEditor(${stepUniq},${textbook})`)
+
+                        // convert from TS to JS
+                        let result = await Main.editor.transpile(Main.editor.hiddenCode, false, false, false);
+
+                        let codebase64 = Buffer.from(result, 'utf8').toString('base64');
+                        let hiddencodebase64 = Buffer.from(Main.editor.hiddenCode, 'utf8').toString('base64');
+                        let hiddendeclbase64 = Buffer.from(Main.editor.hiddenDecl, 'utf8').toString('base64');
+                        writeMoodleLog({ 'datacode': 'LOG_RunCode', 'id': main.moodleID, 'textbook': textbook, 'data01': stepUniq, 'data02': shareKey, 'data05': codebase64, 'data06': hiddencodebase64, 'data07': hiddendeclbase64 })
+
+                        // get something started, fix later
+                        let injectable = Main.editor.injectableScript(Main.editor.hiddenCode, result, false)
+                        Main.editor.injectScript('jxgframe', injectable)
+                    },
 
 
-                    try {
-                        // Main.editor.transpileLog(main.hiddenCode)  // also runs
-                        Main.editor.transpile(main.hiddenCode, false, false, false)
 
-                        // writeMoodleLog({ 'datacode': 'SHARE', 'id': main.moodleID, 'textbook': textbook, 'paragraph': '0', 'data05': main.hiddenCode })
-
-                    } catch (e) {   // transpile error.  show it in an alert
-                        alert(e);
-                    }
-
-                },
-
+                // used by mathcode for running-man button beside code
                 // almost the same as runEditor but code is sent
-                runInCanvas(paragraph: string, textbook: string, code: string) {   // convert from TS to JS first !!
-                    console.log(`runInCanvas(${paragraph})`)
-                    let tsCode = window.atob(code)
-                    // console.log('runInCanvas', tsCode)
+                async runInCanvas(paragraph: string, textbook: string, code: string) {   // convert from TS to JS first !!
+                        // console.log(`runInCanvas(${paragraph},${textbook},${code}`)
+                        let tsCode = window.atob(code)
+                        // console.log('runInCanvas', tsCode)
 
-                    writeMoodleLog({ 'datacode': 'Log_RunIcon', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: tsCode })
-                    // Main.editor.transpile(tsCode);
-                    Main.editor.runEditorCode(tsCode, false)     // and run the whole mess - NOT A POPUP
+                        // <script src="https://unpkg.com/typescript@latest/lib/typescript.js"></script>
+                        let jsCode = ts.transpile(tsCode);
 
+                        writeMoodleLog({ 'datacode': 'Log_RunIcon', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: tsCode })
 
-                },
+                        let injectable = Main.editor.injectableScript(Main.editor.hiddenCode, jsCode, false)
+                        Main.editor.injectScript('jxgframe', injectable)
 
-                download(gameboy: string = '0') {
-                    Main.editor.createWebPage(main.hiddenCode, gameboy == '1')  // asnyc
-                },
+                    },
 
-                //// these are the buttons on the Editor
-                stopEditor() {
-                    try {
-                        // console.log('clicked STOP')
-                        this.eraseFileExplorer()    // in case it is open (also resets '2D')
-                        // Observable.resetUserObservers()
-                        throw 'stop'
-                    } catch (e) { }  // we intentionally throwed, no error msg required
-                },
-
-                snapQuestion(paragraphUniq: string, textbook: string, bakery: number, question: string, answer: string) {
-                    // expose the answer and write it to the log
-                    console.log('snapQuestion()', paragraphUniq, textbook, bakery, question, answer)
-                    // id  Annn is input text
-                    //     Bnnn is answer (hidden, make visibility:visible)
-                    //     Cnnn is verify button (visible, make visiblility:hidden)
-                    let A = document.getElementById('A' + bakery) as HTMLInputElement
-                    let B = document.getElementById('B' + bakery)
-                    let C = document.getElementById('C' + bakery)
-
-                    let myAnswer = A.value
-                    B.style.display = 'block'
-                    C.style.display = 'none'
-
-                    writeMoodleLog({ 'datacode': 'LOG_SnapQuestion', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraphUniq, 'data01': question, 'data02': answer, 'data03': myAnswer })
-                },
-
-                // sometimes the host wants to write without a refresh
-                writeLog(payload64: string) {
-                    let b = Buffer.from(payload64, 'base64')
-                    const msg: HostMsg = JSON.parse(b.toString())
-
-                    writeMoodleLog(msg);
-                },
+                    // used by mathcode for copy-to-editor button beside code
+                    copyToEditor(paragraph: string, textbook: string, code: string) {
+                        // console.log(`copyToEditor(${paragraph},${textbook},${code}`)
 
 
-                // this function called when a tab is clicked
-                tabButton(thisTab: number, nTabs: number, tabPrefix: string) {
-                    let tabName;
+                        let codeString = window.atob(code)
+                        writeMoodleLog({ 'datacode': 'Log_CopyToEditor', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: code })
 
-                    // clear ALL tabs
-                    for (var i = 1; i <= nTabs; i++) {
-                        tabName = tabPrefix + i.toString();
-                        // console.log('clearing ID', tabName)
-                        document.getElementById(tabName).style.display = 'none';
-                    }
-
-                    // now set the one we want
-                    tabName = tabPrefix + thisTab.toString();
-                    // console.log('setting ID ', tabName)
-                    document.getElementById(tabName).style.display = 'block';
-                },
+                        // refresh the editor before we copy, clearing any old hidden stuff
+                        Main.editor.editor.setValue(codeString)
+                    },
 
 
 
 
+
+                    download(gameboy: string = '0') {
+                        Main.editor.createWebPage(main.hiddenCode, gameboy == '1')  // asnyc
+                    },
+
+                    //// these are the buttons on the Editor
+                    stopEditor() {
+                        try {
+                            // console.log('clicked STOP')
+                            this.eraseFileExplorer()    // in case it is open (also resets '2D')
+                            // Observable.resetUserObservers()
+                            throw 'stop'
+                        } catch (e) { }  // we intentionally throwed, no error msg required
+                    },
+
+                    snapQuestion(paragraphUniq: string, textbook: string, bakery: number, question: string, answer: string) {
+                        // expose the answer and write it to the log
+                        console.log('snapQuestion()', paragraphUniq, textbook, bakery, question, answer)
+                        // id  Annn is input text
+                        //     Bnnn is answer (hidden, make visibility:visible)
+                        //     Cnnn is verify button (visible, make visiblility:hidden)
+                        let A = document.getElementById('A' + bakery) as HTMLInputElement
+                        let B = document.getElementById('B' + bakery)
+                        let C = document.getElementById('C' + bakery)
+
+                        let myAnswer = A.value
+                        B.style.display = 'block'
+                        C.style.display = 'none'
+
+                        writeMoodleLog({ 'datacode': 'LOG_SnapQuestion', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraphUniq, 'data01': question, 'data02': answer, 'data03': myAnswer })
+                    },
+
+                    // sometimes the host wants to write without a refresh
+                    writeLog(payload64: string) {
+                        let b = Buffer.from(payload64, 'base64')
+                        const msg: HostMsg = JSON.parse(b.toString())
+
+                        writeMoodleLog(msg);
+                    },
+
+
+                    // this function called when a tab is clicked
+                    tabButton(thisTab: number, nTabs: number, tabPrefix: string) {
+                        let tabName;
+
+                        // clear ALL tabs
+                        for (var i = 1; i <= nTabs; i++) {
+                            tabName = tabPrefix + i.toString();
+                            // console.log('clearing ID', tabName)
+                            document.getElementById(tabName).style.display = 'none';
+                        }
+
+                        // now set the one we want
+                        tabName = tabPrefix + thisTab.toString();
+                        // console.log('setting ID ', tabName)
+                        document.getElementById(tabName).style.display = 'block';
+                    },
+
+
+
+
+
+                }
 
             }
 
-    }
+        constructor() {
 
-    constructor() {
-
-        // console.log('in Main.constructor()')
-        console.log("Your screen resolution is: " + screen.width + "x" + screen.height);
+            // console.log('in Main.constructor()')
+            console.log("Your screen resolution is: " + screen.width + "x" + screen.height);
 
 
-        /** Attaches the mathcode API to the window object so that you can discover it */
-        Main.attachMathCodeAPI();
+            /** Attaches the mathcode API to the window object so that you can discover it */
+            Main.attachMathCodeAPI();
 
-        /** attaches the kybd and mouse events */
-        // addEventListener('keydown', (e) => Observable.notifyObservers('keydown', e))
-        // addEventListener('keypress', (e) => Observable.notifyObservers('keypress', e))
-        // addEventListener('mousedown', (e) => Observable.notifyObservers('mousedown', e))
-        // addEventListener('click', (e) => Observable.notifyObservers('click', e))
+            /** attaches the kybd and mouse events */
+            // addEventListener('keydown', (e) => Observable.notifyObservers('keydown', e))
+            // addEventListener('keypress', (e) => Observable.notifyObservers('keypress', e))
+            // addEventListener('mousedown', (e) => Observable.notifyObservers('mousedown', e))
+            // addEventListener('click', (e) => Observable.notifyObservers('click', e))
 
-        // let str = new LangString()
-        // str.testGetString()
-
-
-        // let fs = new tsFS()
-        // fs.crud()
-
-        // Raytracer()
-
-        // LogRecord.readAndClear()  // initialize
-        // LogRecord.add(1, 2, 3, 'zerodata')
-        // LogRecord.add(11, 12, 13, 'onedata')
-
-        // test_talk_to_moodle() // this is an async function
-
-        // testTree()
-
-        // let treeview = new treeviewComponent('Tree','root label')
-        // treeview.renderTree()
+            // let str = new LangString()
+            // str.testGetString()
 
 
-        Main.onClickSay = new OnClickSay()
-        // this.expandCodestr()   // not static, so use 'this'
+            // let fs = new tsFS()
+            // fs.crud()
+
+            // Raytracer()
+
+            // LogRecord.readAndClear()  // initialize
+            // LogRecord.add(1, 2, 3, 'zerodata')
+            // LogRecord.add(11, 12, 13, 'onedata')
+
+            // test_talk_to_moodle() // this is an async function
+
+            // testTree()
+
+            // let treeview = new treeviewComponent('Tree','root label')
+            // treeview.renderTree()
+
+
+            Main.onClickSay = new OnClickSay()
+            // this.expandCodestr()   // not static, so use 'this'
 
 
 
-        // const State = {
-        //     inputModel: null,
-        //     outputModel: null,
-        // };
-
-
-
-
-    }
-
-
-
-    resetButtons() {
-        this.download.disabled = false;
-        this.upload.disabled = false;
-        this.run.disabled = false;
-        // this.stop.disabled = true;
-        // this.pause.innerText = "Pause";
-        // this.pause.disabled = true;
-        // this.fullscreen.disabled = true;
-    }
-
-    // expandCodestr() {
-    //     console.log('about to expand CODESTR blocks')
-    //     let elements = document.getElementsByClassName('codestr')
-    //     for (let i = 0; i < elements.length; i++) {   // HTMLElements not iterable ?!?
-    //         let codestrElement = elements[i] as HTMLElement
-    //         let codestr = codestrElement.dataset.code
-    //         console.log('before', codestrElement, codestr)
-
-    //         if (codestr) {      // might be undefined
-
-
-    //             // PHP specialcharacters() converts five elements, we must switch them back
-    //             codestr = codestr.replaceAll(`&amp;`, `&`)
-    //             codestr = codestr.replaceAll(`&quot;`, `&`)
-    //             codestr = codestr.replaceAll(`&#039;`, `'`)
-    //             codestr = codestr.replaceAll(`&lt;`, `<`)
-    //             codestr = codestr.replaceAll(`&gt;`, `>`)
-
-    //             console.log('after', codestr)
-
-    //         }
-    //     }
-    // }
-
-
-
-
-    setupMonacoEditor(hiddenCode: string, hiddenDecl: string, popup: boolean, visibleCode = '') {
-        // monaco.editor.createModel(lib_baby, 'typescript', monaco.Uri.parse(babyUri));
-
-        this.editorDiv = document.getElementById("editor") as HTMLDivElement
-        // console.log('%clooking for editor div element', 'background-color:blue;color:white;')
-        if (this.editorDiv) {  // if page has an editor div
-            // console.log('%cSTARTING EDITOR', 'background-color:blue;color:white;')
-
-            Main.editor = new Editor(this.editorDiv, this.template, hiddenCode, hiddenDecl, visibleCode);  // static !!
-            // console.log('%cSTARTING EDITOR', 'background-color:blue;color:white;', 'editorDiv', this.editorDiv, 'template', this.template, 'hiddenCode', hiddenCode, 'hiddenDecl', hiddenDecl)
-
-
-            this.download = document.getElementById("download") as HTMLButtonElement;
-            this.upload = document.getElementById("upload") as HTMLButtonElement;
-            this.files = document.getElementById("files") as HTMLButtonElement;
-            this.run = document.getElementById("run") as HTMLButtonElement;
-            this.stop = document.getElementById("stop") as HTMLButtonElement;
-            this.pause = document.getElementById("pause") as HTMLButtonElement;
-            this.command = document.getElementById("command") as HTMLButtonElement;
-            // this.fullscreen = document.getElementById("fullscreen") as HTMLButtonElement;
-
-
-            if (this.download)
-                this.download.onclick = () => Main.editor.createWebPage(main.hiddenCode, this.gameboy)  // asnyc
-
-            // / Main.editor.download("game.ts");
-            if (this.upload)
-                this.upload.onclick = () => Main.editor.upload();
-            if (this.files)
-                this.files.onclick = () => (window as any).MathcodeAPI.refreshFileExplorer(1);
-
-
-
-            /**** moved to runeditor()
-            if (this.run) {
-                this.run.onclick = async () => {
-                    let jxgDiv = document.getElementById('jxgbox')
-                    // console.log('removing with method 1')
-                    while (jxgDiv.lastElementChild) {
-                        // console.log('removing', jxgDiv.lastElementChild)
-                        jxgDiv.removeChild(jxgDiv.lastElementChild);
-                    }
-
-                    // this.fullscreen.disabled = false;
-
-                    try {
-
-                        // before we do anything else, we WIPE OUT any previous
-                        // content of <div id='jxgbox'>
-                        // if someone wants a canvas, they add their own
-
-                        // const fn = await this.editor.transpile(this.game.scope);
-                        //this.editorDiv.hidden = true;
-                        Main.editor.transpile(main.hiddenCode, popup)  // also runs
-
-                    } catch (e) {   // transpile error.  show it in an alert
-                        alert(e);
-                        this.resetButtons();
-                    }
-                };
-            }
-*/
-
-
-            // this.command.onclick = () => {
-            //     console.log('clicked command')
-            //     // const paused = this.game.paused;
-            //     // this.game.paused = !paused;
-            //     // this.pause.innerText = paused ? "Pause" : "Continue";
-            //     // this.fullscreen.disabled = !paused;
+            // const State = {
+            //     inputModel: null,
+            //     outputModel: null,
             // };
-        } else {
-            console.log('%cdid not find editor div element', 'background-color:blue;color:white;')
-        }
-        // this.fullscreen.onclick = () => this.game.fullScreen = true;
-    }
 
-}
+
+
+
+        }
+
+
+
+        resetButtons() {
+            this.download.disabled = false;
+            this.upload.disabled = false;
+            this.run.disabled = false;
+            // this.stop.disabled = true;
+            // this.pause.innerText = "Pause";
+            // this.pause.disabled = true;
+            // this.fullscreen.disabled = true;
+        }
+
+        // expandCodestr() {
+        //     console.log('about to expand CODESTR blocks')
+        //     let elements = document.getElementsByClassName('codestr')
+        //     for (let i = 0; i < elements.length; i++) {   // HTMLElements not iterable ?!?
+        //         let codestrElement = elements[i] as HTMLElement
+        //         let codestr = codestrElement.dataset.code
+        //         console.log('before', codestrElement, codestr)
+
+        //         if (codestr) {      // might be undefined
+
+
+        //             // PHP specialcharacters() converts five elements, we must switch them back
+        //             codestr = codestr.replaceAll(`&amp;`, `&`)
+        //             codestr = codestr.replaceAll(`&quot;`, `&`)
+        //             codestr = codestr.replaceAll(`&#039;`, `'`)
+        //             codestr = codestr.replaceAll(`&lt;`, `<`)
+        //             codestr = codestr.replaceAll(`&gt;`, `>`)
+
+        //             console.log('after', codestr)
+
+        //         }
+        //     }
+        // }
+
+
+
+
+        setupMonacoEditor(hiddenCode: string, hiddenDecl: string, popup: boolean, visibleCode = '') {
+            // monaco.editor.createModel(lib_baby, 'typescript', monaco.Uri.parse(babyUri));
+
+            this.editorDiv = document.getElementById("editor") as HTMLDivElement
+            // console.log('%clooking for editor div element', 'background-color:blue;color:white;')
+            if (this.editorDiv) {  // if page has an editor div
+                // console.log('%cSTARTING EDITOR', 'background-color:blue;color:white;')
+
+                Main.editor = new Editor(this.editorDiv, this.template, hiddenCode, hiddenDecl, visibleCode);  // static !!
+                // console.log('%cSTARTING EDITOR', 'background-color:blue;color:white;', 'editorDiv', this.editorDiv, 'template', this.template, 'hiddenCode', hiddenCode, 'hiddenDecl', hiddenDecl)
+
+
+                this.download = document.getElementById("download") as HTMLButtonElement;
+                this.upload = document.getElementById("upload") as HTMLButtonElement;
+                this.files = document.getElementById("files") as HTMLButtonElement;
+                this.run = document.getElementById("run") as HTMLButtonElement;
+                this.stop = document.getElementById("stop") as HTMLButtonElement;
+                this.pause = document.getElementById("pause") as HTMLButtonElement;
+                this.command = document.getElementById("command") as HTMLButtonElement;
+                // this.fullscreen = document.getElementById("fullscreen") as HTMLButtonElement;
+
+
+                if (this.download)
+                    this.download.onclick = () => Main.editor.createWebPage(main.hiddenCode, this.gameboy)  // asnyc
+
+                // / Main.editor.download("game.ts");
+                if (this.upload)
+                    this.upload.onclick = () => Main.editor.upload();
+                if (this.files)
+                    this.files.onclick = () => (window as any).MathcodeAPI.refreshFileExplorer(1);
+
+
+
+
+
+                // this.command.onclick = () => {
+                //     console.log('clicked command')
+                //     // const paused = this.game.paused;
+                //     // this.game.paused = !paused;
+                //     // this.pause.innerText = paused ? "Pause" : "Continue";
+                //     // this.fullscreen.disabled = !paused;
+                // };
+            } else {
+                console.log('%cdid not find editor div element', 'background-color:blue;color:white;')
+            }
+            // this.fullscreen.onclick = () => this.game.fullScreen = true;
+        }
+
+    }
 
 
 
