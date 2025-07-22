@@ -19,7 +19,7 @@
 //    DEALINGS IN THE SOFTWARE.
 //
 /////////////////////////////////////////////////////////////////////////////
-//   Generated on July 12, 2025, 10:00 am
+//   Generated on July 22, 2025, 1:33 pm
 let defaultAttrs = {
     keepAspectRatio: true,
     name: '', showinfobox: false,
@@ -354,7 +354,6 @@ export class TSXBoard {
     }
     // this is the code for InitBoard, which is created in the wrapper.
     constructor(canvas = 'jxgbox', attributes = {}) {
-        this.JXGOptions = window.JXG.Options; // no documentation on this, just make it available to TypeScript as any
         this.defaultAttrs = {
             keepAspectRatio: true,
             name: '',
@@ -364,6 +363,8 @@ export class TSXBoard {
         };
         // create the board
         this._jBoard = window.JXG.JSXGraph.initBoard(canvas, attributes);
+        this.JXGOptions = window.JXG.Options;
+        console.log('constructor', this.JXGOptions);
         let bounding = this._jBoard.getBoundingBox();
         // console.log(bounding, [[bounding[0], bounding[3]], Math.abs(bounding[2] - bounding[0]), Math.abs(bounding[3] - bounding[1])])
         // axesPosition is immutable.  if it is set in initBoard(), then set it in view
@@ -390,7 +391,7 @@ export class TSXBoard {
             xPlaneRear: { visible: false },
             yPlaneRear: { visible: false }, //fillOpacity: 0.2, fillColor: 'blue' },
             zPlaneRear: { visible: false },
-            // note: keyboard requires jsxbox div to contain tabindex='0' directive
+            // note: keyboard requires jxgbox div to contain tabindex='0' directive
             az: { pointer: { enabled: false }, keyboard: { enabled: true, key: 'none' } },
             el: { pointer: { enabled: false }, keyboard: { enabled: true, key: 'none' } },
         });

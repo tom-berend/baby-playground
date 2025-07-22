@@ -2923,7 +2923,7 @@ export declare class TSXBoard {
     private _jView3d;
     private printLineNumber;
     /** This contains the default options of the board and of all geometry elements.  See JSXGraph.Options.js for details.  Example: TSX.JXGOptions.elements.tabindex = -1 */
-    JXGOptions: any;
+    JXGOptions: Object;
     private currentCanvas;
     private boardList;
     private defaultAttrs;
