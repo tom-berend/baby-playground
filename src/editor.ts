@@ -12,7 +12,8 @@ import lib_es6 from "./extraLibs/lib.es6.d.ts.txt";  // not sure why i need both
 // import lib_baby from "./extraLibs/baby.d.ts.txt";
 import lib_dom_mini from "./extraLibs/lib.dom_mini.d.ts.txt";
 // import lib_dom from "./extraLibs/lib.dom.d.ts.txt";
-import lib_dom_iterable from "./extraLibs/dom.iterable.d.ts.txt";
+// import lib_dom_iterable from "./extraLibs/dom.iterable.generated.d.ts.txt";    // why not just dom.iterable?
+import lib_dom_iterable from "./extraLibs/dom.iterable.d.ts.txt";    // why not just dom.iterable?
 
 import lib_es2015_collection from "./extraLibs/lib.es2015.collection.d.ts.txt"
 import lib_es2015_core from "./extraLibs/lib.es2015.core.d.ts.txt"
@@ -655,7 +656,14 @@ export class Editor {
 
         let html = '';
 
-        html += "import {TSXBoard } from 'https://cdn.jsdelivr.net/npm/jsxgraph-wrapper-typescript@2.0.8/lib/tsxgraph.js';"
+        // jsDelivr = false // only for testing
+
+
+        if (jsDelivr)
+            html += "import {TSXBoard } from 'https://cdn.jsdelivr.net/npm/jsxgraph-wrapper-typescript@2.0.8/lib/tsxgraph.js';"
+        else
+            html += "import {TSXBoard } from 'http:localhost/TSXGraph/src/tsxgraph.js';"  // only for testing
+
 
         html += "\nlet TSX = new TSXBoard('jxgbox');"
 

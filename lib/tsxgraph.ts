@@ -21,7 +21,7 @@
 //    DEALINGS IN THE SOFTWARE.
 //
 /////////////////////////////////////////////////////////////////////////////
-//   Generated on July 22, 2025, 1:33 pm
+//   Generated on July 26, 2025, 8:46 pm
 
 // match JSXGraph definition for JXG_Point3D, etc
 type NumberFunction = Number | Function
@@ -4173,7 +4173,7 @@ export class TSXBoard {
 
     /** This contains the default options of the board and of all geometry elements.  See JSXGraph.Options.js for details.  Example: TSX.JXGOptions.elements.tabindex = -1 */
 
-    JXGOptions: Object   // no documentation on this, just make it available to TypeScript as any
+    JXGOptions: any   // no documentation on this, just make it available to TypeScript as any
 
         ;
 
@@ -4286,8 +4286,6 @@ export class TSXBoard {
         this._jBoard = (window as any).JXG.JSXGraph.initBoard(canvas, attributes)
 
         this.JXGOptions = (window as any).JXG.Options as Object
-
-        console.log('constructor', this.JXGOptions)
 
 
 
@@ -4913,9 +4911,9 @@ export class TSXBoard {
 
 
 
-    /** Creates a new geometric element of type elementType.*/
+    /** Creates a new geometric element of type elementType.*/   // NOTE: UPPER CASE Create  !!
 
-    create(elementType: string, parents: string, attributes: Object): any { return (this._jBoard as any).create(elementType, parents, attributes) }
+    Create(elementType: string, parents: any[], attributes: Object): any { return (this._jBoard as any).create(elementType, parents, attributes) }
 
 
 
@@ -5803,8 +5801,9 @@ export class TSXBoard {
             params = this.isAttribute(g) ? [a, b, c, d, e, f,] : [a, b, c, d, e, f, g,];
             attrs = this.isAttribute(g) ? g : {};
         }
-        console.log('curvee', b); if (!b || this.isAttribute(b)) { // only one parameter, must be array of [[x,y],[x,y]...]
-            console.log('curve', a)
+        //console.log('curvee',b);
+        if (!b || this.isAttribute(b)) { // only one parameter, must be array of [[x,y],[x,y]...]
+            //console.log('curve',a)
             return (this._jBoard as any).create('curve', [a], b);   // JSXGraph syntax is mangled, too many nested arrays
         }
         // else just return standard create
@@ -6265,12 +6264,50 @@ export class TSXBoard {
         return (this._jView3d as any).create('text3d', params, this.defaultAttributes(attrs))
     }
 
-
-    /** Ticks are used as distance markers on a line or curve. They are mainly used for axis elements and slider elements.  */
-    Ticks(line: Line, attributes: TicksAttributes = {}): Ticks {
-        return (this._jBoard as any).create('ticks', [line,], this.defaultAttributes(attributes)) as Ticks
+    /** Ticks are used as distance markers on a line or curve. They are mainly used for axis elements and slider elements.
+    *```
+   *```
+     */
+    Ticks(line: Line, attributes?: TicksAttributes): Ticks
+    /** Ticks are used as distance markers on a line or curve. They are mainly used for axis elements and slider elements.
+    *```
+   *```
+     */
+    Ticks(line: Line, tickpositions: number[], attributes?: TicksAttributes): Ticks
+    // implementation of signature,  hidden from user
+    Ticks(a?: any, b?: any, c?: any, d?: any, e?: any, f?: any, g?: any, h?: any, i?: any) {
+        let params: any[] = []
+        let attrs = {}
+        if (arguments.length == 1) {
+            params = this.isAttribute(a) ? [] : [a,];
+            attrs = this.isAttribute(a) ? a : {};
+        }
+        if (arguments.length == 2) {
+            params = this.isAttribute(b) ? [a,] : [a, b,];
+            attrs = this.isAttribute(b) ? b : {};
+        }
+        if (arguments.length == 3) {
+            params = this.isAttribute(c) ? [a, b,] : [a, b, c,];
+            attrs = this.isAttribute(c) ? c : {};
+        }
+        if (arguments.length == 4) {
+            params = this.isAttribute(d) ? [a, b, c,] : [a, b, c, d,];
+            attrs = this.isAttribute(d) ? d : {};
+        }
+        if (arguments.length == 5) {
+            params = this.isAttribute(e) ? [a, b, c, d,] : [a, b, c, d, e,];
+            attrs = this.isAttribute(e) ? e : {};
+        }
+        if (arguments.length == 6) {
+            params = this.isAttribute(f) ? [a, b, c, d, e,] : [a, b, c, d, e, f,];
+            attrs = this.isAttribute(f) ? f : {};
+        }
+        if (arguments.length == 7) {
+            params = this.isAttribute(g) ? [a, b, c, d, e, f,] : [a, b, c, d, e, f, g,];
+            attrs = this.isAttribute(g) ? g : {};
+        }
+        return (this._jBoard as any).create('ticks', params, this.defaultAttributes(attrs))
     }
-
 
 
     /** A circular sector is a subarea of the area enclosed by a circle. It is enclosed by two radii and an arc. The sector as curve consists of two legs and an arc. The curve length is 6. That means, a point with coordinates [sector.X(t), sector.Y(t)] is on leg 1 if t is between 0 and 1, the arc if t is between 1 and 5, leg 2 if t is between 5 and 6. */
@@ -6856,15 +6893,56 @@ export class TSXBoard {
     }
 
 
-
     /** Functiongraph visualizes a map x → f(x).  It is a wrapper for element Curve. The graph is drawn for x in the interval [a,b] default -10 to 10.
    ```js
    let f = TSX.Functiongraph((x: number) => 3 * Math.pow(x, 2))
-   ``` */
-    Functiongraph(funct: (x: number) => number, leftBorder?: number, rightBorder?: number, attributes: FunctiongraphAttributes = {}): Curve {
-        return (this._jBoard as any).create('functiongraph', [funct, leftBorder, rightBorder,], this.defaultAttributes(attributes)) as Curve
+   ```
+    *```
+   *```
+     */
+    Functiongraph(funct: (x: number) => number, attributes?: FunctiongraphAttributes): Functiongraph
+    /** Functiongraph visualizes a map x → f(x).  It is a wrapper for element Curve. The graph is drawn for x in the interval [a,b] default -10 to 10.
+   ```js
+   let f = TSX.Functiongraph((x: number) => 3 * Math.pow(x, 2))
+   ```
+    *```
+   *```
+     */
+    Functiongraph(funct: (x: number) => number, leftBorder: number, rightBorder: number, attributes?: FunctiongraphAttributes): Functiongraph
+    // implementation of signature,  hidden from user
+    Functiongraph(a?: any, b?: any, c?: any, d?: any, e?: any, f?: any, g?: any, h?: any, i?: any) {
+        let params: any[] = []
+        let attrs = {}
+        if (arguments.length == 1) {
+            params = this.isAttribute(a) ? [] : [a,];
+            attrs = this.isAttribute(a) ? a : {};
+        }
+        if (arguments.length == 2) {
+            params = this.isAttribute(b) ? [a,] : [a, b,];
+            attrs = this.isAttribute(b) ? b : {};
+        }
+        if (arguments.length == 3) {
+            params = this.isAttribute(c) ? [a, b,] : [a, b, c,];
+            attrs = this.isAttribute(c) ? c : {};
+        }
+        if (arguments.length == 4) {
+            params = this.isAttribute(d) ? [a, b, c,] : [a, b, c, d,];
+            attrs = this.isAttribute(d) ? d : {};
+        }
+        if (arguments.length == 5) {
+            params = this.isAttribute(e) ? [a, b, c, d,] : [a, b, c, d, e,];
+            attrs = this.isAttribute(e) ? e : {};
+        }
+        if (arguments.length == 6) {
+            params = this.isAttribute(f) ? [a, b, c, d, e,] : [a, b, c, d, e, f,];
+            attrs = this.isAttribute(f) ? f : {};
+        }
+        if (arguments.length == 7) {
+            params = this.isAttribute(g) ? [a, b, c, d, e, f,] : [a, b, c, d, e, f, g,];
+            attrs = this.isAttribute(g) ? g : {};
+        }
+        return (this._jBoard as any).create('functiongraph', params, this.defaultAttributes(attrs)) as Curve
     }
-
 
 
     /** A 3D functiongraph visualizes a map (x, y) → f(x, y).  */
@@ -6925,7 +7003,12 @@ export class TSXBoard {
             params = this.isAttribute(g) ? [a, b, c, d, e, f,] : [a, b, c, d, e, f, g,];
             attrs = this.isAttribute(g) ? g : {};
         }
-        params = b ? [b[0] ?? 0, b[1] ?? 0, a] : [0, 0, a]
+        if ((!b || this.isAttribute(b))) {
+            params = [0, 0, a];
+            attrs = b;
+        } else {
+            params = b ? [b[0] ?? 0, b[1] ?? 0, a] : [0, 0, a]
+        }
         return (this._jBoard as any).create('glider', params, this.defaultAttributes(attrs));
     }
 
