@@ -7,23 +7,30 @@ import { DOM } from "./DOM"
 
 import * as monaco from "monaco-editor";
 
-import lib_es5 from "./extraLibs/lib.es5.d.ts.txt";
-import lib_es6 from "./extraLibs/lib.es6.d.ts.txt";  // not sure why i need both but parseInt() fails without es5
 // import lib_baby from "./extraLibs/baby.d.ts.txt";
 import lib_dom_mini from "./extraLibs/lib.dom_mini.d.ts.txt";
 // import lib_dom from "./extraLibs/lib.dom.d.ts.txt";
 // import lib_dom_iterable from "./extraLibs/dom.iterable.generated.d.ts.txt";    // why not just dom.iterable?
 import lib_dom_iterable from "./extraLibs/dom.iterable.d.ts.txt";    // why not just dom.iterable?
 
-import lib_es2015_collection from "./extraLibs/lib.es2015.collection.d.ts.txt"
+import lib_es5 from "./extraLibs/lib.es5.d.ts.txt";
 import lib_es2015_core from "./extraLibs/lib.es2015.core.d.ts.txt"
-import lib_es2015_promise from "./extraLibs/lib.es2015.promise.d.ts.txt"
+import lib_es2015_collection from "./extraLibs/lib.es2015.collection.d.ts.txt"
 import lib_es2015_iterable from "./extraLibs/lib.es2015.iterable.d.ts.txt"
+import lib_es2015_generator from "./extraLibs/lib.es2015.generator.d.ts.txt"
+import lib_es2015_promise from "./extraLibs/lib.es2015.promise.d.ts.txt"
+import lib_es2015_proxy from "./extraLibs/lib.es2015.proxy.d.ts.txt"
+import lib_es2015_reflect from "./extraLibs/lib.es2015.reflect.d.ts.txt"
+import lib_es2015_symbol from "./extraLibs/lib.es2015.symbol.d.ts.txt"
 import lib_es2015_symbol_wellknown from "./extraLibs/lib.es2015.symbol.wellknown.d.ts.txt"
+
+import lib_es6 from "./extraLibs/lib.es6.d.ts.txt";  // not sure why i need both but parseInt() fails without es5
 import lib_es2016_array_include from "./extraLibs/lib.es2016.array.include.d.ts.txt"
+
 import lib_es2017_string from "./extraLibs/lib.es2017.string.d.ts.txt"
 import lib_es2017_object from "./extraLibs/lib.es2017.object.d.ts.txt"
 import lib_es2017_typedarrays from "./extraLibs/lib.es2017.typedarrays.d.ts.txt"
+
 import lib_es2018_asynciterable from "./extraLibs/lib.es2018.asynciterable.d.ts.txt"
 import lib_es2019_string from "./extraLibs/lib.es2019.string.d.ts.txt"
 import lib_es2020_bigint from "./extraLibs/lib.es2020.bigint.d.ts.txt"
@@ -138,7 +145,8 @@ export class Editor {
             noLib: true,    // brings in variables like 'origin'.  what damage does this do?
 
 
-            lib: ["es5, es6, es2020, es2015.core, es2015.iterable, dom.iterable"],    // for some reason, dom.iterable is required for destructuring    [x,y] = [1,2]
+            // lib: ["es5, es6, es2020, es2015.core, es2015.iterable, dom.iterable"],    // for some reason, dom.iterable is required for destructuring    [x,y] = [1,2]
+            lib: ["es5, es6, es2020,  dom.iterable"],    // for some reason, dom.iterable is required for destructuring    [x,y] = [1,2]
 
             sourceMap: true,
             strict: false,
@@ -193,11 +201,16 @@ export class Editor {
 
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_promise, "lib.es2015.promise.d.ts");
 
-        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_collection)
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_core)
-        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_promise)
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_collection)
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_iterable)
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_generator)
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_promise)
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_proxy)
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_reflect)
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_symbol)
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2015_symbol_wellknown)
+
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2016_array_include)
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2017_object)
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2017_string)
@@ -446,7 +459,7 @@ export class Editor {
     /** pull together the source code for a TEXt webpage for download  It is used in the
      * playground to download a page.
     */
-    generateSourceCode(hiddenCode: string, editorCode: string, jsDelivr: boolean, gameboy: boolean): string {
+    generateSourceCode(hiddenCode: string, editorCode: string, jsDelivr: boolean, gameboy: boolean, pathToDist: string = ''): string {
 
         let hostname = location.hostname;
         // console.log('hostname', hostname)
@@ -454,17 +467,17 @@ export class Editor {
         let html = ''
 
         html += this.HTMLBoilerPlate(jsDelivr, gameboy);  // leaves an injectable script open
-        html += '<script type="module">'
+        html += '\n<script type="module">'
 
         if (gameboy) {
             html += this.gameBoyScript();  // leaves an injectable script open
         }
-        html += this.injectableScript(hiddenCode, editorCode, jsDelivr)
+        html += this.injectableScript(hiddenCode, editorCode, jsDelivr, pathToDist)
 
-        html += '</script>';
+        html += '\n</script>';
 
-        html += '</body>';
-        html += '</html>';
+        html += '\n</body>';
+        html += '\n</html>';
 
         // console.log('generateSourceCode', html)
         return html
@@ -489,8 +502,8 @@ export class Editor {
             html += `\n<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>`
             html += `\n<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraph.css" />`;
 
-            html += `<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" integrity="sha384-zh0CIslj+VczCZtlzBcjt5ppRcsAmDnRem7ESsYwWwg3m/OaJ2l4x7YBZl9Kxxib" crossorigin="anonymous">`;
-            html += `<script src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" integrity="sha384-Rma6DA2IPUwhNxmrB/7S3Tno0YY7sFu9WSYMCuulLhIqYSGZ2gKCJWIqhBWqMQfh" crossorigin="anonymous"></script>`;
+            html += `\n<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" integrity="sha384-zh0CIslj+VczCZtlzBcjt5ppRcsAmDnRem7ESsYwWwg3m/OaJ2l4x7YBZl9Kxxib" crossorigin="anonymous">`;
+            html += `\n<script src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" integrity="sha384-Rma6DA2IPUwhNxmrB/7S3Tno0YY7sFu9WSYMCuulLhIqYSGZ2gKCJWIqhBWqMQfh" crossorigin="anonymous"></script>`;
 
         } else {
             // html += `\n<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.js"></script>`
@@ -499,8 +512,8 @@ export class Editor {
             html += `\n<script type="text/javascript" src="dist.${LIB_VERSION}/jsxgraphcore.js"></script>`;
             html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/jsxgraph.css" />`;
 
-            html += `<link rel="stylesheet" href="dist.${LIB_VERSION}/katex.min.css">`;
-            html += `<script src="dist.${LIB_VERSION}/katex.min.js"></script>`;
+            html += `\n<link rel="stylesheet" href="dist.${LIB_VERSION}/katex.min.css">`;
+            html += `\n<script src="dist.${LIB_VERSION}/katex.min.js"></script>`;
 
         }
 
@@ -526,7 +539,7 @@ export class Editor {
 
 
 
-        html += `<script>
+        html += `\n<script>
             window.WebFontConfig = {
                 custom: {
                     families: ['KaTeX_AMS', 'KaTeX_Caligraphic:n4,n7', 'KaTeX_Fraktur:n4,n7',
@@ -535,7 +548,7 @@ export class Editor {
                     'KaTeX_Size4', 'KaTeX_Typewriter'],
                     },
                     };
-                    </script>`;
+                    \n</script>`;
 
         // if (jsDelivr) {  // for downloading a working web page - everything from jsdelivr
         //     html += "<script src='https://cdn.jsdelivr.net/npm/webfontloader@1.6.28/webfontloader.min.js'></script>";
@@ -545,14 +558,14 @@ export class Editor {
 
         if (gameBoy)  // opens two divs
             html +=
-                `<div style='width:1000px;max-width:100%;height:1170px;max-height:100%'>
-                 <div style='border:solid 2px black; border-radius: 10px;padding:10px;background-color: rgb(178, 214, 246);width:100%;height:100%;'>`;
+                `\n<div style='width:1000px;max-width:100%;height:1170px;max-height:100%'>
+                 \n<div style='border:solid 2px black; border-radius: 10px;padding:10px;background-color: rgb(178, 214, 246);width:100%;height:100%;'>`;
 
-        html += `<div id="jxgbox" class="jxgbox" style="aspect-ratio: 1; width: 100%; max-width:1000px; max-height: calc(100vh - 20px);" tabindex= '0'></div>`;
+        html += `\n<div id="jxgbox" class="jxgbox" style="aspect-ratio: 1; width: 100%; max-width:1000px; max-height: calc(100vh - 20px);" tabindex= '0'></div>`;
 
         if (gameBoy)  // closes the two divs
             html +=
-                `<div>
+                `\n<div>
                <div class="wrapper">
                     <table style="padding-left:100px;padding-top:20px;">
                         <tr>
@@ -572,15 +585,15 @@ export class Editor {
                         </tr>
                     </table>
                 </div> <!-- end of first wrapper-->
-                <div class="wrapper"><p>&nbsp;</p></div>  <!--spacer-->
-                <div class="wrapper" style="padding-top:30px;">
-                    <input type="button" class='button' style="margin-right:50px;" id="btn_A" value="A"></input>
-                    <input type="button" class='button' style="margin-right:50px;" id="btn_B" value="B"></input>
-                    <input type="button" class='button' style="margin-right:50px;" id="btn_C" value="C"></input>
-                    <input type="button" class='button' id="btn_D" value="D"></input>
-                </div><!-- end of second wrapper-->
-            </div>
-         </div>
+                \n<div class="wrapper"><p>&nbsp;</p></div>  <!--spacer-->
+                \n<div class="wrapper" style="padding-top:30px;">
+                    \n<input type="button" class='button' style="margin-right:50px;" id="btn_A" value="A"></input>
+                    \n<input type="button" class='button' style="margin-right:50px;" id="btn_B" value="B"></input>
+                    \n<input type="button" class='button' style="margin-right:50px;" id="btn_C" value="C"></input>
+                    \n<input type="button" class='button' id="btn_D" value="D"></input>
+                \n</div><!-- end of second wrapper-->
+            \n</div>
+         \n</div>
 
         `;
 
@@ -652,7 +665,8 @@ export class Editor {
     }
 
 
-    injectableScript(hiddenCode: string, editorCode: string, jsDelivr: Boolean) {
+    injectableScript(hiddenCode: string, editorCode: string, jsDelivr: Boolean, pathToDist: string = '') {
+        console.assert(jsDelivr || pathToDist, "If not jsDelivr then pathToString must be provided");
 
         let html = '';
 
@@ -660,9 +674,9 @@ export class Editor {
 
 
         if (jsDelivr)
-            html += "import {TSXBoard } from 'https://cdn.jsdelivr.net/npm/jsxgraph-wrapper-typescript@2.0.8/lib/tsxgraph.js';"
+            html += "import {TSXBoard } from 'https://cdn.jsdelivr.net/npm/jsxgraph-wrapper-typescript@2.1.1/lib/tsxgraph.js';"
         else
-            html += "import {TSXBoard } from 'http:localhost/TSXGraph/src/tsxgraph.js';"  // only for testing
+            html += `import {TSXBoard } from '${pathToDist}/tsxgraph.js';`  // only for testing
 
 
         html += "\nlet TSX = new TSXBoard('jxgbox');"
@@ -698,18 +712,18 @@ export class Editor {
 
         // console.log(`injectScript(divID: ${divID}, injectable: ${injectable})`)
 
-        const html = `<html>
-                            <body>
-                                <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+        const html = `\n<html>
+                            \n<body>
+                                \n<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
                                 <!--script type="text/javascript" src="/dist.${LIB_VERSION}/jsxgraphcore.js"></script-->
-                                <div id='jxgbox' style="width:600px;height:600px;"> </div>
-                                <script type='module'>
+                                \n<div id='jxgbox' style="width:600px;height:600px;"> </div>
+                                \n<script type='module'>
                                     // import {TSXBoard } from 'https://cdn.jsdelivr.net/npm/jsxgraph-wrapper-typescript@2.0.8/lib/tsxgraph.js'
                                     ${injectable}
-                                </script>
+                                \n</script>
 
-                            </body>
-                        </html>`;
+                            \n</body>
+                        \n</html>`;
 
 
 
