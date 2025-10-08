@@ -667,6 +667,7 @@ export class Editor {
 
     injectableScript(hiddenCode: string, editorCode: string, jsDelivr: Boolean, pathToDist: string = '') {
         console.assert(jsDelivr || pathToDist, "If not jsDelivr then pathToString must be provided");
+        console.log(`injectableScript jsDelivr:${jsDelivr} ${pathToDist}`)
 
         let html = '';
 
@@ -693,7 +694,7 @@ export class Editor {
         html += "\n    console.log(error)"
         html += "\n }"
 
-        // console.log('injectable', html);
+        console.log('injectable', html);
         return html;
     }
 

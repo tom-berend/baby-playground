@@ -532,7 +532,7 @@ export class Main {
 
                 // used by mathcode for RUN button below editor
                 async runMathcodeEditor(stepUniq: string, textbook: string, pathToDist: string) {
-                    // console.log(`runEditor(${stepUniq},${textbook})`)
+                    console.log(`runMathcodeEditor(${stepUniq},${textbook}, ${pathToDist})`)
 
                     // convert from TS to JS
                     let result = await Main.editor.transpile(Main.editor.hiddenCode, false, false, false);
@@ -543,7 +543,7 @@ export class Main {
                     writeMoodleLog({ 'datacode': 'LOG_RunCode', 'id': main.moodleID, 'textbook': textbook, 'data01': stepUniq, 'data05': codebase64, 'data06': hiddencodebase64, 'data07': hiddendeclbase64 })
 
                     // get something started, fix later
-                    let injectable = Main.editor.injectableScript(Main.editor.hiddenCode, result, false, pathToDist)  // never use jsDelivr, always provide pathToDist
+                    let injectable = Main.editor.injectableScript(Main.editor.hiddenCode, result, true, pathToDist)  // never use jsDelivr, always provide pathToDist
                     Main.editor.injectScript('jxgframe', injectable)
                 },
 

@@ -21,7 +21,7 @@
 //    DEALINGS IN THE SOFTWARE.
 //
 /////////////////////////////////////////////////////////////////////////////
-//   Generated on August 26, 2025, 11:20 am
+//   Generated on October 8, 2025, 5:58 pm
 
 // match JSXGraph definition for JXG_Point3D, etc
 type NumberFunction = Number | Function
@@ -29,6 +29,10 @@ type NumberFunction = Number | Function
 /** A 'point' has a position in space.  The only characteristic that distinguishes one point from another is its position. */
 type pointAddr = NumberFunction[] | [number, number] | [number, Function] | [Function, number] | [Function | Function] // allow tuples or arrays
 type pointAddr3D = NumberFunction[] // | [number | Function, number | Function, number | Function]  // either tuple or array
+
+type vertices3D = { [key: string]: number[] | Point3D | string };
+
+
 let defaultAttrs: Object = {
     keepAspectRatio: true,
     name: '', showinfobox: false,
@@ -43,6 +47,8 @@ let defaultAttrs: Object = {
 type arrayNumber = Number[]
 type arrayNumber2 = arrayNumber | Number
 type matAny = arrayNumber2[]
+
+
 
 // eventType accepts any string, but will suggest a few
 type eventType = 'down' | 'up' | 'drag' | 'keydrag' | 'mousedown' | 'mousedrag' | 'mousemove' | 'mouseout' | 'mouseover' | 'mouseup' | 'move' | 'out' | 'over' | 'pendown' | 'pendrag' | 'penup' | 'touchdown' | 'touchdrag' | 'touchup' | 'up' | string
@@ -637,7 +643,7 @@ export interface GeometryElement extends Events {   // fields and methods
     setName(str: string): Object,
     /** Sets ids of elements to the array this.parents. First, this.parents is cleared. See {@link JXG.GeometryElement#addParents}. */
     setParents(parents: any): Object,
-    /** Moves an element by the difference of two coordinates. */
+    /** Moves an element by the difference of two coordinates.  eg: arrow.setPositionDirectly(TSXBoard.COORDS_BY_USER, position) */
     setPositionDirectly(method: number, coords: NumberFunction[], oldcoords?: NumberFunction[]): GeometryElement,
     /** Deprecated alias for {@link JXG.GeometryElement#setAttribute}. */
     setProperty(): GeometryElement,
@@ -649,7 +655,7 @@ export interface GeometryElement extends Events {   // fields and methods
     snapToPoints(force?: Boolean): GeometryElement,
     /** Checks if locale is enabled in the attribute. This may be in the attributes of the board, or in the attributes of the text. The latter has higher priority. The board attribute is taken if attribute  */
     useLocale(): Boolean,
-    /** Translates the object by <tt>(x, y)</tt>. In case the element is defined by points, the defining points are translated, e.g. a circle constructed by a center point and a point on the circle line.  */
+    /** Translates the object by <tt>(x, y)</tt>. In case the element is defined by points, the defining points are translated, e.g. a circle constructed by a center point and a point on the circle line.  eg: arrow.setPosition(TSXBoard.COORDS_BY_USER, position) */
     setPosition(method: number, coords: number[]): GeometryElement,
     /** General update method. Should be overwritten by the element itself. Can be used sometimes to commit changes to the object.  */
     update(): void,
@@ -710,11 +716,11 @@ export interface CoordsElement extends Omit<GeometryElement, 'snapToPoints'> {
     popSlideObject(): Point,
     /** Sets the position of a glider relative to the defining elements of the {@link JXG.Point#slideObject}. */
     setGliderPosition(x: number): Point,
-    /** Sets coordinates and calls the element&#039;s update() method.  Method is the type of coordinates used here. Possible values are JXG.COORDS_BY_USER and JXG.COORDS_BY_SCREEN. */
+    /** Sets coordinates and calls the element&#039;s update() method.  Method is the type of coordinates used here. Possible values are TSXBoard.COORDS_BY_USER and TSXBoard.COORDS_BY_SCREEN. */
     setPosition(method: number, coord: number[]): CoordsElement,
-    /** Translates the point by tv = [x, y]. Method is the type of coordinates used here. Possible values are JXG.COORDS_BY_USER and JXG.COORDS_BY_SCREEN. */
+    /** Translates the point by tv = [x, y]. Method is the type of coordinates used here. Possible values are TSXBoard.COORDS_BY_USER and TSXBoard.COORDS_BY_SCREEN. */
     setPositionByTransform(method: number, tv: number[]): CoordsElement,
-    /** Sets coordinates and calls the elements&#039;s update() method. */
+    /** Sets coordinates and calls the elements&#039;s update() method.  eg: arrow.setPositionDirectly(TSXBoard.COORDS_BY_USER, position) */
     setPositionDirectly(method: number, coords: NumberFunction[]): GeometryElement,
     /** Alias for {@link JXG.Element#handleSnapToGrid} */
     snapToGrid(force: Boolean): CoordsElement,
@@ -1859,7 +1865,7 @@ export interface Polygon extends GeometryElement {   // fields and methods
     pnpoly(x_in: number, y_in: number, coord_type: number): Boolean,
     /** Removes given set of vertices from the polygon  */
     removePoints(p: Point): Polygon,
-    /** Moves the polygon by the difference of two coordinates.  */
+    /** Moves the polygon by the difference of two coordinates. eg: arrow.setPositionDirectly(TSXBoard.COORDS_BY_USER, position) */
     setPositionDirectly(method: number, coords: NumberFunction[], oldcoords: NumberFunction[]): GeometryElement,
     /** Make the element visible.  */
     showElement(borderless?: Boolean): GeometryElement,
@@ -1994,7 +2000,7 @@ export interface Text3D extends Text {   // fields and methods
     //// fields
 
     //// methods
-    /** Set the position of a 3D point. If `noEvent` true, then no events are triggered. */
+    /** Set the position of a 3D point. If `noEvent` true, then no events are triggered. eg:  arrow.setPosition(TSXBoard.COORDS_BY_USER, position) */
     setPosition(method: number, coords: number[] /*,noEvent?:boolean*/): CoordsElement,
     /** Check whether a text's position is finite, i.e. the first entry is not zero.  */
     testIfFinite(): Boolean,
@@ -2085,7 +2091,7 @@ export interface Ticks extends GeometryElement {   // fields and methods
     beautifyScientificNotationLabel(labelText: string): string,
     /** Checks whether (x,y) is near the line. Only available for line elements,  not for ticks on curves. */
     hasPoint(x: number, y: number): Boolean,
-    /** Sets x and y coordinate of the tick. */
+    /** Sets x and y coordinate of the tick.  arrow.setPositionDirectly(TSXBoard.COORDS_BY_USER, position) */
     setPositionDirectly(method: number, coords: NumberFunction[], oldcoords?: NumberFunction[]): GeometryElement,
     /** Uses the boards renderer to update the arc. */
     updateRenderer(): Ticks,
@@ -4919,7 +4925,7 @@ export class TSXBoard {
 
     /** Creates a new geometric element of type elementType.*/   // NOTE: UPPER CASE Create  !!
 
-    create(elementType: string, parents: any[], attributes: Object): any { return (this._jBoard as any).create(elementType, parents, attributes) }
+    create(elementType: string, parents: any[], attributes: Object = {}): any { return (this._jBoard as any).create(elementType, parents, attributes) }
 
 
 
@@ -5764,7 +5770,7 @@ export class TSXBoard {
     *```
    *```
      */
-    Curve(xyArray: number[][], attributes?: CurveAttributes): Curve
+    Curve(xyArray: [number, number | null][], attributes?: CurveAttributes): Curve
     /** Plot a set of points or a function from arrays X and Y
     *```
    *```
@@ -7657,7 +7663,7 @@ export class TSXBoard {
        }
    });
    ``` */
-    Polyhedron3D(vertexList: (Point3D | pointAddr3D)[], faceArray: number[][], attributes: Polyhedron3DAttributes = {}): Polyhedron3D {
+    Polyhedron3D(vertexList: (Point3D | pointAddr3D)[] | vertices3D, faceArray: number[][] | string[][], attributes: Polyhedron3DAttributes = {}): Polyhedron3D {
         return (this._jView3d as any).create('polyhedron3d', [vertexList, faceArray,], this.defaultAttributes(attributes)) as Polyhedron3D
     }
 
