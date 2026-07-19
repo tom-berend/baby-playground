@@ -3481,7 +3481,7 @@ export declare class TSXBoard {
     /** Display a message
                                    
    *```js
-   TSX.Text([3,2],[3,3], {fontSize:20, strokeColor:'blue'})
+   TSX.Text([3,2], 'message', {fontSize:30, strokeColor:'blue'})
    TSX.Text([0, 4], () => 'BD ' + B.distance(D).toFixed(2))
    TSX.Text([-4, 2], '\pm\sqrt{a^2 + b^2}', { useKatex: true })
                                    

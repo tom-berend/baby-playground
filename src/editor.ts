@@ -420,7 +420,7 @@ export class Editor {
             // console.log('popup && plotwindow exists, injecting');
             // console.log('injectableScript', this.injectableScript(this.hiddenCode, this.editorCode, false))
 
-            this.injectScript('jxgframe', this.injectableScript(this.hiddenCode, this.editorCode, false))
+            this.injectScript('jxgframe', this.injectableScript(this.hiddenCode, this.editorCode, false), '')   // TODO 'pathToDist should not be empty
 
         } else {
 
@@ -665,9 +665,9 @@ export class Editor {
     }
 
 
-    injectableScript(hiddenCode: string, editorCode: string, jsDelivr: Boolean, pathToDist: string = '') {
-        console.assert(jsDelivr || pathToDist, "If not jsDelivr then pathToString must be provided");
-        console.log(`injectableScript jsDelivr:${jsDelivr} ${pathToDist}`)
+    injectableScript(hiddenCode: string, editorCode: string, jsDelivr: boolean, pathToDist: string = '') {
+        console.assert(jsDelivr || pathToDist.length > 0, "If not jsDelivr then pathToString must be provided");
+        console.warn(`injectableScript jsDelivr:${jsDelivr} ${pathToDist}`)
 
         let html = '';
 
@@ -694,7 +694,7 @@ export class Editor {
         html += "\n    console.log(error)"
         html += "\n }"
 
-        console.log('injectable', html);
+        // console.log('injectable', html);
         return html;
     }
 
@@ -709,119 +709,61 @@ export class Editor {
 
 
     /** inject a prepared script into a <script>.  script already has module load, error trap, etc */
-    injectScript(divID: string, injectable: string) {
+    injectScript(divID: string, injectable: string, pathToDist: string) {
 
-        // console.log(`injectScript(divID: ${divID}, injectable: ${injectable})`)
+        console.log(`injectScript(divID: ${divID}, injectable: ${injectable}, pathToDist: ${pathToDist})`)
+
+        // const html = `\n<html>
+        //                     \n<body>
+        //                         \n<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
+        //                         <!--script type="text/javascript" src="/dist.${LIB_VERSION}/jsxgraphcore.js"></script-->
+        //                         \n<div id='jxgbox' style="width:600px;height:600px;"> </div>
+        //                         \n<script type='module'>
+        //                             // import {TSXBoard } from 'https://cdn.jsdelivr.net/npm/jsxgraph-wrapper-typescript@2.0.8/lib/tsxgraph.js'
+        //                             ${injectable}
+        //                         \n</script>
+
+        //                     \n</body>
+        //                 \n</html>`;
 
         const html = `\n<html>
-                            \n<body>
-                                \n<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jsxgraph/distrib/jsxgraphcore.js"></script>
-                                <!--script type="text/javascript" src="/dist.${LIB_VERSION}/jsxgraphcore.js"></script-->
-                                \n<div id='jxgbox' style="width:600px;height:600px;"> </div>
-                                \n<script type='module'>
-                                    // import {TSXBoard } from 'https://cdn.jsdelivr.net/npm/jsxgraph-wrapper-typescript@2.0.8/lib/tsxgraph.js'
-                                    ${injectable}
-                                \n</script>
+                        \n<body>
+                            \n<script type="text/javascript" src="${pathToDist}/jsxgraphcore.js"></script>
+                            \n<div id='jxgbox' style="width:600px;height:600px;"> </div>
+                            \n<script type='module'>
+                                // import {TSXBoard } from '${pathToDist}/tsxgraph.js'
+                                ${injectable}
+                            \n</script>
 
-                            \n</body>
-                        \n</html>`;
-
+                        \n</body>
+                    \n</html>`;
+        console.log(html);
 
 
         let divElement = document.getElementById(divID)
-        console.assert(divElement, `did not find element with ID: '${divID}' `)
+        console.assert(divElement !== null, `did not find element with ID: '${divID}' `)
 
-        // delete all children of the div
-        while (divElement.firstChild) {
-            // console.log('removing', divElement.lastChild)
-            divElement.removeChild(divElement.lastChild);
+        if (divElement !== null) {
+            // delete all children of the div
+            while (divElement.firstChild !== null) {
+                // console.log('removing', divElement.lastChild)
+                divElement.removeChild(divElement.lastChild!);  // if there is a firstChild, then it is the minimal lastChild
+            }
+            // this version uses an iframe.  probably more secure, but it means
+            // we must fetch from JSDelivr every time we run.
+            // maybe it doesn't matter
+            // TODO: revisit and rethink.   maybe we can keep the iframe and just change the script
+
+
+            const iframe = document.createElement('iframe');
+            const blob = new Blob([html], { type: 'text/html' });
+            iframe.style = "height:100%;min-height:200px;width:100%;min-width:200px;"
+            iframe.src = window.URL.createObjectURL(blob);
+
+            divElement.appendChild(iframe);
         }
 
-        // this version uses an iframe.  probably more secure, but it means
-        // we must fetch from JSDelivr every time we run.
-        // maybe it doesn't matter
-        // TODO: revisit and rethink.   maybe we can keep the iframe and just change the script
 
-
-        const iframe = document.createElement('iframe');
-        const blob = new Blob([html], { type: 'text/html' });
-        iframe.style = "height:100%;min-height:200px;width:100%;min-width:200px;"
-        iframe.src = window.URL.createObjectURL(blob);
-
-        divElement.appendChild(iframe);
-
-
-
-        //     let iFrameElement = document.getElementById(iFrameID) as HTMLIFrameElement;
-
-
-        //     // let divElement:HTMLDivElement
-        //     // let scriptElement: HTMLScriptElement
-
-        //     if (iFrameElement === null) {
-        //         console.error(`tag ${iFrameID} not found`)
-        //     } else {
-        //         console.log('allBodyTags', allBodyTags)
-
-        //         let bodyElement: HTMLBodyElement
-
-        //         if (allBodyTags.length == 0) {
-        //             bodyElement = document.createElement('body')
-        //             console.log('creating new body element')
-        //         } else {
-        //             bodyElement = allBodyTags[0]
-        //             console.log('taking the first body tag', bodyElement)
-        //         }
-
-
-        //         //    // create a new body
-        //         //     let bodyElement = document.createElement('body')
-
-        //         // now add stuff to the new body.
-
-        //         //<script type="text/javascript" src="dist.${LIB_VERSION}/jsxgraphcore.js"></script>`;
-        //         let jsxScript = document.createElement('script')
-        //         jsxScript.type = "text/javascript:"
-        //         jsxScript.src = `dist.${LIB_VERSION}/jsxgraphcore.js`
-        //         bodyElement.appendChild(jsxScript)
-
-        //         // add a new 'jxgbox' div
-        //         let divElement = document.createElement('div')
-        //         divElement.id = 'jxgbox'
-        //         bodyElement.appendChild(divElement)
-
-        //         // add a new script node
-        //         let scriptElement = document.createElement("script");
-        //         scriptElement.type = "module";
-        //         scriptElement.innerHTML = injectable;
-        //         bodyElement.appendChild(scriptElement)
-
-
-        //         // delete all children of the iFrame
-        //         while (iFrameElement.firstChild) {
-        //             console.log('removing', iFrameElement.lastChild)
-        //             iFrameElement.removeChild(iFrameElement.lastChild);
-        //         }
-
-
-        //         // finally attach the body element
-        //         iFrameElement.appendChild(bodyElement)
-        //     }
     }
 }
 
-
-/*
-// https://stackoverflow.com/questions/39863264/is-it-possible-to-dynamically-replace-the-script-section-of-an-html-page
-reinsertScripts = function() {
-  var script = document.querySelector("#reinsert");
-  var parent = script.parentNode;
-  var nscript = document.createElement("script");
-  nscript.contentEditable = true;           // maybe IMPORTANT ??  just make it user editable
-  nscript.id = "reinsert";
-  nscript.innerHTML = script.innerHTML;
-  parent.removeChild(script);
-
-  parent.appendChild(nscript);
-}
-*/

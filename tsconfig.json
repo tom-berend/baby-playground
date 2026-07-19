@@ -8,8 +8,8 @@
             "es5",
             "es6",
             "esnext",
+            "DOM",
         ],
-        "moduleResolution": "node",
         "allowJs": true,
         "skipLibCheck": true,
         "sourceMap": true,
@@ -26,8 +26,7 @@
     ],
     "include": [
         "src/**/*.ts",
-        "planetcute/planetcute.d.ts",
-        "src/views/studentLesson.ts.unused",
+        "planetcute/planetcute.d.ts"
     ],
     "exclude": [
         "node_modules",

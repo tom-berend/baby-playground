@@ -79,7 +79,7 @@ export class OnClickSay {
 
     sayit(selectedVoice: number = 0) {
 
-        // console.log(`sayit(${selectedVoice})`)
+        console.warn(`sayit(${selectedVoice})`)
 
         if (!this.synthRunning) {
             this.synthCancelled = true

@@ -332,7 +332,7 @@ class Editor {
     }
     /** create <script></script>  */
     generateSourceCode(editorCode, tabIndex0 = false, jsDelivr = true) {
-        // console.log('%chiddencode','color:pink;', this.hiddenCode, this.hiddenDecl)
+        console.warn(`%c generateSourceCode  (jsDelivr:${jsDelivr}, hiddencode:`,'color:pink;', this.hiddenCode, this.hiddenDecl)
         // let code = ''
         // code += "\r\n" + this.hiddenCode + "\r\n"
         // code += "\r\n" + editorCode + "\r\n"

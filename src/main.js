@@ -10,7 +10,7 @@ const editor_1 = require("./editor");
 const onClickSay_1 = require("./onClickSay");
 const tsxgraph_1 = require("./tsxgraph");
 const moodle_1 = require("./moodle");
-const split_1 = require("./split");
+// const split_1 = require("./split");
 // import { asciiMath, testAsciiMath } from './ASCIIMathML'
 // import { VT52 } from './vt52'
 // import { Draw, V3, Ray } from './draw'
@@ -200,7 +200,6 @@ class Main {
                 // trashdirFileExplorer: (s: string) => {
                 //     let fs = new tsFS()
                 //     fs.trashfileFileExplorer(parseInt(s))
-                // },
                 // mindmap: (content: string, canvas: string) => {
                 //     // console.log('drawing mindmap', content, canvas)
                 //     // let pm = new mindmap(content, canvas)

@@ -152,7 +152,7 @@ export class Main {
 
                     // start loading the voices
                     this.onClickSay = new OnClickSay()
-                    this.onClickSay.onClickSay(' .', 0)       // empty utter, but makes sure we are ready
+                    // this.onClickSay.onClickSay(' .', 0)       // empty utter, but makes sure we are ready
 
                 },
 
@@ -543,8 +543,8 @@ export class Main {
                     writeMoodleLog({ 'datacode': 'LOG_RunCode', 'id': main.moodleID, 'textbook': textbook, 'data01': stepUniq, 'data05': codebase64, 'data06': hiddencodebase64, 'data07': hiddendeclbase64 })
 
                     // get something started, fix later
-                    let injectable = Main.editor.injectableScript(Main.editor.hiddenCode, result, true, pathToDist)  // never use jsDelivr, always provide pathToDist
-                    Main.editor.injectScript('jxgframe', injectable)
+                    let injectable = Main.editor.injectableScript(Main.editor.hiddenCode, result, false, pathToDist)  // never use jsDelivr, always provide pathToDist
+                    Main.editor.injectScript('jxgframe', injectable, pathToDist)
                 },
 
 
@@ -552,7 +552,7 @@ export class Main {
                 // used by mathcode for running-man button beside code
                 // almost the same as runEditor but code is sent
                 async runInCanvas(paragraph: string, textbook: string, code: string, pathToDist: string) {   // convert from TS to JS first !!
-                    // console.log(`runInCanvas(${paragraph},${textbook},${code}`)
+                    console.log(`runInCanvas(${paragraph}, textbook:${textbook}, code:${code}, pathToDist:${pathToDist}`)
                     let tsCode = window.atob(code)
                     // console.log('runInCanvas', tsCode)
 
@@ -562,7 +562,7 @@ export class Main {
                     writeMoodleLog({ 'datacode': 'Log_RunIcon', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: tsCode })
 
                     let injectable = Main.editor.injectableScript(Main.editor.hiddenCode, jsCode, false, pathToDist)  // never use jsDelivr, always provide pathToDist
-                    Main.editor.injectScript('jxgframe', injectable)
+                    Main.editor.injectScript('jxgframe', injectable, pathToDist)
 
                 },
 
