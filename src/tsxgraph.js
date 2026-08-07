@@ -19,7 +19,7 @@
 //    DEALINGS IN THE SOFTWARE.
 //
 /////////////////////////////////////////////////////////////////////////////
-//   Generated on July 13, 2026, 9:55 pm
+//   Generated on August 5, 2026, 11:48 am
 let defaultAttrs = {
     keepAspectRatio: true,
     name: '', showinfobox: false,
@@ -319,6 +319,8 @@ export class TSXBoard {
     _jBoard;
     _jView3d;
     printLineNumber = 0;
+    xAxis = null; // used for 'removeAxis()' which is not in JSXGraph
+    yAxis = null;
     /** This contains the default options of the board and of all geometry elements.  See JSXGraph.Options.js for details.  Example: TSX.JXGOptions.elements.tabindex = -1 */
     JXGOptions;
     currentCanvas = '';
@@ -327,9 +329,11 @@ export class TSXBoard {
     /** Store a reference to every board in this central list. */
     static get boards() { return window.JXG.boards; }
     /** Constant: screen coordinates in pixel relative to the upper left corner of the div element. */
-    static get COORDS_BY_SCREEN() { return window.JXG.COORDS_BY_SCREEN; }
+    COORDS_BY_SCREEN = 2;
+    // static get COORDS_BY_SCREEN() { return (window as any).JXG.COORDS_BY_SCREEN }
     /** Constant: user coordinates relative to the coordinates system defined by the bounding box. */
-    static get COORDS_BY_USER() { return window.JXG.COORDS_BY_USER; }
+    COORDS_BY_USER = 1;
+    // static get COORDS_BY_USER() { return (window as any).JXG.COORDS_BY_USER }
     /** Associative array that keeps track of all constructable elements registered via JXG.registerElement. */
     static get elements() { return window.JXG.elements; }
     /** The FileReader object bundles the file input capabilities of JSXGraph. */
@@ -517,8 +521,8 @@ export class TSXBoard {
 
      */
     addAxis() {
-        this._jBoard.create('axis', [[0, 0], [1, 0]]);
-        this._jBoard.create('axis', [[0, 0], [0, 1]]);
+        this.xAxis = this._jBoard.create('axis', [[0, 0], [1, 0]]);
+        this.yAxis = this._jBoard.create('axis', [[0, 0], [0, 1]]);
     }
     /**  Set infobox visible / invisible. */
     displayInfobox(val) { this._jBoard.displayInfobox(val); }
@@ -578,7 +582,15 @@ export class TSXBoard {
     *```
 
     */
-    on(event, handler) { this._jBoard.on(event, handler); }
+    on(event, handler, context) {
+        // JSXGraph doesn't share keyboard events, but I want them
+        if (event == 'keypress' || event == 'keydown' || event == 'keyup') {
+            window.document.addEventListener(event, handler);
+        }
+        else {
+            this._jBoard.on(event, handler, context);
+        }
+    }
     /** given a PointerEvent (eg: TSX.on('down', (e:Event) ... ), returns the mouse coordinates [x,y] in JSXGraph coordinates.  */
     getMouseCoords(e) {
         let cPos = this._jBoard.getCoordsTopLeftCorner(e);
@@ -1228,12 +1240,16 @@ export class TSXBoard {
         else
             return this._jView3d.create('polygon3d', vertices, this.defaultAttributes(attributes));
     }
-    /** Display a message
+    /** Display a message. If you want to attach a message to a point, use the 'anchor' attribute or linking functions.
                                    
    *```js
    TSX.Text([3,2], 'message', {fontSize:30, strokeColor:'blue'})
    TSX.Text([0, 4], () => 'BD ' + B.distance(D).toFixed(2))
    TSX.Text([-4, 2], '\pm\sqrt{a^2 + b^2}', { useKatex: true })
+   
+   TSX.Text([0, 1], 'one unit above pointA', { anchor: pointA })
+   TSX.Text([()=>pointA.X()+1,()=>pointA.Y()],'one unit right of pointA')
+   
                                    
    *``` */
     Text(position, label, attributes = {}) {

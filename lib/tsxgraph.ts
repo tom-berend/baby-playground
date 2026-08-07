@@ -21,7 +21,7 @@
         //    DEALINGS IN THE SOFTWARE.
         //
         /////////////////////////////////////////////////////////////////////////////
-        //   Generated on July 13, 2026, 9:55 pm
+        //   Generated on August 5, 2026, 11:48 am
 
      // match JSXGraph definition for JXG_Point3D, etc
         type NumberFunction = Number | Function
@@ -599,7 +599,7 @@ export type SpaceIcon =
  formatNumberLocale(value:number,digits?:number):string,
  /** Array of strings containing the polynomials defining the element. Used for determining geometric loci the groebner way. */
  generatePolynomial(): number[],
- /** Get the value of the property &lt;tt&gt;key&lt;/tt&gt;. */
+ /** Get the value of the property **key**. */
  getAttribute(key:string):Object,
  /** Retrieve a copy of the current visProp. */
  getAttributes():Object,
@@ -708,8 +708,11 @@ export type SpaceIcon =
  moveAlong(where:number[][]|Function,time?:number,options?:Object):void,
  /** ES6 version of {@link JXG.CoordsElement#moveAlong} using a promise. */
  moveAlongES6(where:number[][]|Function,time?:number,options?:Object):Promise<any>,
- /** Starts an animated point movement towards the given coordinates &lt;tt&gt;where&lt;/tt&gt;. The animation is done after &lt;tt&gt;time&lt;/tt&gt; milliseconds. If the second parameter is not given or is equal to 0, setPosition() is called, see {@link JXG.CoordsElement#setPosition}, i.e. the coordinates are changed without animation. */
- moveTo(where:number[]|Function,time?:number,options?:MoveToOptions):void,
+ /** Starts an animated point movement towards the given coordinates **where**. The animation is done after **time** milliseconds. If the second parameter is not given or is equal to 0, setPosition() is called, see {@link JXG.CoordsElement#setPosition}, i.e. the coordinates are changed without animation.
+    ~~~js
+    pt.moveTo([5,()=>a.X()], 2000) // 2 seconds
+    ~~~ */
+ moveTo(where:pointAddr,time?:number,options?:MoveToOptions):void,
  /** ES6 version of {@link JXG.CoordsElement#moveTo} using a promise. */
  moveToES6(where:number[]|Function,time?:number,options?:MoveToOptions):Promise<any>,
  /** Remove the last slideObject. If there are more than one elements the point is bound to, the second last element is the new active slideObject. */
@@ -728,7 +731,7 @@ export type SpaceIcon =
  snapToPoints(force:Boolean):CoordsElement,
  /** Applies the transformations of the element to {@link JXG.Point#baseElement}. Point transformations are relative to a base element.  */
  updateTransform(fromParent:Boolean):void,
- /** Starts an animated point movement towards the given coordinates &lt;tt&gt;where&lt;/tt&gt;. After arriving at &lt;tt&gt;where&lt;/tt&gt; the point moves back to where it started. The animation is done after &lt;tt&gt;time&lt;/tt&gt; milliseconds. */
+ /** Starts an animated point movement towards the given coordinates **where**. After arriving at **where** the point moves back to where it started. The animation is done after **time** milliseconds. */
  visit(where:number[],time:number,options?:VisitAttributes):CoordsElement,
  /** ES6 version of {@link JXG.CoordsElement#moveVisit} using a promise. */
  visitES6(where:number[],time:number,options?:VisitAttributes):Promise<any>,
@@ -901,7 +904,15 @@ export type SpaceIcon =
   firstArrow?: Boolean | Object
  /** Attributes for the line label. */
   label?: LabelAttributes
- /** Configure the arrow head at the position of its second point or the corresponding intersection with the canvas border.In case lastArrow is an object it has the sub-attributes:{type: 1, // possible values are 1, 2, ..., 7. Default value is 1.size: 6, // size of the arrow head. Default value is 6.// This value is multiplied with the strokeWidth of the line.// Exception: for type=7 size is ignoredhighlightSize: 6, // size of the arrow head in case the element is highlighted. Default value is 6. }type=7 is the default for curves if lastArrow: true */
+ /** Configure the arrow head at the position of its second point or the corresponding intersection with the canvas border.
+~~~js
+TSX.Segment([0,3], [3,4], { lastArrow: true })
+TSX.Segment([0,3], [3,3], { lastArrow: { type: 3, size: 12}})
+TSX.Segment([0,3], [3,2], { lastArrow: { type: 7}})
+~~~
+Possible sub-attributes:{type:  values are 1, 2, ..., 7. Default value is 1
+Default size is 6, which is multiplied with the strokeWidth of the line.
+Exception: for type=7 size is ignoredhighlightSize: 6, // size of the arrow head in case the element is highlighted. Default value is 6. }type=7 is the default for curves if lastArrow: true */
   lastArrow?: Boolean | Object
  /** This number (pixel value) controls where infinite lines end at the canvas border. If zero, the line ends exactly at the border, if negative there is a margin to the inside, if positive the line ends outside of the canvas (which is invisible). */
   margin?: number
@@ -1413,7 +1424,7 @@ export type SpaceIcon =
  updateDataArray(): void,
  /** Updates the visual contents of the curve. */
  updateRenderer() : Curve,
- /** Applies the transformations of the curve to the given point &lt;tt&gt;p&lt;/tt&gt;. Before using it, {@link JXG.Curve#updateTransformMatrix} has to be called. */
+ /** Applies the transformations of the curve to the given point **p**. Before using it, {@link JXG.Curve#updateTransformMatrix} has to be called. */
  updateTransform(p:Point):GeometryElement,
  /** The parametric function which defines the x-coordinate of the curve. */
  X(t:number,suspendUpdate?:Boolean): number,
@@ -1473,13 +1484,13 @@ export type SpaceIcon =
  minimizeObject(instance:Object,s:Object): Dump,
  /** Prepare the attributes object for an element to be dumped as JavaScript or JessieCode code. */
  prepareAttributes(board:Board,obj:GeometryElement): Object,
- /** Stringifies a string, i.e. puts some quotation marks around &lt;tt&gt;s&lt;/tt&gt; if it is of type string. */
+ /** Stringifies a string, i.e. puts some quotation marks around **s** if it is of type string. */
  str(s:string): string,
- /** Saves the construction in &lt;tt&gt;board&lt;/tt&gt; to JavaScript. */
+ /** Saves the construction in **board** to JavaScript. */
  toJavaScript(board:Board): string,
  /** Converts a JavaScript object into a JCAN (JessieCode Attribute Notation) string. */
  toJCAN(obj:Object): string,
- /** Saves the construction in &lt;tt&gt;board&lt;/tt&gt; to JessieCode. */
+ /** Saves the construction in **board** to JessieCode. */
  toJessie(board:Board): string,
 /** sets an arbitrary number of attributes for this Dump element*/  // inserted in writewrapper()
                         setAttribute(attrs: DumpAttributes):void,
@@ -1809,7 +1820,7 @@ export type SpaceIcon =
 ```js
 P.moveTo([A.X(), A.Y()], 5000)
 ``` */
- moveTo(where:number[]|Function,time?:number,options?:MoveToOptions):Promise<any>,
+ moveTo(where:pointAddr,time?:number,options?:MoveToOptions):Promise<any>,
 /** sets an arbitrary number of attributes for this Point3D element*/  // inserted in writewrapper()
                         setAttribute(attrs: Point3DAttributes):void,
  }
@@ -1894,9 +1905,9 @@ P.moveTo([A.X(), A.Y()], 5000)
  /** Anchor element Point, Text or Image of the text. */
   anchor?: Object
  /** The horizontal alignment of the text, eg: 'left' */
-  anchorX?: string
+  anchorX?: 'left' | 'middle' | 'right'
  /** The vertical alignment of the text, 'eg 'top' */
-  anchorY?: string
+  anchorY?: 'top' | 'middle' | 'bottom'
  /** List of attractor elements. */
   attractors?: Element[]
  /** CSS class of the text in non-highlighted view. */
@@ -2077,7 +2088,7 @@ P.moveTo([A.X(), A.Y()], 5000)
  fixedTicks: number[]; 
  /** Used to ensure the uniqueness of label ids this counter is used. */
  labelCounter: number; 
- /** Array where the labels are saved. There is an array element for every tick, even for minor ticks which don&#039;t have labels. In this case the array element contains just &lt;tt&gt;null&lt;/tt&gt;. */
+ /** Array where the labels are saved. There is an array element for every tick, even for minor ticks which don&#039;t have labels. In this case the array element contains just **null**. */
  labels: number[]; 
  /** A list of labels which have to be displayed in updateRenderer. */
  labelsData: number[]; 
@@ -4180,6 +4191,12 @@ export class TSXBoard {
 
 
 
+    private xAxis:Object = null!    // used for 'removeAxis()' which is not in JSXGraph
+
+    private yAxis:Object = null!
+
+
+
     /** This contains the default options of the board and of all geometry elements.  See JSXGraph.Options.js for details.  Example: TSX.JXGOptions.elements.tabindex = -1 */
 
     JXGOptions: any   // no documentation on this, just make it available to TypeScript as any
@@ -4210,11 +4227,15 @@ export class TSXBoard {
 
     /** Constant: screen coordinates in pixel relative to the upper left corner of the div element. */
 
-    static get COORDS_BY_SCREEN() { return (window as any).JXG.COORDS_BY_SCREEN }
+    COORDS_BY_SCREEN = 2;
+
+    // static get COORDS_BY_SCREEN() { return (window as any).JXG.COORDS_BY_SCREEN }
 
     /** Constant: user coordinates relative to the coordinates system defined by the bounding box. */
 
-    static get COORDS_BY_USER() { return (window as any).JXG.COORDS_BY_USER }
+    COORDS_BY_USER = 1;
+
+    // static get COORDS_BY_USER() { return (window as any).JXG.COORDS_BY_USER }
 
     /** Associative array that keeps track of all constructable elements registered via JXG.registerElement. */
 
@@ -4638,9 +4659,9 @@ export class TSXBoard {
 
     addAxis() {        // using _jsxBoard ensures board is created if necessary
 
-        (this._jBoard as any).create('axis', [[0, 0], [1, 0]]);
+        this.xAxis = (this._jBoard as any).create('axis', [[0, 0], [1, 0]]);
 
-        (this._jBoard as any).create('axis', [[0, 0], [0, 1]]);
+        this.yAxis = (this._jBoard as any).create('axis', [[0, 0], [0, 1]]);
 
     }
 
@@ -4796,7 +4817,25 @@ export class TSXBoard {
 
     */
 
-    on(event: string, handler: Function) { (this._jBoard as any).on(event, handler) }
+   on(event: string, handler: (e: Event) => void, context?: unknown): void{
+
+       // JSXGraph doesn't share keyboard events, but I want them
+
+       if(event == 'keypress' || event == 'keydown' || event == 'keyup'){
+
+           (window as any).document.addEventListener(event, handler)
+
+        }else{
+
+            (this._jBoard as any).on(event, handler, context)
+
+        }
+
+    }
+
+
+
+
 
 
 
@@ -6197,15 +6236,19 @@ If you want to move the image, just tie the image to a point, maybe at the cente
 
 
 
- /** Display a message
+ /** Display a message. If you want to attach a message to a point, use the 'anchor' attribute or linking functions.
                                 
 *```js
 TSX.Text([3,2], 'message', {fontSize:30, strokeColor:'blue'})
 TSX.Text([0, 4], () => 'BD ' + B.distance(D).toFixed(2))
 TSX.Text([-4, 2], '\pm\sqrt{a^2 + b^2}', { useKatex: true })
+
+TSX.Text([0, 1], 'one unit above pointA', { anchor: pointA })
+TSX.Text([()=>pointA.X()+1,()=>pointA.Y()],'one unit right of pointA')
+
                                 
 *``` */
- Text (position:Point|pointAddr, label:string|Function, attributes: TextAttributes ={} ):Text {
+ Text (position:pointAddr, label:string|Function, attributes: TextAttributes ={} ):Text {
  (position as any).push(label);
                         return (this._jBoard as any).create('text', position,this.defaultAttributes(attributes));
 }
@@ -7535,12 +7578,26 @@ TSX.OrthogonalProjection(p3, s1)
    return (this._jBoard as any).create('parallelPoint', params, this.defaultAttributes(attrs))
  }
 
- /** Create a line segment between two points. If there is a third variable then the segment has a fixed length (which may be a function) determined by the absolute value of that number. 
+ /** Create a line segment between two points. If there is a third variable then the segment has a fixed length (which may be a function) determined by the absolute value of that number.
+```js
+
+TSX.Segment([-4, 4], [-2, 3])
+let origin = TSX.Point([0, 0], { fixed: true, visible: false })
+let endPoint = TSX.Point([2, 3])
+let s1 = TSX.Segment(origin, endPoint, { lastArrow: true })
+``` 
  *``` 
 *``` 
   */
  Segment( P1:Point|pointAddr,P2:Point|pointAddr,attributes?:SegmentAttributes) : Segment
- /** Create a line segment between two points. If there is a third variable then the segment has a fixed length (which may be a function) determined by the absolute value of that number. 
+ /** Create a line segment between two points. If there is a third variable then the segment has a fixed length (which may be a function) determined by the absolute value of that number.
+```js
+
+TSX.Segment([-4, 4], [-2, 3])
+let origin = TSX.Point([0, 0], { fixed: true, visible: false })
+let endPoint = TSX.Point([2, 3])
+let s1 = TSX.Segment(origin, endPoint, { lastArrow: true })
+``` 
  *``` 
 *``` 
   */

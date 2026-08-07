@@ -326,10 +326,8 @@ export class Main {
                     b = Buffer.from(decl64, 'base64')
                     main.hiddenDecl = b.toString()
 
-
-                    main.setupMonacoEditor(main.hiddenCode, main.hiddenDecl, false) // not popup
-                    // console.log('hidden code', main.hiddenCode)
-                    // console.log('hidden decl', main.hiddenDecl)
+                    console.log('hiddencode', main.hiddenCode, main.hiddenDecl);
+                    
                 },
 
 
@@ -652,46 +650,10 @@ export class Main {
         // console.log('in Main.constructor()')
         console.log("Your screen resolution is: " + screen.width + "x" + screen.height);
 
-
         /** Attaches the mathcode API to the window object so that you can discover it */
         Main.attachMathCodeAPI();
 
-        /** attaches the kybd and mouse events */
-        // addEventListener('keydown', (e) => Observable.notifyObservers('keydown', e))
-        // addEventListener('keypress', (e) => Observable.notifyObservers('keypress', e))
-        // addEventListener('mousedown', (e) => Observable.notifyObservers('mousedown', e))
-        // addEventListener('click', (e) => Observable.notifyObservers('click', e))
-
-        // let str = new LangString()
-        // str.testGetString()
-
-
-        // let fs = new tsFS()
-        // fs.crud()
-
-        // Raytracer()
-
-        // LogRecord.readAndClear()  // initialize
-        // LogRecord.add(1, 2, 3, 'zerodata')
-        // LogRecord.add(11, 12, 13, 'onedata')
-
-        // test_talk_to_moodle() // this is an async function
-
-        // testTree()
-
-        // let treeview = new treeviewComponent('Tree','root label')
-        // treeview.renderTree()
-
-
         Main.onClickSay = new OnClickSay()
-        // this.expandCodestr()   // not static, so use 'this'
-
-
-
-        // const State = {
-        //     inputModel: null,
-        //     outputModel: null,
-        // };
 
 
 

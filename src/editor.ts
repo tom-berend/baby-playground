@@ -105,7 +105,7 @@ import mathcode from "./extraLibs/mathcode.d.ts.txt"
 
 export class Editor {
 
-    editor: monaco.editor.IStandaloneCodeEditor
+    editor: monaco.editor.IStandaloneCodeEditor | null = null
     initFile: string = "";
     el: HTMLElement
     storageKey: string
@@ -245,6 +245,11 @@ export class Editor {
 
         // console.log('value of this.visibleCode:', this.visibleCode)
 
+        if (this.editor) {
+            this.editor.dispose(); // Clean up the old instance and remove attributes
+        }
+
+        // initialize the editor
         this.editor = monaco.editor.create(this.el, {
             automaticLayout: true,
             language: "typescript",
