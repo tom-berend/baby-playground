@@ -2927,6 +2927,7 @@ export declare let JsxMath: {
         percentile(data: number[], ranges: number[]): any;
     };
 };
+export declare let foo: any;
 /** This wraps the JSX library and the constructor is equivalent to the `initBoard()` method.
 
  * ```js

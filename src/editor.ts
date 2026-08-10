@@ -122,10 +122,13 @@ export class Editor {
 
     editorCode = ''
 
-    constructor(el: HTMLElement, initFile: string, hiddenCode: string = '', hiddenDecl: string = '', visibleCode = '') {
+    constructor(el: HTMLElement, hiddenCode: string = '', hiddenDecl: string = '', visibleCode = '') {
+        // console.warn('arrived in editor hiddenCode:', hiddenCode)
+        // console.warn('arrived in editor hiddenDecl:', hiddenDecl)
+
         // return;
         this.el = el
-        this.initFile = initFile
+        // this.initFile = initFile
         this.storageKey = ''
         this.safeDelay = 5000
         this.hiddenCode = hiddenCode
@@ -243,7 +246,9 @@ export class Editor {
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(this.hiddenDecl)
 
-        // console.log('value of this.visibleCode:', this.visibleCode)
+        // console.warn('value of this.visibleCode:', this.visibleCode)
+        // console.warn('value of this.hiddenCode:', this.hiddenCode)
+        // console.warn('value of this.hiddenDecl:', this.hiddenDecl)
 
         if (this.editor) {
             this.editor.dispose(); // Clean up the old instance and remove attributes
@@ -672,7 +677,8 @@ export class Editor {
 
     injectableScript(hiddenCode: string, editorCode: string, jsDelivr: boolean, pathToDist: string = '') {
         console.assert(jsDelivr || pathToDist.length > 0, "If not jsDelivr then pathToString must be provided");
-        console.warn(`injectableScript jsDelivr:${jsDelivr} ${pathToDist}`)
+        // console.warn(`injectableScript jsDelivr:${jsDelivr} ${pathToDist}`)
+        console.warn('injectibleScript:', hiddenCode, editorCode)
 
         let html = '';
 

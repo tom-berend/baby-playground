@@ -21,7 +21,7 @@
         //    DEALINGS IN THE SOFTWARE.
         //
         /////////////////////////////////////////////////////////////////////////////
-        //   Generated on August 5, 2026, 11:48 am
+        //   Generated on August 10, 2026, 4:05 pm
 
      // match JSXGraph definition for JXG_Point3D, etc
         type NumberFunction = Number | Function
@@ -4167,7 +4167,7 @@ Statistics :{
 
 
 
-
+export let foo:any;
 
 
 
@@ -4301,6 +4301,8 @@ export class TSXBoard {
 
             name: '',
 
+            withLabel: true,
+
             showinfobox: false,
 
             pan: { enabled: false },
@@ -4339,8 +4341,6 @@ export class TSXBoard {
 
 
 
-
-
         //create the 3D view
 
         this._jView3d = (this._jBoard as any).create('view3d',
@@ -4354,6 +4354,8 @@ export class TSXBoard {
             [[bounding[0], bounding[2]], [bounding[3], bounding[1]], [bounding[0], bounding[2]]]],  // just guessing at z axis
 
             {
+
+                axes3d: 'none',
 
                 projection: 'central',
 
@@ -4373,9 +4375,15 @@ export class TSXBoard {
 
                 depthOrderPoints: true,
 
+                xPlaneFront: { visible: false },
+
+                yPlaneFront: { visible: false }, 
+
+                zPlaneFront: { visible: false },
+
                 xPlaneRear: { visible: false },
 
-                yPlaneRear: { visible: false }, //fillOpacity: 0.2, fillColor: 'blue' },
+                yPlaneRear: { visible: false }, 
 
                 zPlaneRear: { visible: false },
 

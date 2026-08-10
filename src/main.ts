@@ -75,8 +75,7 @@ export class Main {
     command: HTMLButtonElement
     // fullscreen: HTMLButtonElement
 
-    template = `let center = TSX.Point([0,0],{name:'A'})         // try running this...  \nTSX.Circle(center,2)`;
-
+    
     static onClickSay: OnClickSay      // we'll put an instance here
 
 
@@ -334,6 +333,8 @@ export class Main {
                 // this combines 'hiddencode' and 'copyToEditor' for the playground
                 // used by playground
                 setupEditorWithCode: (hidden64: string, decl64: string, visible64: string) => {
+                    // console.warn('setupEditorWithCode',hidden64,decl64)
+
 
                     let b = Buffer.from(visible64, 'base64')
                     main.initVisibleCode = b.toString()
@@ -700,6 +701,9 @@ export class Main {
 
 
     setupMonacoEditor(hiddenCode: string, hiddenDecl: string, popup: boolean, visibleCode = '') {
+        // console.warn('setupMonacoEditor hiddenCode:',hiddenCode)
+        // console.warn('setupMonacoEditor hiddenDecl:',hiddenDecl)
+        
         // monaco.editor.createModel(lib_baby, 'typescript', monaco.Uri.parse(babyUri));
 
         this.editorDiv = document.getElementById("editor") as HTMLDivElement
@@ -707,7 +711,7 @@ export class Main {
         if (this.editorDiv) {  // if page has an editor div
             // console.log('%cSTARTING EDITOR', 'background-color:blue;color:white;')
 
-            Main.editor = new Editor(this.editorDiv, this.template, hiddenCode, hiddenDecl, visibleCode);  // static !!
+            Main.editor = new Editor(this.editorDiv, hiddenCode, hiddenDecl, visibleCode);  // static !!
             // console.log('%cSTARTING EDITOR', 'background-color:blue;color:white;', 'editorDiv', this.editorDiv, 'template', this.template, 'hiddenCode', hiddenCode, 'hiddenDecl', hiddenDecl)
 
 

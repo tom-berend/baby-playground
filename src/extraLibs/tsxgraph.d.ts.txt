@@ -2927,6 +2927,7 @@ const board = TXG.TSXGraph.initBoard('jxgbox', { axis: true });
         percentile(data: number[], ranges: number[]): any;
     };
 };
+ declare let foo: any;
 /** This wraps the JSX library and the constructor is equivalent to the `initBoard()` method.
 
  * ```js
