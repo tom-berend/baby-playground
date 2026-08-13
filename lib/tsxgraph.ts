@@ -21,7 +21,7 @@
         //    DEALINGS IN THE SOFTWARE.
         //
         /////////////////////////////////////////////////////////////////////////////
-        //   Generated on August 10, 2026, 4:05 pm
+        //   Generated on August 11, 2026, 2:52 pm
 
      // match JSXGraph definition for JXG_Point3D, etc
         type NumberFunction = Number | Function
@@ -583,8 +583,6 @@ export type SpaceIcon =
  addRotation(angle:number):void,
  /** Adds ticks to this line or curve. Ticks can be added to a curve or any kind of line: line, arrow, and axis. */
  addTicks(ticks:Ticks):string,
- /** Add transformations to this element. */
- addTransform(el:GeometryElement,transform:Transformation|Transformation[]):GeometryElement,
  /** Animates properties for that object like stroke or fill color, opacity and maybe even more later. */
  animate(hash:Object,time:number,options?:Object): GeometryElement,
  /** Dimensions of the smallest rectangle enclosing the element. */
@@ -1586,7 +1584,7 @@ Exception: for type=7 size is ignoredhighlightSize: 6, // size of the arrow head
  /** Defines the CSS class used by the image when highlighted. CSS attributes defined in this class will overwrite the corresponding JSXGraph attributes, e.g. highlightFillOpacity. The default CSS class is defined in jsxgraph.css. */
   highlightCssClass?: string
  /** Image rotation in degrees. */
-  rotate?: number
+  rotate?: number| Function
  /** Defines together with Image#snapSizeY the grid the image snaps on to. The image will only snap on user coordinates which are integer multiples to snapSizeX in x and snapSizeY in y direction. If this value is equal to or less than 0, it will use the grid displayed by the major ticks of the default ticks of the default x axes of the currentBoard. */
   snapSizeX?: number
  /** Defines together with Image#snapSizeX the grid the image snaps on to. The image will only snap on integer multiples to snapSizeX in x and snapSizeY in y direction. If this value is equal to or less than 0, it will use the grid displayed by the major ticks of the default ticks of the default y axes of the currentBoard. */
@@ -1611,6 +1609,16 @@ Exception: for type=7 size is ignoredhighlightSize: 6, // size of the arrow head
  setSize(width:number,height:number):void,
  /** Returns the width of the image in user coordinates. */
  W(): number,
+ /** Starts an animated point movement towards the given coordinates **where**. The animation is done after **time** milliseconds. If the second parameter is not given or is equal to 0, setPosition() is called, see {@link JXG.CoordsElement#setPosition}, i.e. the coordinates are changed without animation. */
+ moveTo(where:pointAddr,time?:number,options?:MoveToOptions):void,
+ /** ES6 version of {@link JXG.CoordsElement#moveTo} using a promise. */
+ moveToES6(where:number[]|Function,time?:number,options?:MoveToOptions):Promise<any>,
+ /** Move along a path defined by an array of coordinates  */
+ moveAlong(traversePath?:number[][],time?:number,options?:Object):CoordsElement,
+ /** ES6 version of {@link JXG.CoordsElement#moveAlong} using a promise. */
+ moveAlongES6(where:number[][]|Function,time?:number,options?:Object):Promise<any>,
+ /** Add transformations to this element. */
+ addTransform(t:Transformation|Transformation[]):GeometryElement,
 /** sets an arbitrary number of attributes for this Image element*/  // inserted in writewrapper()
                         setAttribute(attrs: ImageAttributes):void,
  }
@@ -4167,8 +4175,6 @@ Statistics :{
 
 
 
-export let foo:any;
-
 
 
 /** This wraps the JSX library and the constructor is equivalent to the `initBoard()` method.
@@ -5953,9 +5959,10 @@ If you want to move the image, just tie the image to a point, maybe at the cente
             For more flexibility, see TSX.Rotate() and TSX.Translate().  Also, you can fade the image with opacity.
             
 *```js
-            TSX.Image('icons/earth.png', [0, 0],[2,2])
-            let p1 = TSX.Point([3, 2], { opacity: .1 })
-            TSX.Image('icons/moon-full-moon.png', [()=>p1.X(),()=>p1.Y()])
+let img = TSX.Image('icons/earth.png', [0, 0],[2,2])
+img.moveTo([-3,-3],2000) // two second move
+let p1 = TSX.Point([3, 2], { opacity: .1 })
+TSX.Image('icons/moon-full-moon.png', [()=>p1.X(),()=>p1.Y()])
             
 *``` 
  *``` 
@@ -5971,9 +5978,10 @@ If you want to move the image, just tie the image to a point, maybe at the cente
             For more flexibility, see TSX.Rotate() and TSX.Translate().  Also, you can fade the image with opacity.
             
 *```js
-            TSX.Image('icons/earth.png', [0, 0],[2,2])
-            let p1 = TSX.Point([3, 2], { opacity: .1 })
-            TSX.Image('icons/moon-full-moon.png', [()=>p1.X(),()=>p1.Y()])
+let img = TSX.Image('icons/earth.png', [0, 0],[2,2])
+img.moveTo([-3,-3],2000) // two second move
+let p1 = TSX.Point([3, 2], { opacity: .1 })
+TSX.Image('icons/moon-full-moon.png', [()=>p1.X(),()=>p1.Y()])
             
 *``` 
  *``` 

@@ -539,11 +539,11 @@ export class Main {
                     let codebase64 = Buffer.from(result, 'utf8').toString('base64');
                     let hiddencodebase64 = Buffer.from(Main.editor.hiddenCode, 'utf8').toString('base64');
                     let hiddendeclbase64 = Buffer.from(Main.editor.hiddenDecl, 'utf8').toString('base64');
-                    writeMoodleLog({ 'datacode': 'LOG_RunCode', 'id': main.moodleID, 'textbook': textbook, 'data01': stepUniq, 'data05': codebase64, 'data06': hiddencodebase64, 'data07': hiddendeclbase64 })
+                    // writeMoodleLog({ 'datacode': 'LOG_RunCode', 'id': main.moodleID, 'textbook': textbook, 'data01': stepUniq, 'data05': codebase64, 'data06': hiddencodebase64, 'data07': hiddendeclbase64 })
 
                     // get something started, fix later
                     let injectable = Main.editor.injectableScript(Main.editor.hiddenCode, result, false, pathToDist)  // never use jsDelivr, always provide pathToDist
-                    Main.editor.injectScript('jxgframe', injectable, pathToDist)
+                    Main.editor.injectScript2026('jxgframe', injectable, pathToDist)
                 },
 
 

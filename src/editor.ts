@@ -139,6 +139,9 @@ export class Editor {
 
 
         monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+            module: 99,     // ESNext  
+            esModuleInterop: true,
+
             allowNonTsExtensions: true,
             inlineSourceMap: true,
             inlineSources: true,
@@ -165,7 +168,7 @@ export class Editor {
 
             strictFunctionTypes: true,       // show the error, it will run anyhow
             strictNullChecks: true,
-            target: monaco.languages.typescript.ScriptTarget.Latest
+            target: 99, //monaco.languages.typescript.ScriptTarget.Latest
 
             // noImplicitReturns: true,
 
@@ -174,14 +177,14 @@ export class Editor {
         });
 
 
-        monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-            noSemanticValidation: true,
-            noSyntaxValidation: true,
-            allowNonTsExtensions: true,
-            target: monaco.languages.typescript.ScriptTarget.ES2015,
-            // noLib: true,                        // don't bring DOM into intellisense
-            strictNullChecks: false,
-        });
+        // monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+        //     noSemanticValidation: true,
+        //     noSyntaxValidation: true,
+        //     allowNonTsExtensions: true,
+        //     target: monaco.languages.typescript.ScriptTarget.ES2015,
+        //     // noLib: true,                        // don't bring DOM into intellisense
+        //     strictNullChecks: false,
+        // });
 
         monaco.editor.defineTheme('myTheme', {
             base: 'vs',
@@ -191,6 +194,11 @@ export class Editor {
                 'editorInlayHint.background': '#00FF00',
                 'editorInlayHint.foreground': '#FF00FF',
             }
+        });
+
+        // ignore 1375 errors, they catch await because monaco doesn't know yet
+        monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+            diagnosticCodesToIgnore: [1375]
         });
 
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(matter)
@@ -320,7 +328,7 @@ export class Editor {
 
 
         // const args = names.map((key) => scope[key]);
-        const model = this.editor.getModel();
+        const model = this.editor!.getModel();
         let source64: string;
         // console.log('model from editor is', model)
 
@@ -358,7 +366,7 @@ export class Editor {
 
 
             this.editorCode = output.outputFiles[0].text as string;
-            source64 = Buffer.from(sourceCode, 'utf8').toString('base64');
+            source64 = Buffer.from(sourceCode!, 'utf8').toString('base64');
 
             return this.editorCode
 
@@ -678,7 +686,7 @@ export class Editor {
     injectableScript(hiddenCode: string, editorCode: string, jsDelivr: boolean, pathToDist: string = '') {
         console.assert(jsDelivr || pathToDist.length > 0, "If not jsDelivr then pathToString must be provided");
         // console.warn(`injectableScript jsDelivr:${jsDelivr} ${pathToDist}`)
-        console.warn('injectibleScript:', hiddenCode, editorCode)
+        // console.warn('injectibleScript:', hiddenCode, editorCode)
 
         let html = '';
 
@@ -690,19 +698,18 @@ export class Editor {
         else
             html += `import {TSXBoard } from '${pathToDist}/tsxgraph.js';`  // only for testing
 
+        html += "\nprivateAsyncFunction();"
 
-        html += "\nlet TSX = new TSXBoard('jxgbox');"
-
+        html += "\nasync function privateAsyncFunction(){   // so await possible"
+        html += "\nlet TSX = new TSXBoard('jxgframe',{keepAspectRatio:true});"
         html += "\n" + this.hiddenCode   // before try/catch
-
         html += "\r\n try {"
-
         html += "\r\n" + editorCode
-
         html += "\n }"
         html += "\n catch(error) {"
         html += "\n    alert(error);"
         html += "\n    console.log(error)"
+        html += "\n }"
         html += "\n }"
 
         // console.log('injectable', html);
@@ -722,7 +729,7 @@ export class Editor {
     /** inject a prepared script into a <script>.  script already has module load, error trap, etc */
     injectScript(divID: string, injectable: string, pathToDist: string) {
 
-        console.log(`injectScript(divID: ${divID}, injectable: ${injectable}, pathToDist: ${pathToDist})`)
+        // console.log(`injectScript(divID: ${divID}, injectable: ${injectable}, pathToDist: ${pathToDist})`)
 
         // const html = `\n<html>
         //                     \n<body>
@@ -748,7 +755,7 @@ export class Editor {
 
                         \n</body>
                     \n</html>`;
-        console.log(html);
+        // console.log(html);
 
 
         let divElement = document.getElementById(divID)
@@ -770,11 +777,44 @@ export class Editor {
             const blob = new Blob([html], { type: 'text/html' });
             iframe.style = "height:100%;min-height:200px;width:100%;min-width:200px;"
             iframe.src = window.URL.createObjectURL(blob);
-
             divElement.appendChild(iframe);
+
         }
 
 
     }
+
+
+    /** inject a prepared script into a <script>.  script already has module load, error trap, etc */
+    injectScript2026(divID: string, injectable: string, pathToDist: string) {
+
+        // console.log(`injectScript2026(divID: ${divID}, injectable: ${injectable}, pathToDist: ${pathToDist})`)
+
+        const html = injectable;
+        // console.log(html);
+
+
+        let divElement = document.getElementById(divID)
+        console.assert(divElement !== null, `did not find element with ID: '${divID}' `)
+
+        if (divElement !== null) {
+            // delete all children of the div
+            while (divElement.firstChild !== null) {
+                // console.log('removing', divElement.lastChild)
+                divElement.removeChild(divElement.lastChild!);  // if there is a firstChild, then it is the minimal lastChild
+            }
+
+
+            const script = document.createElement("script");
+            script.type = 'module'
+            script.textContent = html;
+            // console.log('about to append',script)
+            divElement.appendChild(script);
+
+        }
+
+    }
+
+
 }
 
