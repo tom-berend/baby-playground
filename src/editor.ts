@@ -370,10 +370,6 @@ export class Editor {
 
             return this.editorCode
 
-            // TODO, get correct ID and textbook
-            // writeMoodleLog({'datacode': 'LOG_EditorRun', id:0, textbook:'', data05: sourceCode})
-            // this.runEditorCode(this.editorCode, popup, true, jsDelivr, gameboy)     // and run the whole mess
-
         }
         throw new Error('invalid typescript');
         return '';
@@ -429,7 +425,7 @@ export class Editor {
         let pop = popup ? 'popup=true,' : ''
         pop += ', noopener'     // for security
 
-        let target = pop ? '_blank' : 'jxgbox'
+        let target = pop ? '_blank' : 'jxgframe'
 
         // if the window is open, we must first close (Chrome's new security)
         // TODO: if window is open, substitute the innerHTML.  \
@@ -438,40 +434,10 @@ export class Editor {
             // console.log('popup && plotwindow exists, injecting');
             // console.log('injectableScript', this.injectableScript(this.hiddenCode, this.editorCode, false))
 
-            this.injectScript('jxgframe', this.injectableScript(this.hiddenCode, this.editorCode, false), '')   // TODO 'pathToDist should not be empty
+            this.injectScript(target, this.injectableScript(this.hiddenCode, this.editorCode, false), '')   // TODO 'pathToDist should not be empty
 
-        } else {
-
-
-
-
-            // console.log('writing whole new webpage')
-            try {
-                // if (this.plotWindow !== null && !this.plotWindow.closed) {
-                this.plotWindow.close();
-                // }
-            } catch { }
-
-            // hope window is gone  not popup (ie: playground-style new window)
-            this.plotWindow = window.open('', '_blank', `${pop}left=100,top=100,width=700,height=700`);
-            // if (!this.plotWindow) {
-            let html = this.generateSourceCode(this.hiddenCode, this.editorCode, jsDelivr, gameboy)
-
-            /********** alternative to document write
-                            document.write=function(s){
-                                var scripts = document.getElementsByTagName('script');
-                                var lastScript = scripts[scripts.length-1];
-                                lastScript.insertAdjacentHTML("beforebegin", s);
-                            }
-            */
-
-            // this.plotWindow.document.open();    // creates a page with <html><head><body>, but nothing else
-            this.plotWindow.document.write(html);
-            this.plotWindow.document.close();
-            // }
         }
     }
-
 
 
     /** pull together the source code for a TEXt webpage for download  It is used in the
@@ -747,7 +713,7 @@ export class Editor {
         const html = `\n<html>
                         \n<body>
                             \n<script type="text/javascript" src="${pathToDist}/jsxgraphcore.js"></script>
-                            \n<div id='jxgbox' style="width:600px;height:600px;"> </div>
+                            \n<div id='jxgframe' style="width:600px;height:600px;"> </div>
                             \n<script type='module'>
                                 // import {TSXBoard } from '${pathToDist}/tsxgraph.js'
                                 ${injectable}

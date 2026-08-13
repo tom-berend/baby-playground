@@ -21,7 +21,7 @@
         //    DEALINGS IN THE SOFTWARE.
         //
         /////////////////////////////////////////////////////////////////////////////
-        //   Generated on August 11, 2026, 2:52 pm
+        //   Generated on August 12, 2026, 10:25 pm
 
      // match JSXGraph definition for JXG_Point3D, etc
         type NumberFunction = Number | Function
@@ -321,7 +321,7 @@ export type SpaceIcon =
     'icons/asteroid.png' |
     'icons/astronaut-helmet.png' |
     'icons/atom.png' |
-    'icons/atronaut.png' |
+    'icons/astronaut.png' |
     'icons/bb-8.png' |
     'icons/big-dipper.png' |
     'icons/black-hole.png' |
