@@ -35,9 +35,11 @@ import lib_es2018_asynciterable from "./extraLibs/lib.es2018.asynciterable.d.ts.
 import lib_es2019_string from "./extraLibs/lib.es2019.string.d.ts.txt"
 import lib_es2020_bigint from "./extraLibs/lib.es2020.bigint.d.ts.txt"
 import lib_es2021_string from "./extraLibs/lib.es2021.string.d.ts.txt"
+import lib_es2022_object from "./extraLibs/lib.es2022.object.d.ts.txt"
 import lib_es2022_array from "./extraLibs/lib.es2022.array.d.ts.txt"
 import lib_es2023_array from "./extraLibs/lib.es2023.array.d.ts.txt"
 import lib_es2099 from "./extraLibs/lib.es2099.d.ts.txt"
+import lib_temporal from "./extraLibs/lib.esnext.temporal.d.ts.txt"
 
 // import lib_jsx_tiny from "./extraLibs/jsx_tiny.d.ts.txt"
 import lib_tsxgraph from "./extraLibs/tsxgraph.d.ts.txt"
@@ -139,7 +141,8 @@ export class Editor {
 
 
         monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-            module: 99,     // ESNext  
+            module: 99,        // ESNext  
+
             esModuleInterop: true,
 
             allowNonTsExtensions: true,
@@ -151,8 +154,9 @@ export class Editor {
             noLib: true,    // brings in variables like 'origin'.  what damage does this do?
 
 
-            // lib: ["es5, es6, es2020, es2015.core, es2015.iterable, dom.iterable"],    // for some reason, dom.iterable is required for destructuring    [x,y] = [1,2]
-            lib: ["es5, es6, es2020,  dom.iterable"],    // for some reason, dom.iterable is required for destructuring    [x,y] = [1,2]
+            target: 99, //monaco.languages.typescript.ScriptTarget.Latest
+            lib: ['es2022', 'dom', 'dom.iterable'],   // for some reason, dom.iterable is required for destructuring    [x,y] = [1,2]
+            // lib: ["es5, es6, es2020, es2022, dom.iterable"],    // for some reason, dom.iterable is required for destructuring    [x,y] = [1,2]
 
             sourceMap: true,
             strict: false,
@@ -168,13 +172,13 @@ export class Editor {
 
             strictFunctionTypes: true,       // show the error, it will run anyhow
             strictNullChecks: true,
-            target: 99, //monaco.languages.typescript.ScriptTarget.Latest
 
             // noImplicitReturns: true,
 
             // allowJs:true,   // very bad!! defaults to JS files, gives 'type annotations not allowed' errors
 
         });
+
 
 
         // monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
@@ -231,11 +235,13 @@ export class Editor {
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2020_bigint)
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2021_string)
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2022_array)
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2022_object)
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2023_array)
 
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(babylonjs)
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2099)      // stuff that Typescript hasn't provided
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_temporal)    
 
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_jsx_tiny)    // my simply remix of the upper level call
 
@@ -434,8 +440,12 @@ export class Editor {
             // console.log('popup && plotwindow exists, injecting');
             // console.log('injectableScript', this.injectableScript(this.hiddenCode, this.editorCode, false))
 
-            this.injectScript(target, this.injectableScript(this.hiddenCode, this.editorCode, false), '')   // TODO 'pathToDist should not be empty
+            let script = this.injectableScript(this.hiddenCode, this.editorCode, false);
+            console.log(script)
+            this.injectScript(target, script, '')   // TODO 'pathToDist should not be empty
 
+        } else {
+            console.error('something went wrong')
         }
     }
 
@@ -754,7 +764,7 @@ export class Editor {
     /** inject a prepared script into a <script>.  script already has module load, error trap, etc */
     injectScript2026(divID: string, injectable: string, pathToDist: string) {
 
-        // console.log(`injectScript2026(divID: ${divID}, injectable: ${injectable}, pathToDist: ${pathToDist})`)
+        console.log(`injectScript2026(divID: ${divID}, injectable: ${injectable}, pathToDist: ${pathToDist})`)
 
         const html = injectable;
         // console.log(html);

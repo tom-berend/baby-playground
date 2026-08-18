@@ -326,6 +326,8 @@ export interface GeometryElement extends Events {
     visProp: Object;
     /** An associative array containing visual properties which are calculated from the attribute values (i.e. visProp) and from other constraints. An example: if an intersection point does not have real coordinates, visPropCalc.visible is set to false. Additionally, the user can control visibility with the attribute  */
     visPropCalc: Object;
+    /** Add transformations to this element. */
+    addTransform(el: GeometryElement, transform: Transformation | Transformation[]): GeometryElement;
     /** Removes all ticks from a line or curve. */
     removeAllTicks(): Object;
     /** Get value of a parameter. If the parameter is a function, call the function and return its value. In that case, the function is called with the GeometryElement as (only) parameter. For label elements (i.e. if the attribute  */
@@ -1082,6 +1084,8 @@ export interface Curve extends Omit<GeometryElement, 'addTransform'> {
     qdt: Object;
     /** Array of ticks storing all the ticks on this curve. Do not set this field directly and use {@link JXG.Curve#addTicks} and {@link JXG.Curve#removeTicks} to add and remove ticks to and from the curve. */
     ticks: number[];
+    /** Return the points of the curve as array of length-three-arrays [z, x, y], i.e. return an array of homogeneous coordinates. The returned coordinates are in user coordinates. */
+    getCoords(): number[][];
     /** Add transformations to this curve. */
     addTransform(transform: Transformation | Transformation[]): GeometryElement;
     /** Allocate points in the Coords array this.points */
@@ -1264,8 +1268,6 @@ export interface Image extends Omit<GeometryElement, 'size'> {
     moveAlong(traversePath?: number[][], time?: number, options?: Object): CoordsElement;
     /** ES6 version of {@link JXG.CoordsElement#moveAlong} using a promise. */
     moveAlongES6(where: number[][] | Function, time?: number, options?: Object): Promise<any>;
-    /** Add transformations to this element. */
-    addTransform(t: Transformation | Transformation[]): GeometryElement;
     /** sets an arbitrary number of attributes for this Image element*/ setAttribute(attrs: ImageAttributes): void;
 }
 export interface ImplicitCurveAttributes extends GeometryElementAttributes {

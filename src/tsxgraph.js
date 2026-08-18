@@ -19,7 +19,7 @@
 //    DEALINGS IN THE SOFTWARE.
 //
 /////////////////////////////////////////////////////////////////////////////
-//   Generated on August 12, 2026, 10:25 pm
+//   Generated on August 18, 2026, 6:35 pm
 let defaultAttrs = {
     keepAspectRatio: true,
     name: '', showinfobox: false,

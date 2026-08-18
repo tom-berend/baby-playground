@@ -21,7 +21,7 @@
         //    DEALINGS IN THE SOFTWARE.
         //
         /////////////////////////////////////////////////////////////////////////////
-        //   Generated on August 12, 2026, 10:25 pm
+        //   Generated on August 18, 2026, 6:35 pm
 
      // match JSXGraph definition for JXG_Point3D, etc
         type NumberFunction = Number | Function
@@ -565,6 +565,8 @@ export type SpaceIcon =
  visPropCalc: Object; 
 
  //// methods 
+ /** Add transformations to this element. */
+ addTransform(el:GeometryElement,transform:Transformation|Transformation[]): GeometryElement,
  /** Removes all ticks from a line or curve. */
  removeAllTicks(): Object,
  /** Get value of a parameter. If the parameter is a function, call the function and return its value. In that case, the function is called with the GeometryElement as (only) parameter. For label elements (i.e. if the attribute  */
@@ -1396,6 +1398,8 @@ Exception: for type=7 size is ignoredhighlightSize: 6, // size of the arrow head
  ticks: number[]; 
 
  //// methods 
+ /** Return the points of the curve as array of length-three-arrays [z, x, y], i.e. return an array of homogeneous coordinates. The returned coordinates are in user coordinates. */
+ getCoords():number[][],
  /** Add transformations to this curve. */
  addTransform(transform:Transformation|Transformation[]):GeometryElement,
  /** Allocate points in the Coords array this.points */
@@ -1617,8 +1621,6 @@ Exception: for type=7 size is ignoredhighlightSize: 6, // size of the arrow head
  moveAlong(traversePath?:number[][],time?:number,options?:Object):CoordsElement,
  /** ES6 version of {@link JXG.CoordsElement#moveAlong} using a promise. */
  moveAlongES6(where:number[][]|Function,time?:number,options?:Object):Promise<any>,
- /** Add transformations to this element. */
- addTransform(t:Transformation|Transformation[]):GeometryElement,
 /** sets an arbitrary number of attributes for this Image element*/  // inserted in writewrapper()
                         setAttribute(attrs: ImageAttributes):void,
  }
