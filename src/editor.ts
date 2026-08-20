@@ -241,7 +241,7 @@ export class Editor {
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(babylonjs)
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_es2099)      // stuff that Typescript hasn't provided
-        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_temporal)    
+        monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_temporal)
 
         // monaco.languages.typescript.typescriptDefaults.addExtraLib(lib_jsx_tiny)    // my simply remix of the upper level call
 
@@ -383,7 +383,7 @@ export class Editor {
 
 
     /** this creates a TEXT webpage for download. */
-    async createWebPage(hiddenCode: string, gameboy: boolean) {
+    async createWebPage(hiddenCode: string, gameboy: boolean, pathToDist:string) {
 
         // const args = names.map((key) => scope[key]);
         const model = this.editor.getModel();
@@ -460,7 +460,7 @@ export class Editor {
 
         let html = ''
 
-        html += this.HTMLBoilerPlate(jsDelivr, gameboy);  // leaves an injectable script open
+        html += this.HTMLBoilerPlate(jsDelivr, gameboy, pathToDist);  // leaves an injectable script open
         html += '\n<script type="module">'
 
         if (gameboy) {
@@ -479,7 +479,7 @@ export class Editor {
 
 
 
-    HTMLBoilerPlate(jsDelivr: boolean, gameBoy: boolean): string {
+    HTMLBoilerPlate(jsDelivr: boolean, gameBoy: boolean, pathToDist: string): string {
 
         // console.log(`HTMLBoilerPlate(jsDelivr:${jsDelivr},gameboy:${gameBoy})`)
 
@@ -503,11 +503,11 @@ export class Editor {
             // html += `\n<script type="text/javascript" charset="UTF-8" src="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.js"></script>`
             // html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/bootstrap/bootstrap-5.3.3.min.css" />`;
 
-            html += `\n<script type="text/javascript" src="dist.${LIB_VERSION}/jsxgraphcore.js"></script>`;
-            html += `\n<link rel="stylesheet" type="text/css" href="dist.${LIB_VERSION}/jsxgraph.css" />`;
+            html += `\n<script type="text/javascript" src="${pathToDist}/jsxgraphcore.js"></script>`;
+            html += `\n<link rel="stylesheet" type="text/css" href="${pathToDist}/jsxgraph.css" />`;
 
-            html += `\n<link rel="stylesheet" href="dist.${LIB_VERSION}/katex.min.css">`;
-            html += `\n<script src="dist.${LIB_VERSION}/katex.min.js"></script>`;
+            html += `\n<link rel="stylesheet" href="${pathToDist}/katex.min.css">`;
+            html += `\n<script src="${pathToDist}/katex.min.js"></script>`;
 
         }
 
@@ -555,7 +555,7 @@ export class Editor {
                 `\n<div style='width:1000px;max-width:100%;height:1170px;max-height:100%'>
                  \n<div style='border:solid 2px black; border-radius: 10px;padding:10px;background-color: rgb(178, 214, 246);width:100%;height:100%;'>`;
 
-        html += `\n<div id="jxgbox" class="jxgbox" style="aspect-ratio: 1; width: 100%; max-width:1000px; max-height: calc(100vh - 20px);" tabindex= '0'></div>`;
+        html += `\n<div id="jxgframe" class="jxgbox" style="aspect-ratio: 1; width: 100%; max-width:1000px; max-height: calc(100vh - 20px);" tabindex= '0'></div>`;
 
         if (gameBoy)  // closes the two divs
             html +=
@@ -589,7 +589,7 @@ export class Editor {
             \n</div>
          \n</div>
 
-        `;
+        \n<script>\n`;
 
         return html;
     }
@@ -720,7 +720,8 @@ export class Editor {
         //                     \n</body>
         //                 \n</html>`;
 
-        const html = `\n<html>
+        const html = `<!DOCTYPE html>
+                      \n<html>
                         \n<body>
                             \n<script type="text/javascript" src="${pathToDist}/jsxgraphcore.js"></script>
                             \n<div id='jxgframe' style="width:600px;height:600px;"> </div>
@@ -733,30 +734,7 @@ export class Editor {
                     \n</html>`;
         // console.log(html);
 
-
-        let divElement = document.getElementById(divID)
-        console.assert(divElement !== null, `did not find element with ID: '${divID}' `)
-
-        if (divElement !== null) {
-            // delete all children of the div
-            while (divElement.firstChild !== null) {
-                // console.log('removing', divElement.lastChild)
-                divElement.removeChild(divElement.lastChild!);  // if there is a firstChild, then it is the minimal lastChild
-            }
-            // this version uses an iframe.  probably more secure, but it means
-            // we must fetch from JSDelivr every time we run.
-            // maybe it doesn't matter
-            // TODO: revisit and rethink.   maybe we can keep the iframe and just change the script
-
-
-            const iframe = document.createElement('iframe');
-            const blob = new Blob([html], { type: 'text/html' });
-            iframe.style = "height:100%;min-height:200px;width:100%;min-width:200px;"
-            iframe.src = window.URL.createObjectURL(blob);
-            divElement.appendChild(iframe);
-
-        }
-
+        return html
 
     }
 

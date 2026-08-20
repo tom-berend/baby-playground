@@ -11,7 +11,6 @@ import { Editor } from "./editor";
 import { OnClickSay } from "./onClickSay"
 import { TSXBoard } from './tsxgraph'
 import { talk_to_moodle } from './moodle'
-import { dragElement } from './split'
 import { HostMsg } from './writeMoodleLog';
 
 // import { asciiMath, testAsciiMath } from './ASCIIMathML'
@@ -56,16 +55,15 @@ async function test_talk_to_moodle() {
 
 export class Main {
 
-    moodleID: number     // might be several textbooks, but only one moodle person
     prevUniq = ''        // best guess, in case we don't have one for a log record
     hiddenCode = ''      // prefix to code from the editor
     hiddenDecl = ''      // TS decl for hidden code
     initVisibleCode = ''        // initial code
     gameboy = false       // show gameboy frame
 
-    editorDiv: HTMLDivElement
     static editor: Editor
-    // game: GameLauncher
+    moodleID = 0;
+    editorDiv:HTMLElement
     download: HTMLButtonElement
     upload: HTMLButtonElement
     files: HTMLButtonElement
@@ -73,7 +71,7 @@ export class Main {
     stop: HTMLButtonElement
     pause: HTMLButtonElement
     command: HTMLButtonElement
-    // fullscreen: HTMLButtonElement
+    fullscreen: HTMLButtonElement
 
     
     static onClickSay: OnClickSay      // we'll put an instance here
@@ -132,21 +130,6 @@ export class Main {
                 loader: (courseInfo: string, moodleID: number) => {
                     console.log('%cMathcodeAPI.loader successful', 'background-color:red;color:white;')
                     // console.log('courseInfo(raw): ', courseInfo, 'moodleID', moodleID)
-
-                    main.moodleID = moodleID;
-
-
-                    // attach the dragger
-                    let h = document.getElementById("hsplitbar")
-
-                    if (h) {
-                        dragElement(h, "V");
-                    }
-
-                    let v = document.getElementById("vsplitbar")
-                    if (v) {
-                        dragElement(v, "H");
-                    }
 
 
                     // start loading the voices
@@ -389,7 +372,7 @@ export class Main {
 
                 // used by playground.  All parameters must be  strings.
                 async runPlayground(popup: string = '1', gameboy: string = '0', jsDelivr: string = '1', pathToDist: string = '') {
-                    // console.log(`run Playground(popup='${popup}' gameBoy='${gameboy}' jsDelivr='${jsDelivr}')`)
+                    console.log(`run Playground(popup='${popup}' gameBoy='${gameboy}' jsDelivr='${jsDelivr}, pathToDist='${pathToDist}'')`)
 
                     // convert from TS to JS
                     let result = await Main.editor.transpile(Main.editor.hiddenCode, false, false, false);
@@ -406,6 +389,7 @@ export class Main {
                         console.assert(this.plotWindow, 'could not open plotwindow')
 
                         let html = Main.editor.generateSourceCode(this.hiddenCode, result, jsDelivr == '1', gameboy == '1', pathToDist)
+                        console.log(html)
 
                         /********** alternative to document write
                                         document.write=function(s){
@@ -442,92 +426,37 @@ export class Main {
 
                 // used by playground.  All parameters must be  strings.
                 async downloadPlayground(hiddenCode: string, gameboy: string = '0', jsDelivr: string = '1', pathToDist: string = '') {
-                    console.log('found downloadPlayground()')
-                    Main.editor.createWebPage(main.hiddenCode, this.gameboy)  // asnyc
+                    console.log(`downloadPlayground`)
+
+                    // convert from TS to JS
+                    let result = await Main.editor.transpile(Main.editor.hiddenCode, false, false, false);
+
+                    let codebase64 = Buffer.from(result, 'utf8').toString('base64');
+                    let hiddencodebase64 = Buffer.from(Main.editor.hiddenCode, 'utf8').toString('base64');
+                    let hiddendeclbase64 = Buffer.from(Main.editor.hiddenDecl, 'utf8').toString('base64');
+                    // writeMoodleLog({ 'datacode': 'LOG_RunCode', 'id': main.moodleID, 'textbook': textbook, 'data01': stepUniq, 'data05': codebase64, 'data06': hiddencodebase64, 'data07': hiddendeclbase64 })
+
+                    // get something started, fix later
+                    let html = Main.editor.HTMLBoilerPlate(true,gameboy=='1',pathToDist)
+                    html += '\n<script type="module">'
+                    html += Main.editor.injectableScript(Main.editor.hiddenCode, result, true, pathToDist)  // never use jsDelivr, always provide pathToDist
+                    html += '</script>';
+                    html +='</body></html>';  // not worth a function
+
+                    const downloadSource = new Blob([html], { type: "text/plain" });
+
+                    if (this.initFile) {
+                        window.URL.revokeObjectURL(this.initFile);
+                    }
+                    this.initFile = window.URL.createObjectURL(downloadSource);
+                    const link = document.createElement("a");
+                    link.download = 'jsxgraph.html';
+                    link.href = this.initFile;
+                    link.dispatchEvent(new MouseEvent("click"));
                 },
 
 
 
-
-                /*
-
-                                    // let jxgbox = document.getElementById('jxgbox')
-                                    // // console.log('removing with method 1')
-                                    // if (jxgbox) {  // might not exist if this is the first run
-                                    //     while (jxgbox.firstChild) {
-                                    //         console.log('removing', jxgbox.lastChild)
-                                    //         jxgbox.removeChild(jxgbox.lastChild);
-                                    //     }
-                                    // } else{
-                                    //     console.error('did not find jxgbox')
-                                    // }
-                                    // // this.fullscreen.disabled = false;
-
-                                    // //<script type="text/javascript" src="dist.${LIB_VERSION}/jsxgraphcore.js"></script>`;
-                                    // let jsxScript = document.createElement('script')
-                                    // jsxScript.type = "text/javascript:"
-                                    // jsxScript.src = `dist.${LIB_VERSION}/jsxgraphcore.js`
-                                    // jxgbox.appendChild(jsxScript)
-
-
-                                    try {
-
-                                        // before we do anything else, we WIPE OUT any previous
-                                        // content of <div id='jxgbox'>
-                                        // if someone wants a canvas, they add their own
-
-                                        // const fn = await this.editor.transpile(this.game.scope);
-                                        //this.editorDiv.hidden = true;
-
-                                        let jsCode = `let TSX = new TSXBoard('jxgbox'); \n`;
-                                        jsCode += await Main.editor.transpile(main.hiddenCode, jsDelivr == '1', popup == '1', gameboy == '1')  // also runs
-
-                                        console.log('transpile', jsCode)
-
-                                        // // add a new script
-                                        // jsCode = `import { TSXBoard, JsxMath } from '/TSXGraph/playground//dist.${LIB_VERSION}/tsxgraph.js';
-                                        //             \n let TSX = new TSXBoard('jxgbox');
-                                        //             \n` + jsCode
-                                        // let scriptElement = document.createElement("script");
-                                        // scriptElement.type = "module";
-                                        // scriptElement.innerHTML = jsCode;
-                                        // jxgbox.appendChild(scriptElement)
-
-                                        Main.editor.injectScript('jxgbox',jsCode);
-
-                                    } catch (e) {   // transpile error.  show it in an alert
-                                        alert(e);            // this.runEditorCode(this.editorCode, popup, true, jsDelivr, gameboy)     // and run the whole mess
-
-                                        this.resetButtons();
-                                    }
-                                },
-                */
-
-                /*
-                                // used by mathcode for RUN button below editor
-                                async runEditor(stepUniq: string, textbook: string, shareKey: string = '', gameframe: string = '0') {
-                                    console.log(`runEditor(${stepUniq},${textbook})`)
-
-                                    // write log with a callback, this is an async function
-
-                                    let blob = new Blob([Main.editor.editor.getValue()], { type: "text/plain" })
-                                    let reader = new FileReader();
-                                    reader.readAsText(blob);
-                                    reader.onloadend = function() {
-                                        let result = reader.result
-                                        if (typeof result == 'string') {    // because might be ArrayBuffer
-                                            let codebase64 = Buffer.from(result, 'utf8').toString('base64');
-                                            let hiddencodebase64 = Buffer.from(Main.editor.hiddenCode, 'utf8').toString('base64');
-                                            let hiddendeclbase64 = Buffer.from(Main.editor.hiddenDecl, 'utf8').toString('base64');
-                                            writeMoodleLog({ 'datacode': 'LOG_RunCode', 'id': main.moodleID, 'textbook': textbook, 'data01': stepUniq, 'data02': shareKey, 'data05': codebase64, 'data06': hiddencodebase64, 'data07': hiddendeclbase64 })
-
-                                            // get something started, fix later
-                                            let injectable = Main.editor.injectableScript(Main.editor.hiddenCode, result, false)
-                                            Main.editor.injectScript('jxgframe', injectable)
-                                        }
-                                    }
-                                },
-                */
 
                 // used by mathcode for RUN button below editor
                 async runMathcodeEditor(stepUniq: string, textbook: string, pathToDist: string) {
@@ -581,9 +510,9 @@ export class Main {
 
 
 
-                download(gameboy: string = '0') {
-                    Main.editor.createWebPage(main.hiddenCode, gameboy == '1')  // asnyc
-                },
+                // download(gameboy: string = '0') {
+                //     Main.editor.createWebPage(main.hiddenCode, gameboy == '1')  // asnyc
+                // },
 
                 //// these are the buttons on the Editor
                 stopEditor() {
