@@ -274,7 +274,7 @@ function getBody()
     PAGETEXT;
 
 
-$html .= 
+    $html .=
         "<div>
         <table class='table' style='max-width:1000px;'>
             <tr><td><strong><a href='https://github.com/tom-berend/jsxgraph-wrapper-typescript' target='_blank'>Simplified JSXGraph</a> Playground V{$GLOBALS['dist']}</strong></td>
@@ -282,7 +282,7 @@ $html .=
             <td>{$GLOBALS['helpDrawer']}</td></tr></table>
 ";
 
-$html .=
+    $html .=
         "<table class='table' style='max-width:1000px;height:80px;'>
         <tr><td style='width:500px;'>
 
@@ -298,8 +298,8 @@ $html .=
                  &nbsp;
 ";
 
-$html .=
-                "<!-- Button trigger modal -->
+    $html .=
+        "<!-- Button trigger modal -->
                 <button type='button' class='btn btn-md btn-primary' data-bs-toggle='modal' data-bs-target='#staticBackdrop' onclick='MathcodeAPI.share(``,`playground`,`{$GLOBALS['key']}`);return false;'>
                 Share
                 </button>
@@ -339,7 +339,7 @@ $html .=
 
         </td>
         <td style='font-size:14px;'><b>Space Icons</b> by <a href='https://goodstuffnononsense.com/'>Good Stuff No Nonsense</a>
-                        <br>licensed under <a href='https://creativecommons.org/licenses/by/4.0/?ref=chooser-v1' target='_blank' rel='license noopener noreferrer' style='display:inline-block;'><img style='height:22px!important;margin-left:3px;vertical-align:text-bottom;' src='by.png' alt='CC BY 4.0' title='CC_BY_4.0'></a>&nbsp;<a href='?previewIcons' target='_blank'>preview</a>
+                        <br>licensed under <a href='https://creativecommons.org/licenses/by/4.0/?ref=chooser-v1' target='_blank' rel='license noopener noreferrer' style='display:inline-block;'><img style='height:22px!important;margin-left:3px;vertical-align:text-bottom;' src='by.png' alt='CC BY 4.0' title='CC_BY_4.0'></a>&nbsp;&nbsp;&nbsp;<a href='?previewIcons' target='_blank'>preview</a>
         </td>
         </tr>
         </table>
@@ -401,6 +401,9 @@ function previewIcons(): string
     foreach ($files as $file) {
         if ($file == '.' or $file == '..')
             continue;
+        if (substr($file, 0, 1) == '_')  // starts with underscore
+            continue;
+
         $html .= "<div style='float:left;'><figure>
                     <img src='icons/$file' style='height:100px' />
                     <figcaption>$file</figcaption>

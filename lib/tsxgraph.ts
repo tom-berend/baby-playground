@@ -21,7 +21,7 @@
         //    DEALINGS IN THE SOFTWARE.
         //
         /////////////////////////////////////////////////////////////////////////////
-        //   Generated on August 18, 2026, 6:35 pm
+        //   Generated on August 26, 2026, 4:04 am
 
      // match JSXGraph definition for JXG_Point3D, etc
         type NumberFunction = Number | Function
@@ -4199,9 +4199,9 @@ export class TSXBoard {
 
 
 
-    private xAxis:Object = null!    // used for 'removeAxis()' which is not in JSXGraph
+    private xAxis: Object = null!    // used for 'removeAxis()' which is not in JSXGraph
 
-    private yAxis:Object = null!
+    private yAxis: Object = null!
 
 
 
@@ -4209,7 +4209,7 @@ export class TSXBoard {
 
     JXGOptions: any   // no documentation on this, just make it available to TypeScript as any
 
-;
+        ;
 
 
 
@@ -4385,13 +4385,13 @@ export class TSXBoard {
 
                 xPlaneFront: { visible: false },
 
-                yPlaneFront: { visible: false }, 
+                yPlaneFront: { visible: false },
 
                 zPlaneFront: { visible: false },
 
                 xPlaneRear: { visible: false },
 
-                yPlaneRear: { visible: false }, 
+                yPlaneRear: { visible: false },
 
                 zPlaneRear: { visible: false },
 
@@ -4531,67 +4531,51 @@ export class TSXBoard {
 
         let top = bbox[1] - (2 * lineHeight) - (this.printLineNumber * lineHeight)  // align y to top border
 
+        let first = true
 
 
-        let helper = (stringText: string, item: any): string => {
 
-            if (typeof item == null) {
+        let stringify = (value: unknown): string => {
 
-                stringText += 'null, ';
+            let trimmer = (val: string) => {
 
-            } else if (item == undefined) {
+                let maxLength = args.length == 1 ? 60: 30;  // longer if only a single param
 
-                stringText += 'undefined';
-
-            } else if (typeof item == 'string') {
-
-                stringText += '\'' + item + '\'';
-
-            } else if (typeof item == 'number') {
-
-                stringText += Number.isInteger(item) ? item.toString() : item.toFixed(2);
-
-            } else if (typeof item == 'boolean') {
-
-                stringText += item ? 'true' : 'false';
-
-            } else if (Array.isArray(item)) {
-
-                stringText += '['
-
-                stringText = item.reduce((acc, curr) => acc + helper('', curr), stringText)
-
-                stringText += ']'
-
-            } else if (typeof item == 'object') {
-
-                stringText += '{'
-
-                if ('elType' in item) {
-
-                    stringText += item.elType
-
-                } else if ('elV2Math' in item) {
-
-                    stringText += [item.X(), item.Y()]
-
-                }
-
-                stringText += '}'
-
-            } else {
-
-                stringText += 'UNKNOWN';
+                return val.length <= maxLength ? val : val.slice(0, maxLength) + "..."
 
             }
 
-            stringText += ', '
+            if (value === undefined) { return "undefined" }
 
-            return stringText
+            if (value === null || Array.isArray(value) || typeof value === 'object' || typeof value === 'boolean') {
+
+                return trimmer(JSON.stringify(value))
+
+            }
+
+            if (typeof value === 'function') {
+
+                return trimmer(value + value.toString());
+
+            }
+
+            if (typeof value === "string") return trimmer(value);
+
+
+
+            if (Number.isNaN(value as number)) return "NaN";
+
+            if (value === Infinity || value === -Infinity) return 'Infinity'
+
+            if (typeof value === "number") return trimmer(value.toFixed(2));
+
+            
+
+            if (typeof value === 'symbol' || typeof value === 'bigint') return trimmer(value.toString())
+
+            return 'unknown ' + typeof value  + trimmer(value.toString())
 
         }
-
-
 
 
 
@@ -4599,7 +4583,11 @@ export class TSXBoard {
 
         args.forEach((argn) => {
 
-            stringText = helper(stringText, argn)
+            if (!first) stringText += ',     '
+
+            stringText += stringify(argn).replaceAll(' ','&nbsp;')   // JSXGraph will trim leading spaces, we don't want that
+
+            first = false
 
         });
 
@@ -4833,15 +4821,15 @@ export class TSXBoard {
 
     */
 
-   on(event: string, handler: (e: Event) => void, context?: unknown): void{
+    on(event: string, handler: (e: Event) => void, context?: unknown): void {
 
-       // JSXGraph doesn't share keyboard events, but I want them
+        // JSXGraph doesn't share keyboard events, but I want them
 
-       if(event == 'keypress' || event == 'keydown' || event == 'keyup'){
+        if (event == 'keypress' || event == 'keydown' || event == 'keyup') {
 
-           (window as any).document.addEventListener(event, handler)
+            (window as any).document.addEventListener(event, handler)
 
-        }else{
+        } else {
 
             (this._jBoard as any).on(event, handler, context)
 
@@ -4979,7 +4967,7 @@ export class TSXBoard {
 
     /** Creates a new geometric element of type elementType.*/   // NOTE: UPPER CASE Create  !!
 
-    create(elementType: string, parents: any[], attributes: Object={}): any { return (this._jBoard as any).create(elementType, parents, attributes) }
+    create(elementType: string, parents: any[], attributes: Object = {}): any { return (this._jBoard as any).create(elementType, parents, attributes) }
 
 
 

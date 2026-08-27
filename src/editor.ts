@@ -6,6 +6,7 @@ import { Buffer } from "buffer";
 import { DOM } from "./DOM"
 
 import * as monaco from "monaco-editor";
+import JSMonacoLinter from 'monaco-js-linter';
 
 // import lib_baby from "./extraLibs/baby.d.ts.txt";
 import lib_dom_mini from "./extraLibs/lib.dom_mini.d.ts.txt";
@@ -163,6 +164,7 @@ export class Editor {
             alwaysStrict: false,
 
             noImplicitAny: false,
+            noImplicitReturns: true,
 
             noUnusedParameters: false,       // easier for beginners
             noUnusedLocals: true,            // i filter those errors out from the alert
@@ -260,9 +262,41 @@ export class Editor {
 
         monaco.languages.typescript.typescriptDefaults.addExtraLib(this.hiddenDecl)
 
-        // console.warn('value of this.visibleCode:', this.visibleCode)
-        // console.warn('value of this.hiddenCode:', this.hiddenCode)
-        // console.warn('value of this.hiddenDecl:', this.hiddenDecl)
+
+        // Define a function to validate code for semicolons
+        function validateSemicolons(model:monaco.editor.ITextModel) {
+            const code = model.getValue();
+            const lines:string[] = code.split('\n');
+            const markers:monaco.editor.IMarkerData[] = [];
+
+            lines.forEach((line, index) => {
+                let trimmed = line.trimEnd();
+                console.log('trim test',trimmed, trimmed.indexOf('//'))
+                if(trimmed.indexOf('//') > -1){
+                    console.log('trimmed before',trimmed)
+                    trimmed = trimmed.slice(0,trimmed.indexOf('//')).trimEnd()
+                    console.log('trimmed after',trimmed)
+                } 
+                // Simple example check: lines ending with characters that usually require a semicolon
+                if (trimmed.length > 0 && trimmed.endsWith(')')){
+
+                    markers.push({
+                        severity: monaco.MarkerSeverity.Error, // Renders a red error squiggly
+                        message: 'Possible missing semicolon.',
+                        startLineNumber: index + 1,
+                        startColumn: trimmed.length + 1,
+                        endLineNumber: index + 1,
+                        endColumn: trimmed.length + 2
+                    });
+                }
+            });
+
+            // Apply the markers to the specific model
+            monaco.editor.setModelMarkers(model, "semicolon_enforcer", markers);
+        }
+
+
+        /////////////////
 
         if (this.editor) {
             this.editor.dispose(); // Clean up the old instance and remove attributes
@@ -290,9 +324,12 @@ export class Editor {
             if (safeTimeout) {
                 clearTimeout(safeTimeout);
             }
+
+            // validateSemicolons(this.editor!.getModel()!);    // enforce semicolons
+
             safeTimeout = window.setTimeout(
                 () => {
-                    window.localStorage.setItem(this.storageKey, this.editor.getValue()),
+                    window.localStorage.setItem(this.storageKey, this.editor!.getValue()),
                         this.safeDelay
                 })
 
@@ -383,7 +420,7 @@ export class Editor {
 
 
     /** this creates a TEXT webpage for download. */
-    async createWebPage(hiddenCode: string, gameboy: boolean, pathToDist:string) {
+    async createWebPage(hiddenCode: string, gameboy: boolean, pathToDist: string) {
 
         // const args = names.map((key) => scope[key]);
         const model = this.editor.getModel();
@@ -742,7 +779,7 @@ export class Editor {
     /** inject a prepared script into a <script>.  script already has module load, error trap, etc */
     injectScript2026(divID: string, injectable: string, pathToDist: string) {
 
-        console.log(`injectScript2026(divID: ${divID}, injectable: ${injectable}, pathToDist: ${pathToDist})`)
+        // console.log(`injectScript2026(divID: ${divID}, injectable: ${injectable}, pathToDist: ${pathToDist})`)
 
         const html = injectable;
         // console.log(html);
