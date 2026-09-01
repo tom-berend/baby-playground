@@ -19,7 +19,7 @@
 //    DEALINGS IN THE SOFTWARE.
 //
 /////////////////////////////////////////////////////////////////////////////
-//   Generated on August 26, 2026, 4:04 am
+//   Generated on August 31, 2026, 9:16 pm
 let defaultAttrs = {
     keepAspectRatio: true,
     name: '', showinfobox: false,
@@ -483,6 +483,9 @@ export class TSXBoard {
         });
         this._jBoard.create('text', [left, top, stringText], { fontSize: 10, strokeColor: 'blue', fontUnits: 'EM' });
         this.printLineNumber += 1;
+    }
+    Audio(a) {
+        return (new Audio('sounds/' + a)); // prefix into correct directory
     }
     /** Set the bounding box of the board.  Returns the board.
 

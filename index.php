@@ -276,14 +276,14 @@ function getBody()
 
     $html .=
         "<div>
-        <table class='table' style='max-width:1000px;'>
+        <table class='table' style='max-width:1200px;'>
             <tr><td><strong><a href='https://github.com/tom-berend/jsxgraph-wrapper-typescript' target='_blank'>Simplified JSXGraph</a> Playground V{$GLOBALS['dist']}</strong></td>
             <td><b><a href='https://jsxgraph.uni-bayreuth.de/' target='_blank'>JSXGraph</a> with VSCode scaffolding !!</b></td>
             <td>{$GLOBALS['helpDrawer']}</td></tr></table>
 ";
 
     $html .=
-        "<table class='table' style='max-width:1000px;height:80px;'>
+        "<table class='table' style='max-width:1200px;height:80px;'>
         <tr><td style='width:500px;'>
 
 
@@ -338,8 +338,10 @@ function getBody()
           </div>
 
         </td>
-        <td style='font-size:14px;'><b>Space Icons</b> by <a href='https://goodstuffnononsense.com/'>Good Stuff No Nonsense</a>
-                        <br>licensed under <a href='https://creativecommons.org/licenses/by/4.0/?ref=chooser-v1' target='_blank' rel='license noopener noreferrer' style='display:inline-block;'><img style='height:22px!important;margin-left:3px;vertical-align:text-bottom;' src='by.png' alt='CC BY 4.0' title='CC_BY_4.0'></a>&nbsp;&nbsp;&nbsp;<a href='?previewIcons' target='_blank'>preview</a>
+        <td style='font-size:14px;'><b>Space Icons</b> by <a href='https://goodstuffnononsense.com/' target='_blank'>Good Stuff No Nonsense</a>
+                        licensed under <a href='https://creativecommons.org/licenses/by/4.0/?ref=chooser-v1' target='_blank' rel='license noopener noreferrer' style='display:inline-block;'>CC-BY 4.0</a>
+        <br><b>Essential Retro Video Game Sound Effects Collection </b> by <a href='https://juhanijunkala.com' target='_blank'>Juhani Junkala</a> 
+                          licensed under <a href='https://creativecommons.org/publicdomain/zero/1.0/deed.en' target='_blank' rel='license noopener noreferrer' style='display:inline-block;'>CC0</a>
         </td>
         </tr>
         </table>

@@ -263,37 +263,37 @@ export class Editor {
         monaco.languages.typescript.typescriptDefaults.addExtraLib(this.hiddenDecl)
 
 
-        // Define a function to validate code for semicolons
-        function validateSemicolons(model:monaco.editor.ITextModel) {
-            const code = model.getValue();
-            const lines:string[] = code.split('\n');
-            const markers:monaco.editor.IMarkerData[] = [];
+        // // Define a function to validate code for semicolons
+        // function validateSemicolons(model:monaco.editor.ITextModel) {
+        //     const code = model.getValue();
+        //     const lines:string[] = code.split('\n');
+        //     const markers:monaco.editor.IMarkerData[] = [];
 
-            lines.forEach((line, index) => {
-                let trimmed = line.trimEnd();
-                console.log('trim test',trimmed, trimmed.indexOf('//'))
-                if(trimmed.indexOf('//') > -1){
-                    console.log('trimmed before',trimmed)
-                    trimmed = trimmed.slice(0,trimmed.indexOf('//')).trimEnd()
-                    console.log('trimmed after',trimmed)
-                } 
-                // Simple example check: lines ending with characters that usually require a semicolon
-                if (trimmed.length > 0 && trimmed.endsWith(')')){
+        //     lines.forEach((line, index) => {
+        //         let trimmed = line.trimEnd();
+        //         console.log('trim test',trimmed, trimmed.indexOf('//'))
+        //         if(trimmed.indexOf('//') > -1){
+        //             console.log('trimmed before',trimmed)
+        //             trimmed = trimmed.slice(0,trimmed.indexOf('//')).trimEnd()
+        //             console.log('trimmed after',trimmed)
+        //         } 
+        //         // Simple example check: lines ending with characters that usually require a semicolon
+        //         if (trimmed.length > 0 && trimmed.endsWith(')')){
 
-                    markers.push({
-                        severity: monaco.MarkerSeverity.Error, // Renders a red error squiggly
-                        message: 'Possible missing semicolon.',
-                        startLineNumber: index + 1,
-                        startColumn: trimmed.length + 1,
-                        endLineNumber: index + 1,
-                        endColumn: trimmed.length + 2
-                    });
-                }
-            });
+        //             markers.push({
+        //                 severity: monaco.MarkerSeverity.Error, // Renders a red error squiggly
+        //                 message: 'Possible missing semicolon.',
+        //                 startLineNumber: index + 1,
+        //                 startColumn: trimmed.length + 1,
+        //                 endLineNumber: index + 1,
+        //                 endColumn: trimmed.length + 2
+        //             });
+        //         }
+        //     });
 
-            // Apply the markers to the specific model
-            monaco.editor.setModelMarkers(model, "semicolon_enforcer", markers);
-        }
+        //     // Apply the markers to the specific model
+        //     monaco.editor.setModelMarkers(model, "semicolon_enforcer", markers);
+        // }
 
 
         /////////////////

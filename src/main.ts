@@ -460,7 +460,7 @@ export class Main {
 
                 // used by mathcode for RUN button below editor
                 async runMathcodeEditor(stepUniq: string, textbook: string, pathToDist: string) {
-                    console.log(`runMathcodeEditor(${stepUniq},${textbook}, ${pathToDist})`)
+                    // console.log(`runMathcodeEditor(${stepUniq},${textbook}, ${pathToDist})`)
 
                     // convert from TS to JS
                     let result = await Main.editor.transpile(Main.editor.hiddenCode, false, false, false);
