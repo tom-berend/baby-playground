@@ -1,7 +1,7 @@
 <?php
 
 
-$GLOBALS['dist'] = '2.1.5';        // point at current dist directory
+$GLOBALS['dist'] = '2.1.6';        // point at current dist directory
 
 
 // list of all table names in the database

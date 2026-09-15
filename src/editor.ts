@@ -160,10 +160,9 @@ export class Editor {
             // lib: ["es5, es6, es2020, es2022, dom.iterable"],    // for some reason, dom.iterable is required for destructuring    [x,y] = [1,2]
 
             sourceMap: true,
-            strict: false,
-            alwaysStrict: false,
+            strict: true,
 
-            noImplicitAny: false,
+            noImplicitAny: true,
             noImplicitReturns: true,
 
             noUnusedParameters: false,       // easier for beginners
@@ -181,16 +180,19 @@ export class Editor {
 
         });
 
-
-
-        // monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-        //     noSemanticValidation: true,
-        //     noSyntaxValidation: true,
-        //     allowNonTsExtensions: true,
-        //     target: monaco.languages.typescript.ScriptTarget.ES2015,
-        //     // noLib: true,                        // don't bring DOM into intellisense
-        //     strictNullChecks: false,
+        // monaco.languages.typescript.javascriptDefaults.getDiagnosticsOptions({
+        //     SemicolonPreference:
         // });
+
+
+        monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+            noSemanticValidation: false,
+            noSyntaxValidation: false,
+            // allowNonTsExtensions: true,
+            // target: monaco.languages.typescript.ScriptTarget.ES2015,
+            // // noLib: true,                        // don't bring DOM into intellisense
+            // strictNullChecks: false,
+        });
 
         monaco.editor.defineTheme('myTheme', {
             base: 'vs',
@@ -308,6 +310,8 @@ export class Editor {
             language: "typescript",
             // language: "javascript",
             scrollBeyondLastLine: true,
+            formatOnType: true,
+            formatOnPaste: true,
 
             value: (this.visibleCode == '')
                 ? window.localStorage.getItem(this.storageKey) || this.initFile
@@ -706,12 +710,14 @@ export class Editor {
         // jsDelivr = false // only for testing
 
 
-        if (jsDelivr)
+        if (jsDelivr) {
+            // console.warn('importing from JSDelivr')
             html += "import {TSXBoard } from 'https://cdn.jsdelivr.net/npm/jsxgraph-wrapper-typescript@2.1.1/lib/tsxgraph.js';"
-        else
-            html += `import {TSXBoard } from '${pathToDist}/tsxgraph.js';`  // only for testing
-
-        html += "\nprivateAsyncFunction();"
+        } else {
+            // console.warn('importing from dist directory')
+            html += `import {TSXBoard } from '${pathToDist}/tsxgraph.js';`  
+        }
+        html += "\nprivateAsyncFunction();  // create top-level async function"
 
         html += "\nasync function privateAsyncFunction(){   // so await possible"
         html += "\nlet TSX = new TSXBoard('jxgframe',{keepAspectRatio:true});"
@@ -762,6 +768,7 @@ export class Editor {
                         \n<body>
                             \n<script type="text/javascript" src="${pathToDist}/jsxgraphcore.js"></script>
                             \n<div id='jxgframe' style="width:600px;height:600px;"> </div>
+                            \n<!--  script type='module' -->
                             \n<script type='module'>
                                 // import {TSXBoard } from '${pathToDist}/tsxgraph.js'
                                 ${injectable}
@@ -769,8 +776,8 @@ export class Editor {
 
                         \n</body>
                     \n</html>`;
-        // console.log(html);
 
+        // console.warn(html);
         return html
 
     }
@@ -797,8 +804,8 @@ export class Editor {
 
 
             const script = document.createElement("script");
-            script.type = 'module'
             script.textContent = html;
+            script.type = 'module'
             // console.log('about to append',script)
             divElement.appendChild(script);
 

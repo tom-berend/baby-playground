@@ -226,55 +226,6 @@ export class Main {
                 },
 
 
-                // saveFileExplorer: (s: string) => {
-                //     this.editor.createWebPage(main.hiddenCode, )  // asnyc
-                // },
-
-
-                // //////// these functions are for the file explorer
-                // refreshFileExplorer: (n: number) => {
-                //     let fs = new tsFS()
-                //     fs.eraseFileExplorer()
-                //     fs.fileExplorer(n)
-                // },
-                // eraseFileExplorer: () => {    // erases the canvas
-                //     let fs = new tsFS()
-                //     fs.eraseFileExplorer()
-                // },
-                // findFileExplorer: (s: string) => {
-                //     let fs = new tsFS()
-                //     fs.findFileExplorer(s)
-                // },
-                // saveFileExplorer: (s: string) => {
-                //     let fs = new tsFS()
-                //     fs.saveFileExplorer(s)
-                // },
-
-                // trashfileFileExplorer: (s: string) => {
-                //     let fs = new tsFS()
-                //     fs.trashfileFileExplorer(parseInt(s))
-                // },
-                // trashdirFileExplorer: (s: string) => {
-                //     let fs = new tsFS()
-                //     fs.trashfileFileExplorer(parseInt(s))
-                // },
-
-                // mindmap: (content: string, canvas: string) => {
-                //     // console.log('drawing mindmap', content, canvas)
-                //     // let pm = new mindmap(content, canvas)
-                //     // pm.drawMindMap()
-                //     // testMindMap()
-                // },
-
-
-                // // expose the Split library...
-                // Split:(a:any,b:any)=>{
-                //     console.log(window,a,b);
-                //     const Split = window.Split
-
-                //     Split(a,b);
-                // },
-
                 // student clicks into reflection, have they finished all challenges?
                 readyToReflect: (step: string, textbook: string): boolean => {
                     // console.log(`readyToReflect: (${step}:number,${activity}:number,${topic}:number)`)
@@ -480,7 +431,7 @@ export class Main {
                 // used by mathcode for running-man button beside code
                 // almost the same as runEditor but code is sent
                 async runInCanvas(paragraph: string, textbook: string, code: string, pathToDist: string) {   // convert from TS to JS first !!
-                    console.log(`runInCanvas(${paragraph}, textbook:${textbook}, code:${code}, pathToDist:${pathToDist}`)
+                    // console.log(`runInCanvas(${paragraph}, textbook:${textbook}, code:${code}, pathToDist:${pathToDist}`)
                     let tsCode = window.atob(code)
                     // console.log('runInCanvas', tsCode)
 
@@ -490,7 +441,7 @@ export class Main {
                     writeMoodleLog({ 'datacode': 'Log_RunIcon', 'id': main.moodleID, 'textbook': textbook, 'paragraph': paragraph, data01: tsCode })
 
                     let injectable = Main.editor.injectableScript(Main.editor.hiddenCode, jsCode, false, pathToDist)  // never use jsDelivr, always provide pathToDist
-                    Main.editor.injectScript('jxgframe', injectable, pathToDist)
+                    Main.editor.injectScript2026('jxgframe', injectable, pathToDist)
 
                 },
 

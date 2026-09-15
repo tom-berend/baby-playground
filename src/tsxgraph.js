@@ -19,13 +19,90 @@
 //    DEALINGS IN THE SOFTWARE.
 //
 /////////////////////////////////////////////////////////////////////////////
-//   Generated on August 31, 2026, 9:16 pm
+//   Generated on September 8, 2026, 6:23 pm
 let defaultAttrs = {
     keepAspectRatio: true,
     name: '', showinfobox: false,
     pan: { enabled: false },
     resize: { enabled: false }
 };
+/////////////////////////////  GROUP MoveToES6() function
+/** version of moveES6 for groups */
+function groupMoveToES6(jBoard, group, params, msec = 0) {
+    if (msec > 0 && msec < 60)
+        console.warn('Group move time is MSEC.'); // common error  
+    let setup = () => {
+        // set up the grouppu object for the length of the move
+        let temp;
+        if (!Object.hasOwn(group, "moveES6params")) { // was not previously moved
+            temp = {
+                currentInterval: 0, // initialize it
+                initialPosition: [0, 0],
+                initialRotation: 0,
+                initialScale: 1,
+                currentRotation: 0,
+                translatePoint: jBoard.create('point', [0, 0], { visible: false }),
+                rotatePoint: jBoard.create('point', [0, 1], { visible: false }),
+                scalerPoint: jBoard.create('point', [1, 0], { visible: false }),
+            };
+            group['moveES6params'] = temp; // add it to group object for persistance
+            // set up the basic tranform points
+            group.addPoints([temp.translatePoint, temp.rotatePoint, temp.scalerPoint]);
+            group.setTranslationPoints(temp.translatePoint);
+            group.setRotationCenter(temp.translatePoint);
+            group.setRotationPoints(temp.rotatePoint);
+            group.setScaleCenter(temp.translatePoint);
+            group.setScalePoints(temp.scalerPoint);
+            return temp;
+        }
+        else {
+            // retrieve current params left over from last move
+            temp = group['moveES6params'];
+            temp.currentInterval = 0; // re-initialize it
+            // console.log('tr',temp.translatePoint.X(),'sc',temp.scalerPoint.X())
+            // temp.initialScale = temp.scalerPoint.X()  ;
+        }
+        return temp;
+    };
+    let m = setup(); // create and initialize the 'movesInProgess' object
+    let nIntervals = Math.ceil(msec / 50); // break into 50 ms intervals
+    nIntervals = Math.max(nIntervals, 1); // run at least once
+    return new Promise((resolve) => {
+        let processMoves = () => {
+            if (m.currentInterval < nIntervals) {
+                let fraction = m.currentInterval / nIntervals;
+                // last move should be exactly to end
+                if (m.currentInterval == nIntervals - 1)
+                    fraction = 1;
+                if (Object.hasOwn(params, "rotation")) {
+                    let dAng = m.initialRotation + (params.rotation / nIntervals);
+                    m.rotatePoint.moveTo([m.translatePoint.X() + Math.sin(dAng), m.translatePoint.Y() + Math.cos(dAng)]);
+                    m.initialRotation = dAng;
+                }
+                if (Object.hasOwn(params, "translation")) {
+                    let dx = params.translation[0] - m.initialPosition[0];
+                    let dy = params.translation[1] - m.initialPosition[1];
+                    m.translatePoint.moveTo([m.initialPosition[0] + dx * fraction, m.initialPosition[1] + dy * fraction]);
+                }
+                if (Object.hasOwn(params, "scale")) {
+                    let newScale = m.initialScale + ((params.scale - m.initialScale) * fraction);
+                    m.scalerPoint.moveTo([m.translatePoint.X() + newScale, m.translatePoint.Y()]);
+                }
+                m.currentInterval += 1;
+                requestAnimationFrame(processMoves);
+            }
+            else {
+                m.initialPosition = params.translation; // set up for next time
+                // initialRotation is updated continuously
+                m.initialScale = params.scale;
+                resolve(true);
+            }
+        };
+        // and start the animation
+        processMoves();
+    });
+}
+;
 /**
 *  Constant: user coordinates relative to the coordinates system defined by the bounding box.
 */
@@ -306,6 +383,7 @@ export let JsxMath = { Matrix: {
 //////////////////////////////////////////////////////////////
 ///  WE NEED A PLACE TO STORE THE BOARD AND VIEW3D OBJECTS ///
 //////////////////////////////////////////////////////////////
+/** param types for call to Group.moveES6() */
 /** This wraps the JSX library and the constructor is equivalent to the `initBoard()` method.
 
  * ```js
@@ -1041,10 +1119,13 @@ export class TSXBoard {
     }
     /** Array of Points */
     Group(pointArray, attributes = {}) {
+        let temp; // group that we will modify
         if (Array.isArray(pointArray))
-            return this._jBoard.create('group', pointArray, this.defaultAttributes(attributes));
+            temp = this._jBoard.create('group', pointArray, this.defaultAttributes(attributes));
         else
-            return this._jBoard.create('group', [pointArray], this.defaultAttributes(attributes));
+            temp = this._jBoard.create('group', [pointArray], this.defaultAttributes(attributes));
+        temp['moveToES6'] = (params, msec) => groupMoveToES6(this._jBoard, temp, params, msec);
+        return temp;
     }
     // implementation of signature,  hidden from user
     Image(a, b, c, d, e, f, g, h, i) {
@@ -2482,7 +2563,12 @@ export class TSXBoard {
         }
         return this._jView3d.create('segment3d', params, this.defaultAttributes(attrs));
     }
-    /** Create a Transformation object with Translate properties. */
+    /** Create a Transformation object with Translate properties.
+   ~~~js
+   let p0 = TSX.Point([0, 3], { name: 'A' })
+   let t = TSX.Translate(() => p0.X(), 1) // adds [p0.X(), 1]
+   let t1 = TSX.TransformPoint(p0, [t])   // so x is twice p0
+   ~~~ */
     Translate(dx, dy, attributes = {}) {
         return this._jBoard.create('transform', [dx, dy], { type: 'translate' });
     }

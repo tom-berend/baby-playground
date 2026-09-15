@@ -21,7 +21,7 @@
         //    DEALINGS IN THE SOFTWARE.
         //
         /////////////////////////////////////////////////////////////////////////////
-        //   Generated on August 31, 2026, 9:16 pm
+        //   Generated on September 8, 2026, 6:23 pm
 
      // match JSXGraph definition for JXG_Point3D, etc
         type NumberFunction = Number | Function
@@ -52,6 +52,118 @@ type matAny = arrayNumber2[]
 
 // eventType accepts any string, but will suggest a few
 type eventType = 'down' | 'up' | 'drag' | 'keydrag' | 'mousedown' | 'mousedrag' | 'mousemove' | 'mouseout' | 'mouseover' | 'mouseup' | 'move' | 'out' | 'over' | 'pendown' | 'pendrag' | 'penup' | 'touchdown' | 'touchdrag' | 'touchup' | 'up' | string
+
+
+
+type groupMoveParams = {
+    translation?: number[],
+    rotation?: number,
+    scale?: number,
+}
+/** object to track progress of Group ES6 moves */
+type groupMovesInProgress = {
+    currentInterval: number,
+    initialPosition: number[],
+    initialRotation: number
+    currentRotation: number
+    initialScale: number,
+    translatePoint: Point,
+    rotatePoint: Point,
+    scalerPoint: Point,
+}
+
+/////////////////////////////  GROUP MoveToES6() function
+
+/** version of moveES6 for groups */
+function groupMoveToES6(jBoard: any, group: any, params: groupMoveParams, msec: number = 0) {
+    if (msec > 0 && msec < 60) console.warn('Group move time is MSEC.'); // common error  
+
+    let setup = (): groupMovesInProgress => {   // factory to set up m object
+        // set up the grouppu object for the length of the move
+        let temp: groupMovesInProgress;
+        if (!Object.hasOwn(group, "moveES6params")) {   // was not previously moved
+            temp = {
+                currentInterval: 0,   // initialize it
+                initialPosition: [0, 0],
+                initialRotation: 0,
+                initialScale: 1,
+                currentRotation: 0,
+                translatePoint: jBoard.create('point', [0, 0], { visible: false }),
+                rotatePoint: jBoard.create('point', [0, 1], { visible: false }),
+                scalerPoint: jBoard.create('point', [1, 0], { visible: false }),
+            };
+            (group as any)['moveES6params'] = temp;   // add it to group object for persistance
+
+            // set up the basic tranform points
+            group.addPoints([temp.translatePoint, temp.rotatePoint, temp.scalerPoint])
+            group.setTranslationPoints(temp.translatePoint)
+            group.setRotationCenter(temp.translatePoint)
+            group.setRotationPoints(temp.rotatePoint);
+            group.setScaleCenter(temp.translatePoint)
+            group.setScalePoints(temp.scalerPoint);
+            return temp
+        } else {
+            // retrieve current params left over from last move
+            temp = (group as any)['moveES6params'] as groupMovesInProgress;
+            temp.currentInterval = 0;   // re-initialize it
+            
+            // console.log('tr',temp.translatePoint.X(),'sc',temp.scalerPoint.X())
+            // temp.initialScale = temp.scalerPoint.X()  ;
+        }
+        return temp;
+    }
+    
+    let m = setup();   // create and initialize the 'movesInProgess' object
+    
+    let nIntervals = Math.ceil(msec / 50); // break into 50 ms intervals
+    nIntervals = Math.max(nIntervals, 1);  // run at least once
+        
+    
+    return new Promise((resolve) => {     // define the process that will update the screen over time
+        let processMoves = () => {
+            
+            if (m.currentInterval < nIntervals) {
+                let fraction = m.currentInterval / nIntervals
+                
+                // last move should be exactly to end
+                if (m.currentInterval == nIntervals - 1) fraction = 1
+
+                if (Object.hasOwn(params, "rotation")) {
+                    let dAng = m.initialRotation + (params.rotation! / nIntervals)
+                    m.rotatePoint.moveTo([m.translatePoint.X() + Math.sin(dAng), m.translatePoint.Y() + Math.cos(dAng)])
+                    m.initialRotation = dAng
+                }
+                
+                if (Object.hasOwn(params, "translation")) {
+                    let dx = params.translation![0] - m.initialPosition[0]
+                    let dy = params.translation![1] - m.initialPosition[1]
+                    m.translatePoint.moveTo([m.initialPosition[0] + dx * fraction, m.initialPosition[1] + dy * fraction])
+                }
+                
+                if (Object.hasOwn(params, "scale")) {
+                    let newScale = m.initialScale + ((params.scale! - m.initialScale) * fraction)
+                    m.scalerPoint.moveTo([m.translatePoint.X() + newScale, m.translatePoint.Y()])
+                }
+                m.currentInterval += 1;
+                requestAnimationFrame(processMoves)
+                
+            } else {
+                m.initialPosition = params.translation! // set up for next time
+                // initialRotation is updated continuously
+                m.initialScale = params.scale!
+                
+                resolve(true);
+            }
+        };
+        // and start the animation
+        processMoves()
+    });
+    
+};
+
+
+
+
 
 interface Events {
     /** event handlers, eventType is a STRING
@@ -391,14 +503,14 @@ export type SpaceIcon =
 
 
 
-    export type Sounds = 
+export type Sounds =
     'Alien/sfx_deathscream_alien1.wav' |
     'Alien/sfx_deathscream_alien2.wav' |
     'Alien/sfx_deathscream_alien3.wav' |
     'Alien/sfx_deathscream_alien4.wav' |
     'Alien/sfx_deathscream_alien5.wav' |
     'Alien/sfx_deathscream_alien6.wav' |
-    
+
     'Android/sfx_deathscream_android1.wav' |
     'Android/sfx_deathscream_android2.wav' |
     'Android/sfx_deathscream_android3.wav' |
@@ -407,7 +519,7 @@ export type SpaceIcon =
     'Android/sfx_deathscream_android6.wav' |
     'Android/sfx_deathscream_android7.wav' |
     'Android/sfx_deathscream_android8.wav' |
-    
+
     'Human/sfx_deathscream_human1.wav' |
     'Human/sfx_deathscream_human10.wav' |
     'Human/sfx_deathscream_human11.wav' |
@@ -422,12 +534,12 @@ export type SpaceIcon =
     'Human/sfx_deathscream_human7.wav' |
     'Human/sfx_deathscream_human8.wav' |
     'Human/sfx_deathscream_human9.wav' |
-    
+
     'Robot/sfx_deathscream_robot1.wav' |
     'Robot/sfx_deathscream_robot2.wav' |
     'Robot/sfx_deathscream_robot3.wav' |
     'Robot/sfx_deathscream_robot4.wav' |
-    
+
     'Clusters/sfx_exp_cluster1.wav' |
     'Clusters/sfx_exp_cluster10.wav' |
     'Clusters/sfx_exp_cluster11.wav' |
@@ -439,18 +551,18 @@ export type SpaceIcon =
     'Clusters/sfx_exp_cluster7.wav' |
     'Clusters/sfx_exp_cluster8.wav' |
     'Clusters/sfx_exp_cluster9.wav' |
-    
+
     'Double/sfx_exp_double1.wav' |
     'Double/sfx_exp_double2.wav' |
     'Double/sfx_exp_double3.wav' |
-    
+
     'Long/sfx_exp_long1.wav' |
     'Long/sfx_exp_long2.wav' |
     'Long/sfx_exp_long3.wav' |
     'Long/sfx_exp_long4.wav' |
     'Long/sfx_exp_long5.wav' |
     'Long/sfx_exp_long6.wav' |
-    
+
     'Medium Length/sfx_exp_medium1.wav' |
     'Medium Length/sfx_exp_medium10.wav' |
     'Medium Length/sfx_exp_medium11.wav' |
@@ -464,7 +576,7 @@ export type SpaceIcon =
     'Medium Length/sfx_exp_medium7.wav' |
     'Medium Length/sfx_exp_medium8.wav' |
     'Medium Length/sfx_exp_medium9.wav' |
-    
+
     'Odd/sfx_exp_odd1.wav' |
     'Odd/sfx_exp_odd2.wav' |
     'Odd/sfx_exp_odd3.wav' |
@@ -472,7 +584,7 @@ export type SpaceIcon =
     'Odd/sfx_exp_odd5.wav' |
     'Odd/sfx_exp_odd6.wav' |
     'Odd/sfx_exp_odd7.wav' |
-    
+
     'Short/sfx_exp_short_hard1.wav' |
     'Short/sfx_exp_short_hard10.wav' |
     'Short/sfx_exp_short_hard11.wav' |
@@ -502,7 +614,7 @@ export type SpaceIcon =
     'Short/sfx_exp_short_soft7.wav' |
     'Short/sfx_exp_short_soft8.wav' |
     'Short/sfx_exp_short_soft9.wav' |
-    
+
     'Shortest/sfx_exp_shortest_hard1.wav' |
     'Shortest/sfx_exp_shortest_hard10.wav' |
     'Shortest/sfx_exp_shortest_hard2.wav' |
@@ -522,7 +634,7 @@ export type SpaceIcon =
     'Shortest/sfx_exp_shortest_soft7.wav' |
     'Shortest/sfx_exp_shortest_soft8.wav' |
     'Shortest/sfx_exp_shortest_soft9.wav' |
-    
+
     'Various/sfx_exp_various1.wav' |
     'Various/sfx_exp_various2.wav' |
     'Various/sfx_exp_various3.wav' |
@@ -530,24 +642,24 @@ export type SpaceIcon =
     'Various/sfx_exp_various5.wav' |
     'Various/sfx_exp_various6.wav' |
     'Various/sfx_exp_various7.wav' |
-    
-    'Alarms/Alarms/sfx_alarm_loop1.wav' |
-    'Alarms/Alarms/sfx_alarm_loop2.wav' |
-    'Alarms/Alarms/sfx_alarm_loop3.wav' |
-    'Alarms/Alarms/sfx_alarm_loop4.wav' |
-    'Alarms/Alarms/sfx_alarm_loop5.wav' |
-    'Alarms/Alarms/sfx_alarm_loop6.wav' |
-    'Alarms/Alarms/sfx_alarm_loop7.wav' |
-    'Alarms/Alarms/sfx_alarm_loop8.wav' |
-    
-    'Alarms/Lowhealth/sfx_lowhealth_alarmloop1.wav' |
-    'Alarms/Lowhealth/sfx_lowhealth_alarmloop2.wav' |
-    'Alarms/Lowhealth/sfx_lowhealth_alarmloop3.wav' |
-    'Alarms/Lowhealth/sfx_lowhealth_alarmloop4.wav' |
-    'Alarms/Lowhealth/sfx_lowhealth_alarmloop5.wav' |
-    'Alarms/Lowhealth/sfx_lowhealth_alarmloop6.wav' |
-    'Alarms/Lowhealth/sfx_lowhealth_alarmloop7.wav' |
-    
+
+    'Alarms/sfx_alarm_loop1.wav' |
+    'Alarms/sfx_alarm_loop2.wav' |
+    'Alarms/sfx_alarm_loop3.wav' |
+    'Alarms/sfx_alarm_loop4.wav' |
+    'Alarms/sfx_alarm_loop5.wav' |
+    'Alarms/sfx_alarm_loop6.wav' |
+    'Alarms/sfx_alarm_loop7.wav' |
+    'Alarms/sfx_alarm_loop8.wav' |
+
+    'Lowhealth/sfx_lowhealth_alarmloop1.wav' |
+    'Lowhealth/sfx_lowhealth_alarmloop2.wav' |
+    'Lowhealth/sfx_lowhealth_alarmloop3.wav' |
+    'Lowhealth/sfx_lowhealth_alarmloop4.wav' |
+    'Lowhealth/sfx_lowhealth_alarmloop5.wav' |
+    'Lowhealth/sfx_lowhealth_alarmloop6.wav' |
+    'Lowhealth/sfx_lowhealth_alarmloop7.wav' |
+
     'Buttons/sfx_sounds_button1.wav' |
     'Buttons/sfx_sounds_button10.wav' |
     'Buttons/sfx_sounds_button11.wav' |
@@ -562,7 +674,7 @@ export type SpaceIcon =
     'Buttons/sfx_sounds_button7.wav' |
     'Buttons/sfx_sounds_button8.wav' |
     'Buttons/sfx_sounds_button9.wav' |
-    
+
     'Coins/sfx_coin_cluster1.wav' |
     'Coins/sfx_coin_cluster2.wav' |
     'Coins/sfx_coin_cluster3.wav' |
@@ -585,11 +697,11 @@ export type SpaceIcon =
     'Coins/sfx_coin_single4.wav' |
     'Coins/sfx_coin_single5.wav' |
     'Coins/sfx_coin_single6.wav' |
-    
+
     'Fanfares/sfx_sounds_fanfare1.wav' |
     'Fanfares/sfx_sounds_fanfare2.wav' |
     'Fanfares/sfx_sounds_fanfare3.wav' |
-    
+
     'High Pitched Sounds/sfx_sounds_high1.wav' |
     'High Pitched Sounds/sfx_sounds_high2.wav' |
     'High Pitched Sounds/sfx_sounds_high3.wav' |
@@ -597,7 +709,7 @@ export type SpaceIcon =
     'High Pitched Sounds/sfx_sounds_high5.wav' |
     'High Pitched Sounds/sfx_sounds_high6.wav' |
     'High Pitched Sounds/sfx_sounds_high7.wav' |
-    
+
     'Impacts/sfx_sounds_impact1.wav' |
     'Impacts/sfx_sounds_impact10.wav' |
     'Impacts/sfx_sounds_impact11.wav' |
@@ -613,7 +725,7 @@ export type SpaceIcon =
     'Impacts/sfx_sounds_impact7.wav' |
     'Impacts/sfx_sounds_impact8.wav' |
     'Impacts/sfx_sounds_impact9.wav' |
-    
+
     'Interactions/sfx_sounds_interaction1.wav' |
     'Interactions/sfx_sounds_interaction10.wav' |
     'Interactions/sfx_sounds_interaction11.wav' |
@@ -640,7 +752,7 @@ export type SpaceIcon =
     'Interactions/sfx_sounds_interaction7.wav' |
     'Interactions/sfx_sounds_interaction8.wav' |
     'Interactions/sfx_sounds_interaction9.wav' |
-    
+
     'Menu Sounds/sfx_menu_move1.wav' |
     'Menu Sounds/sfx_menu_move2.wav' |
     'Menu Sounds/sfx_menu_move3.wav' |
@@ -651,7 +763,7 @@ export type SpaceIcon =
     'Menu Sounds/sfx_menu_select3.wav' |
     'Menu Sounds/sfx_menu_select4.wav' |
     'Menu Sounds/sfx_menu_select5.wav' |
-    
+
     'Negative Sounds/sfx_sounds_damage1.wav' |
     'Negative Sounds/sfx_sounds_damage2.wav' |
     'Negative Sounds/sfx_sounds_damage3.wav' |
@@ -672,7 +784,7 @@ export type SpaceIcon =
     'Negative Sounds/sfx_sounds_error9.wav' |
     'Negative Sounds/sfx_sounds_negative1.wav' |
     'Negative Sounds/sfx_sounds_negative2.wav' |
-    
+
     'Neutral Sounds/sfx_sound_neutral1.wav' |
     'Neutral Sounds/sfx_sound_neutral10.wav' |
     'Neutral Sounds/sfx_sound_neutral11.wav' |
@@ -684,7 +796,7 @@ export type SpaceIcon =
     'Neutral Sounds/sfx_sound_neutral7.wav' |
     'Neutral Sounds/sfx_sound_neutral8.wav' |
     'Neutral Sounds/sfx_sound_neutral9.wav' |
-    
+
     'Pause Sounds/sfx_sounds_pause1_in.wav' |
     'Pause Sounds/sfx_sounds_pause1_out.wav' |
     'Pause Sounds/sfx_sounds_pause2_in.wav' |
@@ -699,7 +811,7 @@ export type SpaceIcon =
     'Pause Sounds/sfx_sounds_pause6_out.wav' |
     'Pause Sounds/sfx_sounds_pause7_in.wav' |
     'Pause Sounds/sfx_sounds_pause7_out.wav' |
-    
+
     'Positive Sounds/sfx_sounds_powerup1.wav' |
     'Positive Sounds/sfx_sounds_powerup10.wav' |
     'Positive Sounds/sfx_sounds_powerup11.wav' |
@@ -718,7 +830,7 @@ export type SpaceIcon =
     'Positive Sounds/sfx_sounds_powerup7.wav' |
     'Positive Sounds/sfx_sounds_powerup8.wav' |
     'Positive Sounds/sfx_sounds_powerup9.wav' |
-    
+
     'Simple Bleeps/sfx_sounds_Blip1.wav' |
     'Simple Bleeps/sfx_sounds_Blip10.wav' |
     'Simple Bleeps/sfx_sounds_Blip11.wav' |
@@ -730,7 +842,7 @@ export type SpaceIcon =
     'Simple Bleeps/sfx_sounds_Blip7.wav' |
     'Simple Bleeps/sfx_sounds_Blip8.wav' |
     'Simple Bleeps/sfx_sounds_Blip9.wav' |
-    
+
     'Simple Damage Sounds/sfx_damage_hit1.wav' |
     'Simple Damage Sounds/sfx_damage_hit10.wav' |
     'Simple Damage Sounds/sfx_damage_hit2.wav' |
@@ -741,7 +853,7 @@ export type SpaceIcon =
     'Simple Damage Sounds/sfx_damage_hit7.wav' |
     'Simple Damage Sounds/sfx_damage_hit8.wav' |
     'Simple Damage Sounds/sfx_damage_hit9.wav' |
-    
+
     'Weird Sounds/sfx_sound_bling.wav' |
     'Weird Sounds/sfx_sound_depressurizing.wav' |
     'Weird Sounds/sfx_sound_mechanicalnoise1.wav' |
@@ -758,7 +870,7 @@ export type SpaceIcon =
     'Weird Sounds/sfx_sound_shutdown1.wav' |
     'Weird Sounds/sfx_sound_shutdown2.wav' |
     'Weird Sounds/sfx_sound_vaporizing.wav' |
-    
+
     'Climbing Ladder/sfx_movement_ladder1a.wav' |
     'Climbing Ladder/sfx_movement_ladder1b.wav' |
     'Climbing Ladder/sfx_movement_ladder1loop.wav' |
@@ -777,7 +889,7 @@ export type SpaceIcon =
     'Climbing Ladder/sfx_movement_ladder6a.wav' |
     'Climbing Ladder/sfx_movement_ladder6b.wav' |
     'Climbing Ladder/sfx_movement_ladder6loop.wav' |
-    
+
     'Climbing Stairs/sfx_movement_stairs1a.wav' |
     'Climbing Stairs/sfx_movement_stairs1b.wav' |
     'Climbing Stairs/sfx_movement_stairs1loop.wav' |
@@ -796,7 +908,7 @@ export type SpaceIcon =
     'Climbing Stairs/sfx_movement_stairs6a.wav' |
     'Climbing Stairs/sfx_movement_stairs6b.wav' |
     'Climbing Stairs/sfx_movement_stairs6loop.wav' |
-    
+
     'Falling Sounds/sfx_sounds_falling1.wav' |
     'Falling Sounds/sfx_sounds_falling10.wav' |
     'Falling Sounds/sfx_sounds_falling11.wav' |
@@ -809,7 +921,7 @@ export type SpaceIcon =
     'Falling Sounds/sfx_sounds_falling7.wav' |
     'Falling Sounds/sfx_sounds_falling8.wav' |
     'Falling Sounds/sfx_sounds_falling9.wav' |
-    
+
     'Footsteps/sfx_movement_footsteps1a.wav' |
     'Footsteps/sfx_movement_footsteps1b.wav' |
     'Footsteps/sfx_movement_footsteps5.wav' |
@@ -817,7 +929,7 @@ export type SpaceIcon =
     'Footsteps/sfx_movement_footstepsloop3_slow.wav' |
     'Footsteps/sfx_movement_footstepsloop4_fast.wav' |
     'Footsteps/sfx_movement_footstepsloop4_slow.wav' |
-    
+
     'Jumping and Landing/sfx_movement_jump1.wav' |
     'Jumping and Landing/sfx_movement_jump10.wav' |
     'Jumping and Landing/sfx_movement_jump10_landing.wav' |
@@ -849,19 +961,19 @@ export type SpaceIcon =
     'Jumping and Landing/sfx_movement_jump8.wav' |
     'Jumping and Landing/sfx_movement_jump9.wav' |
     'Jumping and Landing/sfx_movement_jump9_landing.wav' |
-    
+
     'Opening Doors/sfx_movement_dooropen1.wav' |
     'Opening Doors/sfx_movement_dooropen2.wav' |
     'Opening Doors/sfx_movement_dooropen3.wav' |
     'Opening Doors/sfx_movement_dooropen4.wav' |
-    
+
     'Portals and Transitions/sfx_movement_portal1.wav' |
     'Portals and Transitions/sfx_movement_portal2.wav' |
     'Portals and Transitions/sfx_movement_portal3.wav' |
     'Portals and Transitions/sfx_movement_portal4.wav' |
     'Portals and Transitions/sfx_movement_portal5.wav' |
     'Portals and Transitions/sfx_movement_portal6.wav' |
-    
+
     'Vehicles/sfx_vehicle_breaks.wav' |
     'Vehicles/sfx_vehicle_carloop1.wav' |
     'Vehicles/sfx_vehicle_carloop2.wav' |
@@ -871,18 +983,18 @@ export type SpaceIcon =
     'Vehicles/sfx_vehicle_helicopterloop3.wav' |
     'Vehicles/sfx_vehicle_helicopterloop4.wav' |
     'Vehicles/sfx_vehicle_plainloop.wav' |
-    
+
     'Cannon/sfx_wpn_cannon1.wav' |
     'Cannon/sfx_wpn_cannon2.wav' |
     'Cannon/sfx_wpn_cannon3.wav' |
     'Cannon/sfx_wpn_cannon4.wav' |
     'Cannon/sfx_wpn_cannon5.wav' |
     'Cannon/sfx_wpn_cannon6.wav' |
-    
+
     'Grenade Whistles/sfx_wpn_grenadewhistle1.wav' |
     'Grenade Whistles/sfx_wpn_grenadewhistle2.wav' |
     'Grenade Whistles/sfx_wpn_missilelaunch.wav' |
-    
+
     'Lasers/sfx_wpn_laser 10.wav' |
     'Lasers/sfx_wpn_laser1.wav' |
     'Lasers/sfx_wpn_laser10.wav' |
@@ -896,7 +1008,7 @@ export type SpaceIcon =
     'Lasers/sfx_wpn_laser7.wav' |
     'Lasers/sfx_wpn_laser8.wav' |
     'Lasers/sfx_wpn_laser9.wav' |
-    
+
     'Machinegun/sfx_wpn_machinegun_loop1.wav' |
     'Machinegun/sfx_wpn_machinegun_loop2.wav' |
     'Machinegun/sfx_wpn_machinegun_loop3.wav' |
@@ -906,7 +1018,7 @@ export type SpaceIcon =
     'Machinegun/sfx_wpn_machinegun_loop7.wav' |
     'Machinegun/sfx_wpn_machinegun_loop8.wav' |
     'Machinegun/sfx_wpn_machinegun_loop9.wav' |
-    
+
     'Melee/sfx_wpn_dagger.wav' |
     'Melee/sfx_wpn_punch1.wav' |
     'Melee/sfx_wpn_punch2.wav' |
@@ -915,16 +1027,16 @@ export type SpaceIcon =
     'Melee/sfx_wpn_sword1.wav' |
     'Melee/sfx_wpn_sword2.wav' |
     'Melee/sfx_wpn_sword3.wav' |
-    
+
     'Out of Ammo/sfx_wpn_noammo1.wav' |
     'Out of Ammo/sfx_wpn_noammo2.wav' |
     'Out of Ammo/sfx_wpn_noammo3.wav' |
     'Out of Ammo/sfx_wpn_reload.wav' |
-    
+
     'Shotgun/sfx_weapon_shotgun1.wav' |
     'Shotgun/sfx_weapon_shotgun2.wav' |
     'Shotgun/sfx_weapon_shotgun3.wav' |
-    
+
     'Single Shot Sounds/sfx_weapon_singleshot1.wav' |
     'Single Shot Sounds/sfx_weapon_singleshot10.wav' |
     'Single Shot Sounds/sfx_weapon_singleshot11.wav' |
@@ -946,8 +1058,8 @@ export type SpaceIcon =
     'Single Shot Sounds/sfx_weapon_singleshot6.wav' |
     'Single Shot Sounds/sfx_weapon_singleshot7.wav' |
     'Single Shot Sounds/sfx_weapon_singleshot8.wav' |
-    'Single Shot Sounds/sfx_weapon_singleshot9.wav' 
-    
+    'Single Shot Sounds/sfx_weapon_singleshot9.wav'
+
 
 
 
@@ -2095,6 +2207,16 @@ Exception: for type=7 size is ignoredhighlightSize: 6, // size of the arrow head
  coords: Object; 
 
  //// methods 
+ /** Async/Await Move a group through rotation, translation, scale.
+~~~js
+await g1.moveToES6({
+    translation: [2, 2],
+    rotation: Math.PI,
+    scale: 2,
+}, 5000)   // 5 seconds
+
+~~~ */
+ moveToES6(params:groupMoveParams, msec?: number): Promise<boolean>,
  /** Adds all points in a group to this group. */
  addGroup(group:Group): Group,
  /** Adds ids of elements to the array this.parents. This is a copy of {@link Element.addParents}. */
@@ -4732,7 +4854,7 @@ Statistics :{
 
 //////////////////////////////////////////////////////////////
 
-
+/** param types for call to Group.moveES6() */
 
 
 
@@ -5169,6 +5291,12 @@ export class TSXBoard {
         return (new Audio('sounds/'+a))  // prefix into correct directory
 
     }
+
+
+
+
+
+
 
 
 
@@ -6201,8 +6329,6 @@ export class TSXBoard {
 
 
 
-
-
  /** Create a point. If any parent elements are functions or the attribute 'fixed' is true then point will be constrained.
             
 *```js
@@ -6502,11 +6628,16 @@ TSX.ForeignObject(
 
 
  /** Array of Points */
- Group (pointArray:Point[]|Polygon, attributes: GroupAttributes ={} ):Group {
- if (Array.isArray(pointArray))
-                    return (this._jBoard as any).create('group', pointArray, this.defaultAttributes(attributes))
+ Group (pointArray:(Point|Image)[]|Polygon, attributes: GroupAttributes ={} ):Group {
+ 
+                let temp // group that we will modify
+                if (Array.isArray(pointArray))
+                    temp =  (this._jBoard as any).create('group', pointArray, this.defaultAttributes(attributes))
                 else
-                    return (this._jBoard as any).create('group', [pointArray], this.defaultAttributes(attributes))
+                    temp =  (this._jBoard as any).create('group', [pointArray], this.defaultAttributes(attributes))
+
+                temp['moveToES6'] = (params:any, msec:any) => groupMoveToES6(this._jBoard,temp,params,msec);
+                return temp
                 
 }
 
@@ -8646,7 +8777,12 @@ let  curve = TSX.Stepfunction([0,1,2,3,4,5], [1,3,0,2,2,1]);
  }
 
 
- /** Create a Transformation object with Translate properties. */
+ /** Create a Transformation object with Translate properties.
+~~~js            
+let p0 = TSX.Point([0, 3], { name: 'A' })
+let t = TSX.Translate(() => p0.X(), 1) // adds [p0.X(), 1]
+let t1 = TSX.TransformPoint(p0, [t])   // so x is twice p0 
+~~~ */
  Translate (dx:number|Function, dy:number|Function, attributes: TranslateAttributes ={} ):Transformation {
  return (this._jBoard as any).create('transform', [dx,dy], {type:'translate'}) as Transformation
 }

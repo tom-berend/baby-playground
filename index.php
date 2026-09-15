@@ -73,7 +73,8 @@ if (isset($_REQUEST['modifyFrame'])) {
     $_SESSION['gameframe']  = 1 - $_SESSION['gameframe'];
 }
 
-// turn mobile on/off
+// icon preview
+// echo print_r($_REQUEST);
 if (isset($_REQUEST['previewIcons'])) {
     $html = previewIcons();
     echo $html;
@@ -339,7 +340,7 @@ function getBody()
 
         </td>
         <td style='font-size:14px;'><b>Space Icons</b> by <a href='https://goodstuffnononsense.com/' target='_blank'>Good Stuff No Nonsense</a>
-                        licensed under <a href='https://creativecommons.org/licenses/by/4.0/?ref=chooser-v1' target='_blank' rel='license noopener noreferrer' style='display:inline-block;'>CC-BY 4.0</a>
+                        licensed under <a href='https://creativecommons.org/licenses/by/4.0/?ref=chooser-v1' target='_blank' rel='license noopener noreferrer' style='display:inline-block;'>CC-BY 4.0</a>&nbsp;&nbsp;&nbsp;&nbsp;<a href='?previewIcons'><b>Preview</b></a>
         <br><b>Essential Retro Video Game Sound Effects Collection </b> by <a href='https://juhanijunkala.com' target='_blank'>Juhani Junkala</a> 
                           licensed under <a href='https://creativecommons.org/publicdomain/zero/1.0/deed.en' target='_blank' rel='license noopener noreferrer' style='display:inline-block;'>CC0</a>
         </td>
